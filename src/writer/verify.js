@@ -247,11 +247,12 @@ export function verifyDraft(input, brief, names, ctx = null) {
   // length: a standard block has at most 2 body paragraphs (3 only for a featured game)
   if (brief.max_paragraphs && (draft.paragraphs || []).length > brief.max_paragraphs) push('length', 'block', `${draft.paragraphs.length} פסקאות — המקסימום כאן ${brief.max_paragraphs}`, { type: 'trim', keep: brief.max_paragraphs });
 
-  // the code-chosen angle has to lead
-  const ang = brief.main_angle?.type;
-  if (['FIRST_LOSS', 'FIRST_WIN'].includes(ang)) {
-    const opening = [draft.headline, draft.deck, draft.lead, draft.paragraphs?.[0]].filter(Boolean).join(' ');
-    if (!/ראשון|ראשונה/.test(opening)) push('angle', 'style', `הזווית המרכזית (${brief.main_angle.fact_he}) חייבת להופיע בכותרת או בפתיחה`);
+  // the story stage's main angle has to lead: headline or sub-headline. If not, the verified angle written by
+  // the code becomes the headline (structure, not style: a recap that leads with the wrong story is wrong)
+  const tokens = brief.main_angle?.tokens || [];
+  if (brief.kind === 'game' && draft.headline && tokens.length) {
+    const top = [draft.headline, draft.deck, draft.subheadline].filter(Boolean).join(' ');
+    if (!tokens.some((t) => top.includes(t))) push('angle', 'block', `הכותרת לא מובילה בזווית המרכזית (${brief.main_angle.fact_he})`, { type: 'headline', to: brief.main_angle.fact_he });
   }
 
   const toApprove = names.filter((x) => x.inGame && x.he && x.status !== 'approved' && x.status !== 'sport5' && (text.includes(x.he) || (x.surname && x.surname.length >= 3 && text.includes(x.surname)))).map((x) => `${x.he} (${x.en})`);
@@ -279,6 +280,8 @@ export function autoFix(draft, issues, brief = null) {
     if (i.fix.type === 'replace') edit((t) => (t.includes(i.fix.sentence) ? t.replace(i.fix.sentence, i.fix.sentence.replace(i.fix.from, i.fix.to)) : t));
     else if (i.fix.type === 'drop') edit((t) => t.replace(i.fix.sentence, ''));
   }
+  const head = issues.find((x) => x.severity === 'block' && x.fix?.type === 'headline');
+  if (head) d.headline = head.fix.to;
   const trim = issues.find((x) => x.fix?.type === 'trim');
   if (trim) d.paragraphs = d.paragraphs.slice(0, trim.fix.keep);
   for (const k of fields) if (typeof d[k] === 'string') d[k] = d[k].replace(/^[\s,;]+/, '').trim();

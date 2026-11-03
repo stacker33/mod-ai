@@ -4,12 +4,32 @@
 //   final result ("ניצחון 129:136", "הפסד 124:103")   subject's score LAST   -> pair()
 //   partial scores: quarter, halftime, after three     subject's score FIRST  -> partialPair()
 //     ("טורונטו ניצחה את הרבע הרביעי 47:27")
-//   in-game moments and runs ("שלשה שקבעה 129:135", "ריצת 0:17")  subject LAST, as in Sport5 copy -> pair()
+//   in-game moments (lead, late score, score after a play)  subject FIRST since round 3 -> formatScore(.., 'state')
+//   runs ("ריצת 0:17")                                    running team's points LAST -> formatScore(.., 'run')
 //   record in parentheses after a team name           WINS:LOSSES   ("ממפיס (6:1)")      -> formatRecord(..., 'standalone')
 //   record after "עלה/עלתה/ירד/ירדה למאזן"            LOSSES:WINS   ("עלתה למאזן 1:6")   -> formatRecord(..., 'relative')
 
 export const pair = (subject, other) => `${other}:${subject}`;
 export const partialPair = (subject, other) => `${subject}:${other}`;
+
+// THE score formatter: every score the prose may contain is rendered here, from the narrative subject's side.
+//   'state'  any game state — quarter, halftime, after three, a lead, a late score, the score after a play:
+//            the subject's score FIRST ("הקליפרס הובילו 78:62")          (editor, 2026-11-03, round 3)
+//   'final'  the final result after ניצחון/הפסד: the subject's score LAST ("ניצחון 129:136")
+//   'run'    a scoring run: the running team's points LAST ("ריצת 0:19")
+export function formatScore(score, side, context = 'state') {
+  const me = score[side], them = score[side === 'home' ? 'away' : 'home'];
+  if (context === 'state') return partialPair(me, them);
+  if (context === 'final' || context === 'run') return pair(me, them);
+  throw new Error(`formatScore: unknown context ${context}`);
+}
+
+// a shot type (pbp.js shotType) as an action of the player who made it — free throws are never "a basket"
+export function shotActionHe(shot, made = 1) {
+  if (/free-throw/.test(shot)) return made === 1 ? 'קלע זריקת עונשין' : made === 2 ? 'קלע שתי זריקות עונשין' : `קלע ${made} זריקות עונשין`;
+  return { three: 'קלע שלשה', dunk: 'הטביע', layup: 'קלע לייאפ', hook: 'קלע הוק', floater: 'קלע פלואטר', jumper: 'קלע מחצי מרחק', 'field-goal': 'קלע סל' }[shot] || 'קלע';
+}
+export const PLAY_LABEL_HE = { tying: 'השוויון', 'go-ahead': 'העלה ליתרון', extends: 'הגדיל את היתרון', cuts: 'צימק', other: null };
 
 // "6-1" (ESPN) -> {wins: 6, losses: 1}
 export function parseRecord(rec) {

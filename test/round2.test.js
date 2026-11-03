@@ -96,14 +96,14 @@ test('D. a basket called tying must leave the score equal', () => {
 });
 
 // ---------- E. go-ahead ----------
-test('E. a basket called go-ahead must turn a tie or deficit into a lead', () => {
+test('E. a basket called go-ahead must turn a tie or deficit into a lead (scores subject-first)', () => {
   const f = game('401909918'); // Denver went from 87:87 to 89:87
-  assert.ok(!codes(one(f, "ג'מאל מארי העלה את דנבר ליתרון 87:89.")).includes('semantic'));
-  // Portland was behind after that basket: "took the lead 89:87" is false
-  assert.ok(codes(one(f, 'פורטלנד עלתה ליתרון 89:87.')).includes('semantic'));
+  assert.ok(!codes(one(f, "ג'מאל מארי העלה את דנבר ליתרון 89:87.")).includes('semantic'));
+  // Portland was behind after that basket: "took the lead 87:89" is false
+  assert.ok(codes(one(f, 'פורטלנד עלתה ליתרון 87:89.')).includes('semantic'));
   // lead-cutting: still behind afterwards
-  assert.ok(!codes(one(f, 'פורטלנד צימקה ל-89:87.')).includes('semantic'));
-  assert.ok(codes(one(f, 'דנבר צימקה ל-87:89.')).includes('semantic'));
+  assert.ok(!codes(one(f, 'פורטלנד צימקה ל-87:89.')).includes('semantic'));
+  assert.ok(codes(one(f, 'דנבר צימקה ל-89:87.')).includes('semantic'));
 });
 
 // ---------- F. runs from the play-by-play ----------
@@ -130,20 +130,15 @@ test('F. the 19:0 Detroit run is computed from the play-by-play and reproducible
   assert.equal(one(f, 'דטרויט רשמה ריצת 0:25.').issues.find((i) => i.code === 'run')?.fix.type, 'drop');
 });
 
-// ---------- G. broken Hebrew ----------
-test('G. broken Hebrew is caught before publication (MIL @ MIN)', () => {
+// ---------- G. Hebrew fluency belongs to the writing layer ----------
+test('G. random Hebrew typos are not code rules (editor, round 3); translated idioms stay a style note', () => {
   const f = game('401909915');
-  assert.ok(codes(one(f, 'המארחת פתחה חזק עם מינסוטה ניצחה את הרבע הראשון.')).includes('hebrew'));
-  const typo = { headline: 'כ', paragraphs: ['מינסוטה ניצחה אחרי האארכה.'] };
-  assert.equal(autoFix(typo, check(f, typo).issues).paragraphs[0], 'מינסוטה ניצחה אחרי ההארכה.');
-  const dup = { headline: 'כ', paragraphs: ['מינסוטה ניצחה ניצחה בבית.'] };
-  assert.equal(autoFix(dup, check(f, dup).issues).paragraphs[0], 'מינסוטה ניצחה בבית.');
-  assert.ok(codes(one(f, 'מינסוטה ניצחה עם שלשה מחייבת.')).includes('hebrew'));
-  // plural nickname with a singular verb
-  const nick = { headline: 'כ', paragraphs: ['הטימברוולבס ניצחה בבית.'] };
-  assert.equal(autoFix(nick, check(f, nick).issues).paragraphs[0], 'הטימברוולבס ניצחו בבית.');
-  // English idiom translated word for word: a style note back to the writer
-  assert.ok(codes(one(f, 'ומשם הזאבים לא הסתכלו אחורה.')).includes('banned'));
+  for (const t of ['מינסוטה ניצחה אחרי האארכה.', 'מינסוטה ניצחה ניצחה בבית.']) {
+    assert.equal(check(f, { paragraphs: [t] }).blocking, 0, t);
+  }
+  const r = one(f, 'ומשם הזאבים לא הסתכלו אחורה.');
+  assert.ok(codes(r).includes('banned'));
+  assert.equal(r.blocking, 0);
 });
 
 // ---------- H. record convention (kept from round 1) ----------

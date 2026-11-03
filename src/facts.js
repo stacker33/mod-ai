@@ -6,6 +6,7 @@
 // are listed in `research` — never asserted.
 
 import { heTeam, isPlural } from './teams.js';
+import { shotType, classifyPlay, isFreeThrow } from './pbp.js';
 
 export const SCHEMA = 1;
 
@@ -140,6 +141,8 @@ export function normPlays(raw, names, homeId) {
       shooting: !!p.shootingPlay,
       text: p.text || '',
       type: p.type?.text || '',
+      // free throw / three / dunk / layup / ... from ESPN's play type (pbp.js)
+      shot: scoring || p.shootingPlay ? shotType(p.type?.text, p.text, value) : null,
     };
   });
   plays.quality = { reportedMismatches, clockRegressions };
@@ -248,7 +251,8 @@ function gameStates(plays) {
   }
   let prev = { home: 0, away: 0 };
   const moments = sc.map((x) => {
-    const m = { period: x.period, secondsLeft: x.cs, clock: x.clockText, side: x.side, points: x.value, before: prev, after: { home: x.home, away: x.away } };
+    const after = { home: x.home, away: x.away };
+    const m = { period: x.period, secondsLeft: x.cs, clock: x.clockText, side: x.side, points: x.value, before: prev, after, shot: x.shot, player: x.player, label: classifyPlay(prev, after, x.side) };
     prev = m.after;
     return m;
   });
@@ -294,13 +298,19 @@ function clutch(plays, winner, finalPeriod) {
     out.marginAt2min = { ...s2, winnerMargin: sign * (s2.home - s2.away) };
   }
   if (decisive) {
+    // a decisive free throw is part of a trip: every free throw the same player made at that clock
+    const trip = isFreeThrow(decisive.shot) ? sc.filter((p) => p.period === decisive.period && p.clockText === decisive.clockText && p.player === decisive.player && isFreeThrow(p.shot)) : [decisive];
+    const last = trip.at(-1);
     out.winningBasket = {
       ...at(decisive),
       player: decisive.player,
       side: decisive.side,
       points: decisive.value,
+      shot: decisive.shot,
+      made: trip.length,
       text: decisive.text,
       scoreAfter: { home: decisive.home, away: decisive.away },
+      tripScoreAfter: { home: last.home, away: last.away },
       inFinalPeriod: decisive.period === finalPeriod,
       late: decisive.period === finalPeriod && decisive.cs <= 30,
       buzzer: decisive.period === finalPeriod && decisive.cs <= 1,
@@ -310,7 +320,7 @@ function clutch(plays, winner, finalPeriod) {
     const reg = sc.filter((p) => p.period === REG_PERIODS);
     const last = reg[reg.length - 1];
     if (last && last.home === last.away) {
-      out.tyingShotToOT = { ...at(last), player: last.player, side: last.side, points: last.value, text: last.text, score: { home: last.home, away: last.away } };
+      out.tyingShotToOT = { ...at(last), player: last.player, side: last.side, points: last.value, shot: last.shot, text: last.text, score: { home: last.home, away: last.away } };
     }
   }
   out.loserLedInLast3min = plays.some((p) => p.period === finalPeriod && p.cs <= 180 && -sign * (p.home - p.away) > 0);
@@ -392,11 +402,14 @@ function candidates(f) {
   // (only when the game was still close as it began — not padding in a blowout)
   const lateRun = f.flow.spurts.find((s) => s.side === f.result.winner && s.end_period === f.clutch.finalPeriod && s.end_seconds_left <= 300 && s.for - s.against >= 8 && Math.abs(s.score_before.home - s.score_before.away) <= 8);
   if (lateRun) c.push({ type: 'DECISIVE_RUN', weight: 62, side: lateRun.side, run: lateRun, why: `${W.abbr} ${lateRun.for}-${lateRun.against} run late in the game`, evidence: 'pbp' });
-  for (const s of f.flow.spurts.slice(0, 1)) {
+  // a "major run" for the story is one inside a single period — a cross-period run is computable but not a story
+  for (const s of f.flow.spurts.filter((x) => x.start_period === x.end_period).slice(0, 1)) {
     if (s.for - s.against >= 15) add('MAJOR_RUN', 45, `${f.teams[s.side].abbr} ${s.for}-${s.against} run (${s.from.periodName} ${s.from.clock} to ${s.to.periodName} ${s.to.clock})`, 'pbp', { side: s.side, run: s });
   }
   for (const i of f.israelis) {
-    if (i.played) add('ISRAELI_ANGLE', 85, `${i.name} (${i.team}): ${i.pts} pts, ${i.reb} reb, ${i.ast} ast in ${i.min} min`, 'box');
+    // Avdija (full track) leads his game; Wolf / Saraf have their own short item, so they lead only with a big night
+    const w = i.track === 'full' ? 85 : i.pts >= 15 ? 70 : 45;
+    if (i.played) add('ISRAELI_ANGLE', w, `${i.name} (${i.team}): ${i.pts} pts, ${i.reb} reb, ${i.ast} ast in ${i.min} min`, 'box', { side: i.side, player: i.name, pts: i.pts });
     else add('ISRAELI_ANGLE', 60, `${i.name} (${i.team}) did not play${i.dnpReason ? ': ' + i.dnpReason : ''}`, 'box');
   }
   // fallback so every game has a top performer candidate

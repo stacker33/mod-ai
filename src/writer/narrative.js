@@ -3,15 +3,16 @@
 //
 //   entity     a team-level action (record, streak) hanging on a player as its subject
 //   narrative  "took the lead / turned it around before halftime" vs the score at that checkpoint
+//   terminology free throws called "a basket", a "winning three" that was not a three
+//   chronology a halftime state presented as the result of the second half
 //   semantic   impossible basketball: a mid-range three, a "tying" basket that did not tie, a go-ahead
 //              basket that did not give the lead, a buzzer-beater with time left, a double-double that
 //              is not one, "the final seconds" for a lead taken minutes earlier
 //   run        a run that is not one of the play-by-play runs
-//   hebrew     duplicated words, known typos, broken clause joins, nickname + singular verb
+//   (Hebrew spelling / fluency is the writing layer's job — no hard-coded typo rules here)
 //   context    history / streak language that does not match a verified context fact
 //   repetition headline, deck and opening sentence repeating the same numbers
 
-import { NICK_HE } from '../teams.js';
 
 const SENT = /[^.!?\n]+[.!?]?/g;
 const sentences = (text) => (text.match(SENT) || []).map((s) => s.trim()).filter(Boolean);
@@ -62,8 +63,7 @@ const sideOfClause = (sentence, index, words) => {
 };
 
 const other = (s) => (s === 'home' ? 'away' : 'home');
-// a moment pair is written subject-last: "a:b" for side S means S has b
-const pairFor = (a, b, side) => ({ [side]: b, [other(side)]: a });
+// a game-state pair is written subject-first (he.js formatScore 'state'): "a:b" for side S means S has a
 
 // ---------- 1. entity: team-level actions need the team as their subject ----------
 const TEAM_ACTION = new RegExp(`(^|\\s)(ו?)((?:עלתה|עלו|ירדה|ירדו|עלה|ירד)\\s+למאזן\\s+\\d+:\\d+|(?:רשמה|רשמו|רשם|ספגה|ספגו|ספג)\\s+(?:את\\s+)?ה?(?:ניצחון|הפסד)\\s+\\S+\\s+ברציפות|(?:האריכה|האריכו|האריך)\\s+את\\s+ה?רצף|(?:טיפסה|טיפסו|טיפס)\\s+למקום)`, 'g');
@@ -169,6 +169,13 @@ const EXTEND = new RegExp(`(הגדיל|הגדילה|הגדילו|הרחיב|הר
 const WINNER_SHOT = /סל\s+הניצחון|שלשת\s+הניצחון|הסל\s+המכריע|שהכריע\s+את\s+המשחק|קבע\s+את\s+הניצחון/;
 const BUZZER = /באזר|בזמזם|עם\s+הצפירה|על\s+הצפירה|עם\s+הצלצול|עם\s+סיום\s+הזמן/;
 const DD = /דאבל[- ]?דאבל/, TD = /טריפל[- ]?דאבל/;
+const FT_BASKET = /סל[^.,]{0,25}מהקו|מהקו[^.,]{0,10}(?:ב|ה|ל)?סל(?![א-ת])|סל(י)?\s+עונשין/;
+const COMEBACK_N = /(?:חזר(?:ה|ו)?|מהפך|קאמבק|מחק(?:ה|ו)?)[^.,]{0,20}(?:מ|את\s+ה)פיגור\s+(?:של\s+)?(\d+)/;
+const COMEBACK_DONE = new RegExp(`(השלימ(ה|ו)\\s+(את\\s+)?ה?(מהפך|קאמבק)|ביצע(ה|ו)?\\s+מהפך)${NOT_HE}`);
+const LARGEST_LEAD = /(?:יתרון|הפרש)\s+שיא\s+של\s+(\d+)|היתרון\s+הגדול\s+ביותר[^.,]{0,15}?(\d+)|(?:ברח(?:ה|ו)?|עלת?(?:ה|ו)?)\s+ליתרון\s+של\s+(\d+)\s+נקודות\s+(?:לכל\s+היותר|במקסימום)/;
+const SECOND_HALF = /במחצית\s+השנייה|אחרי\s+ההפסקה|לאחר\s+ההפסקה/;
+const HALF_STATE = /נכנס(?:ה|ו)\s+(?:ל|אל\s+)?ה?הפסקה|הלכ(?:ה|ו)\s+להפסקה|לחדר(?:י)?\s+ההלבשה|(?:הובילה|הובילו|פיגרה|פיגרו)\s+במחצית(?!\s+השנייה)|במחצית\s+\d+:\d+/;
+const CONTROL_2H = new RegExp(`(השתלט(ה|ו)?|שלט(ה|ו)?|ברח(ה|ו)?|הכריע(ה|ו)?|לקח(ה|ו)?\\s+את\\s+המשחק)${NOT_HE}[^.,]{0,25}(במחצית\\s+השנייה|אחרי\\s+ההפסקה)`);
 const LAST_SECONDS = /בשניות\s+ה?(אחרונות|האחרונות|הסיום)|בשנייה\s+האחרונה|בשניות\s+האחרונות/;
 
 function semanticIssues(sentence, brief, words) {
@@ -184,11 +191,57 @@ function semanticIssues(sentence, brief, words) {
     const q = ck.quarters[p - 1];
     const subj = sideOfClause(sentence, qm.index, words);
     if (q && subj && q[subj.side] <= q[other(subj.side)]) drop('semantic', `${subj.w} לא ניצחה את הרבע ה-${p} (${q[subj.side]}:${q[other(subj.side)]})`);
+    // "won the quarter 47:27": those must be that quarter's points, the subject's first
+    const pr = q && subj ? clauseAt(sentence, qm.index).text.slice(qm.index - clauseAt(sentence, qm.index).start).match(/(\d+):(\d+)/) : null;
+    if (pr && q[subj.side] > q[other(subj.side)]) {
+      const [a, b] = [Number(pr[1]), Number(pr[2])];
+      const mine = q[subj.side], theirs = q[other(subj.side)];
+      if (!(a === mine && b === theirs) && !(a === theirs && b === mine)) drop('semantic', `${subj.w} ניצחה את הרבע ה-${p} ${mine}:${theirs}, לא ${a}:${b}`);
+    }
+  }
+
+  // free throws are not "a basket" ("קלע את סל הניצחון מהקו" is wrong — "הכריע את המשחק מהקו")
+  if (FT_BASKET.test(sentence)) drop('terminology', 'זריקות עונשין הן לא "סל" — "הכריע מהקו" / "קלע שתי זריקות עונשין" / "דייק מהקו"');
+  const wbShot = ck.winning_basket?.shot;
+  const ws = sentence.match(WINNER_SHOT);
+  if (ws && wbShot) {
+    if (/free-throw/.test(wbShot) && /סל|שלשת/.test(ws[0])) drop('terminology', `ההכרעה הייתה מהקו (${ck.winning_basket.player || 'זריקות עונשין'}) — לא "${ws[0]}"; "הכריע את המשחק מהקו"`);
+    if (/שלשת/.test(ws[0]) && wbShot !== 'three') drop('terminology', 'ההכרעה לא הייתה בשלשה');
+  }
+
+  // a comeback has to be backed by a real deficit (and the size, when given, by the largest one)
+  const cbm = sentence.match(COMEBACK_N);
+  const cbSubj = cbm ? sideOfClause(sentence, cbm.index, words) : null;
+  if (cbm && cbSubj && ck.largest_lead) {
+    const n = Number(cbm[cbm.length - 1]);
+    const deficit = ck.largest_lead[other(cbSubj.side)] ?? 0;
+    if (n > deficit) drop('semantic', `${cbSubj.w} פיגרה לכל היותר ב-${deficit}, לא ב-${n}`);
+  }
+  const cb = sentence.match(COMEBACK_DONE);
+  if (cb && ck.largest_lead && !WINDOWS.some((w) => w.re.test(sentence))) {
+    const subj = sideOfClause(sentence, cb.index, words);
+    if (subj && (subj.side !== ck.winner || (ck.largest_lead[other(subj.side)] ?? 0) < 6)) drop('semantic', `"${cb[0]}" — ${subj.w} ${subj.side !== ck.winner ? 'לא ניצחה' : 'לא פיגרה בפער של ממש'}`);
+  }
+  // largest lead: the number has to be the computed one
+  const ll = sentence.match(LARGEST_LEAD);
+  if (ll && ck.largest_lead) {
+    const subj = sideOfClause(sentence, ll.index, words);
+    const n = Number(ll.slice(1).find((x) => /^\d+$/.test(x || '')));
+    if (subj && n && ck.largest_lead[subj.side] !== n) drop('semantic', `היתרון הגדול ביותר של ${subj.w} היה ${ck.largest_lead[subj.side]}, לא ${n}`);
+  }
+  // chronology: a halftime state cannot be the result of what happened in the second half
+  const h2 = sentence.match(SECOND_HALF);
+  const hs = sentence.match(HALF_STATE);
+  if (h2 && hs && hs.index > h2.index) drop('chronology', `"${h2[0]}" ואחריו "${hs[0]}" — המחצית קרתה לפני המחצית השנייה`);
+  const c2 = sentence.match(CONTROL_2H);
+  if (c2 && ck.second_half) {
+    const subj = sideOfClause(sentence, c2.index, words);
+    if (subj && ck.second_half[subj.side] <= ck.second_half[other(subj.side)]) drop('semantic', `${subj.w} לא ניצחה את המחצית השנייה (${ck.second_half[subj.side]}:${ck.second_half[other(subj.side)]})`);
   }
 
   // plays: the claim must match the score the play produced
   const pairsIn = (text) => [...text.matchAll(/(\d+):(\d+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
-  const momentFor = (a, b, side) => (ck.moments || []).find((m) => m.after[side] === b && m.after[other(side)] === a);
+  const momentFor = (a, b, side) => (ck.moments || []).find((m) => m.after[side] === a && m.after[other(side)] === b);
   const claim = (re, test, msg) => {
     const m = sentence.match(re);
     if (!m) return;
@@ -205,15 +258,15 @@ function semanticIssues(sentence, brief, words) {
   claim(TIE, ([a, b]) => a === b, ([a, b]) => `"שוויון" אבל התוצאה ${a}:${b} אינה שוויון`);
   claim(GO_AHEAD, ([a, b], side) => {
     if (!side) return null;
-    if (b <= a) return false; // subject-last: the subject has b
+    if (a <= b) return false; // subject-first: the subject has a
     const m = momentFor(a, b, side);
     if (!m) return null;
     return m.side === side && m.before[side] <= m.before[other(side)];
   }, ([a, b]) => `"יתרון" — אבל ${a}:${b} לא העלה את הקבוצה ליתרון (או שכבר הובילה)`);
-  claim(CUT, ([a, b], side) => (side ? b < a : null), ([a, b]) => `"צימקה" — אבל ב-${a}:${b} הקבוצה כבר לא בפיגור`);
+  claim(CUT, ([a, b], side) => (side ? a < b : null), ([a, b]) => `"צימקה" — אבל ב-${a}:${b} הקבוצה כבר לא בפיגור`);
   claim(EXTEND, ([a, b], side) => {
     if (!side) return null;
-    if (b <= a) return false;
+    if (a <= b) return false;
     const m = momentFor(a, b, side);
     return m ? m.before[side] > m.before[other(side)] : null;
   }, ([a, b]) => `"הגדילה את היתרון" — אבל לפני ${a}:${b} הקבוצה לא הובילה`);
@@ -278,39 +331,6 @@ function runIssues(sentence, brief) {
   return out;
 }
 
-// ---------- 5. Hebrew that should never reach publication ----------
-const TYPOS = [
-  [/האארכה/g, 'ההארכה'], [/בהאארכה/g, 'בהארכה'], [/מוומנטום/g, 'מומנטום'],
-];
-const NONSENSE = [/שלשה\s+מחייבת/, /מחציא/, /שלשה\s+מחצי\b/];
-const PLURAL_NICKS = new Set([...Object.values(NICK_HE).flat(), 'הקליפרס', 'הלייקרס', 'הניקס']);
-const SG_VERBS = ['ניצחה', 'הובילה', 'הפסידה', 'פתחה', 'סגרה', 'רשמה', 'ספגה', 'ברחה', 'עלתה', 'ירדה', 'קלעה', 'לקחה', 'השלימה', 'צימקה', 'שלטה', 'נכנסה'];
-const toPlural = (verb) => (verb === 'עלתה' ? 'עלו' : verb.replace(/ה$/, 'ו'));
-
-function hebrewIssues(sentence, brief, words) {
-  const out = [];
-  const dup = sentence.match(/(^|\s)([א-ת][א-ת"'״׳-]+)\s+\2(?=[\s.,!?]|$)/);
-  if (dup) out.push({ code: 'hebrew', severity: 'block', msg: `מילה כפולה: "${dup[2]} ${dup[2]}"`, fix: { type: 'replace', sentence, from: `${dup[2]} ${dup[2]}`, to: dup[2] } });
-  for (const [re, to] of TYPOS) {
-    const m = sentence.match(re);
-    if (m) out.push({ code: 'hebrew', severity: 'block', msg: `שגיאת כתיב: "${m[0]}" → "${to}"`, fix: { type: 'replace', sentence, from: m[0], to } });
-  }
-  for (const re of NONSENSE) if (re.test(sentence)) out.push({ code: 'hebrew', severity: 'block', msg: `ביטוי שבור: "${sentence.match(re)[0]}"`, fix: { type: 'drop', sentence } });
-  // "פתחה חזק עם מינסוטה ניצחה ..." — a preposition swallowed the subject of the next clause
-  const teams = words.filter((x) => x.kind === 'team').map((x) => x.w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  if (teams.length) {
-    const re = new RegExp(`(?:^|\\s)(עם|של|על|מול|את)\\s+(${teams.join('|')})\\s+(${SG_VERBS.join('|')}|${SG_VERBS.map(toPlural).join('|')})${NOT_HE}`);
-    const m = sentence.match(re);
-    if (m) out.push({ code: 'hebrew', severity: 'block', msg: `משפט שבור: "${m[0].trim()}" — שני משפטים התחברו בלי פסיק / "ו"`, fix: { type: 'drop', sentence } });
-  }
-  // plural nickname + singular verb ("הקליפרס ניצחה")
-  for (const n of PLURAL_NICKS) {
-    const m = sentence.match(new RegExp(`(^|\\s)${n}\\s+(${SG_VERBS.join('|')})${NOT_HE}`));
-    if (m) out.push({ code: 'hebrew', severity: 'block', msg: `"${n} ${m[2]}": שם ברבים — "${n} ${toPlural(m[2])}"`, fix: { type: 'replace', sentence, from: `${n} ${m[2]}`, to: `${n} ${toPlural(m[2])}` } });
-  }
-  return out;
-}
-
 // ---------- 6. history / streak language needs a verified context fact ----------
 const HISTORICAL = /בהיסטוריה|אי פעם|המהיר ביותר|הצעיר ביותר|המבוגר ביותר|שיא\s+ה?(ליגה|מועדון|זיכיון|פרנצ'ייז)|שיא כל הזמנים|לראשונה מאז|בפעם הראשונה מאז/;
 const STREAK_ANY = /ברציפות|רצו[ףפ]|רצופ(ים|ות)|(^|\s)ה?רצף/;
@@ -337,7 +357,7 @@ export function narrativeChecks(draft, text, brief, ctx) {
   const words = lexicon(brief, ctx);
   const out = [];
   for (const s of sentences(text)) {
-    out.push(...entityIssues(s, brief, words), ...narrativeIssues(s, brief, words), ...semanticIssues(s, brief, words), ...runIssues(s, brief), ...hebrewIssues(s, brief, words), ...contextIssues(s, brief));
+    out.push(...entityIssues(s, brief, words), ...narrativeIssues(s, brief, words), ...semanticIssues(s, brief, words), ...runIssues(s, brief), ...contextIssues(s, brief));
   }
   out.push(...repetitionIssues(draft));
   return out;

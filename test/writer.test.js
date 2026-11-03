@@ -144,8 +144,9 @@ test('redundant and translated phrasing is flagged', () => {
 // ---------- earlier real mistakes stay caught ----------
 test('score written from the wrong team is caught (BKN @ BOS)', () => {
   const f = oldFacts('401909877');
-  assert.ok(codes(check(f, { paragraphs: ['ברוקלין כבר הובילה 124:119 כשנותרו פחות משתי דקות לסיום.'] })).includes('score-order'));
-  assert.deepEqual(codes(check(f, { paragraphs: ['ברוקלין כבר הובילה 119:124 כשנותרו פחות משתי דקות לסיום.'] })), []);
+  // round 3 (editor): a game state is written from the sentence subject — its score FIRST
+  assert.ok(codes(check(f, { paragraphs: ['ברוקלין כבר הובילה 119:124 כשנותרו פחות משתי דקות לסיום.'] })).includes('score-order'));
+  assert.deepEqual(codes(check(f, { paragraphs: ['ברוקלין כבר הובילה 124:119 כשנותרו פחות משתי דקות לסיום.'] })), []);
   // round 2: the final score belongs in the headline only (article) — that is where its order is checked
   const art = { ...gameBrief(f), final_score_in: 'headline' };
   assert.deepEqual(codes(check(f, { headline: 'בדרך לניצחון 124:125 של בוסטון על ברוקלין.' }, art)), []);
@@ -187,9 +188,9 @@ test('compound sentences: each score is judged by its own clause (real flash-lit
 });
 
 test('a score in parentheses that is not a record is still checked (real output, TOR @ LAC)', () => {
-  const f = game('401909920'); // Toronto trailed 62-78
-  assert.ok(codes(check(f, { paragraphs: ['טורונטו פיגרה ב-16 ברבע השלישי (62:78).'] })).includes('score-order'));
-  assert.deepEqual(codes(check(f, { paragraphs: ['טורונטו פיגרה ב-16 ברבע השלישי (78:62).'] })), []);
+  const f = game('401909920'); // Toronto trailed 62-78 (round 3: subject first)
+  assert.ok(codes(check(f, { paragraphs: ['טורונטו פיגרה ב-16 ברבע השלישי (78:62).'] })).includes('score-order'));
+  assert.deepEqual(codes(check(f, { paragraphs: ['טורונטו פיגרה ב-16 ברבע השלישי (62:78).'] })), []);
 });
 
 test('the closest result word decides the final-score order ("6 ניצחונות... ונכנעה")', () => {

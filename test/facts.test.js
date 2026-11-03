@@ -61,7 +61,7 @@ test('a box score that does not add up is marked not ok', () => {
 });
 
 test('Israeli players are picked up from the box score', () => {
-  const f = buildFacts(load('401909906'), { israelis: ['Luka Doncic'] }); // stand-in name to exercise the path
+  const f = buildFacts(load('401909906'), { israelis: [{ name: 'Luka Doncic', track: 'full' }] }); // stand-in name to exercise the path
   assert.equal(f.israelis.length, 1);
   assert.equal(f.candidates[0].type, 'ISRAELI_ANGLE');
 });

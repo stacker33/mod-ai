@@ -3,7 +3,8 @@
 // or decides whether a milestone is true. A claim the data does not verify is not in the brief at all.
 
 import { heTeam, v } from '../teams.js';
-import { pair, partialPair, recordForms, whenHe, periodNumber, nightHe, fullLineHe, shortLineHe, KIND_HE, PERIOD_HE } from './he.js';
+import { classifyPlay } from '../pbp.js';
+import { pair, partialPair, formatScore, shotActionHe, PLAY_LABEL_HE, recordForms, whenHe, periodNumber, nightHe, fullLineHe, shortLineHe, KIND_HE, PERIOD_HE } from './he.js';
 
 export const FEATURED = 90; // story weight from which a game block may run to 3 paragraphs
 
@@ -49,7 +50,11 @@ function angleHe(k, f, tn, names = new Map()) {
   if (k.context) return k.fact_he; // verified context facts arrive already written
   switch (k.type) {
     case 'COMEBACK': return `${t(k.side)} ${vb(k.side, 'חזרה', 'חזרו')} מפיגור ${k.pts}`;
-    case 'GAME_WINNER': return who ? `${who} קלע את סל הניצחון של ${t(k.side)} בשניות האחרונות` : null;
+    case 'GAME_WINNER': {
+      const wb = f.clutch.winningBasket;
+      if (!who) return null;
+      return /free-throw/.test(wb?.shot || '') ? `${who} הכריע את המשחק מהקו בשניות האחרונות` : `${who} ${shotActionHe(wb?.shot || 'field-goal')} והכריע את המשחק בשניות האחרונות`;
+    }
     case 'BUZZER_BEATER': return who ? `${who} הכריע את המשחק עם הבאזר` : null;
     case 'FORCED_OT': return who ? `${who} השווה בסיום הזמן החוקי ושלח את המשחק להארכה` : null;
     case 'OVERTIME': return `${t(k.side)} ${vb(k.side, 'ניצחה', 'ניצחו')} אחרי ${k.n === 1 ? 'הארכה' : `${k.n} הארכות`}`;
@@ -86,7 +91,8 @@ export function gameBrief(f) {
     const fmt = kind === 'partial' ? partialPair : pair;
     return h === a ? `${h}:${a}` : { [tn('home')]: fmt(h, a), [tn('away')]: fmt(a, h) };
   };
-  const byS = (s, kind = 'last') => by(s.home, s.away, kind);
+  // a game state (lead, late score, score after a play): the subject's score first (he.js formatScore 'state')
+  const byS = (s, kind = 'partial') => by(s.home, s.away, kind);
   const recs = { home: recordForms(f.teams.home.record, W === 'home', !f.teams.home.plural), away: recordForms(f.teams.away.record, W === 'away', !f.teams.away.plural) };
   const story = f.story || { main: f.candidates[0] || null, secondary: f.candidates.slice(1, 3) };
   const top = story.main;
@@ -126,7 +132,7 @@ export function gameBrief(f) {
   b.after_three_clause = lead(f.result.after3, 'אחרי שלושה רבעים', 'after3');
 
   // the angle is chosen by the story stage (story.js), in code; the lead must open with it
-  b.main_angle = top ? { type: top.type, category: top.category || null, fact_he: angleHe(top, f, tn, names) || heText(names, top.why) } : null;
+  b.main_angle = top ? { type: top.type, category: top.category || null, fact_he: angleHe(top, f, tn, names) || heText(names, top.why), tokens: angleTokens(top, names) } : null;
   b.secondary_angles = story.secondary.map((k) => ({ type: k.type, category: k.category || null, fact_he: angleHe(k, f, tn, names) || heText(names, k.why) }));
   // CONTEXT FACTS (streaks, highs, head-to-head): the only season / history claims the text may make
   const ctxFacts = (f.contextFacts || []).filter((x) => x.verified);
@@ -136,7 +142,8 @@ export function gameBrief(f) {
     b.largest_lead = ['home', 'away'].filter((s) => f.flow.largestLead[s].pts > 0).map((s) => ({ team_he: tn(s), pts: f.flow.largestLead[s].pts, period_he: f.flow.largestLead[s].at ? PERIOD_HE(f.flow.largestLead[s].at.period, fp) : null, score_by_subject: byS(f.flow.largestLead[s].score) }));
     b.lead_changes = f.flow.leadChanges;
     // runs come from the play-by-play (facts.js, validated); the clause is ready to copy, without times
-    b.runs = f.flow.spurts.slice(0, 2).map((s) => {
+    // only runs inside one period: a cross-period run is computable but rarely a clean story
+    b.runs = f.flow.spurts.filter((s) => s.start_period === s.end_period).slice(0, 2).map((s) => {
       states.push(s.side === 'home' ? { home: s.for, away: s.against, kind: 'last' } : { home: s.against, away: s.for, kind: 'last' });
       return { team_he: tn(s.side), clause_he: runClause(s, f) };
     });
@@ -144,20 +151,24 @@ export function gameBrief(f) {
 
   // decisive plays: each one separately, with who, assist, time and the score after it
   const c = f.clutch;
+  // a decisive play, classified in code: what kind of shot (free throws are never "a basket") and the score after
   const play = (x, side) => {
     if (!x) return null;
     const scorer = names.get(x.player) || x.player;
     const assist = (x.text.match(/\(([^)]+) assists\)/) || [])[1];
-    return { player_he: scorer, assist_he: assist ? names.get(assist) || assist : null, team_he: tn(side), points: x.points ?? x.value, when_he: at(x), score_after_by_subject: byS(x.scoreAfter || x.score) };
+    return { player_he: scorer, assist_he: assist ? names.get(assist) || assist : null, team_he: tn(side), shot: x.shot || null, action_he: x.shot ? `${scorer} ${shotActionHe(x.shot, x.made || 1)}` : null, free_throws: /free-throw/.test(x.shot || ''), when_he: at(x), score_after_by_subject: byS(x.tripScoreAfter || x.scoreAfter || x.score) };
   };
   b.final_minutes = {
     five_minutes_left_by_subject: c.marginAt5min ? byS(c.marginAt5min) : null,
     two_minutes_left_by_subject: c.marginAt2min ? byS(c.marginAt2min) : null,
-    winning_basket: c.winningBasket ? { ...play(c.winningBasket, c.winningBasket.side), decisive_late: c.winningBasket.late } : null,
+    // the play that put the winner ahead for good — only when it came late (last 3 minutes of the final period);
+    // an early one does not explain the finish and its clock is noise
+    winning_basket: c.winningBasket && c.winningBasket.period === fp && c.winningBasket.secondsLeftInPeriod <= 180 ? { ...play(c.winningBasket, c.winningBasket.side), decisive_late: c.winningBasket.late } : null,
     tying_shot_to_overtime: c.tyingShotToOT ? play(c.tyingShotToOT, c.tyingShotToOT.side) : null,
     loser_led_in_last_three_minutes: c.loserLedInLast3min,
     // separate plays, in order — never merge two of them into one sentence about one player
-    last_two_minutes: c.finalSequence.filter((p) => p.scoring).slice(-8).map((p) => ({ when_he: whenHe(fp, p.clock, fp), team_he: p.side ? tn(p.side) : null, score_after_by_subject: byS(p.score), play: heText(names, p.text) })),
+    // only plays that explain the finish: ties, go-ahead plays, the decisive one (free-throw trips merged)
+    last_two_minutes: c.finalSequence.length ? keyPlays(f, fp).map((m) => ({ when_he: whenHe(fp, m.clock, fp), team_he: tn(m.side), player_he: names.get(m.player) || m.player, action_he: `${names.get(m.player) || m.player} ${shotActionHe(m.shot, m.made)}${m.andOne ? ' ועוד זריקת עונשין (סל ועבירה)' : ''}`, label_he: PLAY_LABEL_HE[m.label], score_after_by_subject: byS(m.after) })) : [],
   };
   b.stars = {
     [tn(W)]: f.players[W].filter((p) => p.played).sort((x, y) => y.pts - x.pts).slice(0, 4).map((p) => starBrief(p)),
@@ -200,12 +211,14 @@ function checkData(f, names, tn, recordAngles, ctxFacts) {
     period_lead: f.flow.periodLead || [],
     quarters: f.teams.home.periods.map((h, i) => ({ home: h, away: f.teams.away.periods[i] })),
     moments: (f.flow.moments || []).map((m) => ({ side: m.side, period: m.period, s: m.secondsLeft, before: m.before, after: m.after })),
-    winning_basket: c.winningBasket ? { side: c.winningBasket.side, after: c.winningBasket.scoreAfter, secondsLeft: c.winningBasket.secondsLeftInPeriod, period: c.winningBasket.period, late: c.winningBasket.late, buzzer: c.winningBasket.buzzer } : null,
+    winning_basket: c.winningBasket ? { side: c.winningBasket.side, after: c.winningBasket.scoreAfter, tripAfter: c.winningBasket.tripScoreAfter || null, secondsLeft: c.winningBasket.secondsLeftInPeriod, period: c.winningBasket.period, late: c.winningBasket.late, buzzer: c.winningBasket.buzzer, shot: c.winningBasket.shot || null, player: names.get(c.winningBasket.player) || c.winningBasket.player } : null,
     tying_to_ot: c.tyingShotToOT ? { secondsLeft: c.tyingShotToOT.secondsLeftInPeriod } : null,
     // periods that really ended on a basket at the buzzer (the color layer finds them in the play-by-play)
     buzzer_periods: [...new Set([...(f.color?.events || []).filter((e) => e.kind === 'end-of-period buzzer basket').map((e) => e.period),
       ...(c.winningBasket?.buzzer ? [c.winningBasket.period] : []), ...(c.tyingShotToOT && c.tyingShotToOT.secondsLeftInPeriod <= 1 ? [4] : [])])],
     runs: (f.flow.spurts || []).map((r) => ({ side: r.side, for: r.points_for, against: r.points_against })),
+    largest_lead: { home: f.flow.largestLead?.home?.pts ?? null, away: f.flow.largestLead?.away?.pts ?? null },
+    second_half: { home: (f.teams.home.periods[2] || 0) + (f.teams.home.periods[3] || 0), away: (f.teams.away.periods[2] || 0) + (f.teams.away.periods[3] || 0) },
     lines: Object.fromEntries(['home', 'away'].flatMap((s) => f.players[s].filter((p) => p.played).map((p) => [names.get(p.name) || p.name, { pts: p.pts, reb: p.reb, ast: p.ast, stl: p.stl, blk: p.blk, side: s }]))),
     streak_tokens: [...ctxFacts.filter((x) => x.flag === 'streak').flatMap((x) => x.tokens || []), ...(recordAngles.length ? ['ראשון', 'ראשונה', 'בלי הפסד', 'בלי ניצחון'] : [])],
   };
@@ -215,7 +228,7 @@ export function playerBrief(f, t) {
   const g = gameBrief(f);
   const names = heOf(f);
   const tnp = (side) => f.teams[side].heShort || f.teams[side].he;
-  const subject = (s) => { g.states.push({ home: s.home, away: s.away, kind: 'last' }); return s.home === s.away ? `${s.home}:${s.away}` : { [tnp('home')]: pair(s.home, s.away), [tnp('away')]: pair(s.away, s.home) }; };
+  const subject = (s) => { g.states.push({ home: s.home, away: s.away, kind: 'partial' }); return s.home === s.away ? `${s.home}:${s.away}` : { [tnp('home')]: formatScore(s, 'home'), [tnp('away')]: formatScore(s, 'away') }; };
   const rec = recordForms(t.team.record, t.won);
   const ms = t.milestones.map((m) => m.type);
   const streak = t.team.context.streak;
@@ -261,6 +274,43 @@ export function playerBrief(f, t) {
   const extraTokens = [b.team_streak_he ? ordinal(streak.length) : null, ...t.milestones.filter((m) => m.type === 'STREAK').map((m) => String(m.text.match(/\d+/)?.[0] || ''))].filter(Boolean);
   b._check = { ...g._check, streak_tokens: [...(g._check.streak_tokens || []), ...extraTokens] };
   return b;
+}
+
+// the late plays worth telling: ties and go-ahead plays in the last two minutes, the decisive play, and a
+// free-throw trip as ONE play. Cuts and padding are left out (they rarely explain the finish).
+export function keyPlays(f, fp) {
+  const wb = f.clutch.winningBasket;
+  const ms = (f.flow.moments || []).filter((m) => m.period === fp && m.secondsLeft <= 120);
+  const merged = [];
+  for (const m of ms) {
+    const prev = merged.at(-1);
+    const sameTrip = prev && prev.player === m.player && prev.clock === m.clock && /free-throw/.test(m.shot || '');
+    if (sameTrip && /free-throw/.test(prev.shot || '')) { prev.after = m.after; prev.made++; prev.label = classifyPlay(prev.before, prev.after, prev.side); }
+    else if (sameTrip) { prev.after = m.after; prev.andOne = true; prev.label = classifyPlay(prev.before, prev.after, prev.side); } // basket + the foul shot
+    else merged.push({ ...m, made: 1 });
+  }
+  return merged.filter((m) => ['tying', 'go-ahead'].includes(m.label) || (wb && m.player === wb.player && m.clock === wb.clock && m.period === wb.period)).slice(-6);
+}
+
+// words the headline / sub-headline must contain to carry the main angle (the validator checks them)
+function angleTokens(k, names) {
+  const sur = (n) => { const he = names.get(n) || n || ''; return he.split(' ').slice(1).join(' ') || he; };
+  if (k.context) return k.tokens || [];
+  switch (k.type) {
+    case 'FIRST_LOSS': case 'FIRST_WIN': return ['ראשון', 'ראשונה'];
+    case 'UNBEATEN': return ['בלי הפסד', 'ללא הפסד', 'מושלמת'];
+    case 'WINLESS': return ['בלי ניצחון', 'ללא ניצחון'];
+    case 'SHORT_ROSTER': return ['שחקנים'];
+    case 'COMEBACK': return ['פיגור', 'מהפך', 'קאמבק', 'חזרה', 'חזרו'];
+    case 'OVERTIME': case 'FORCED_OT': return ['הארכה', 'הארכות'];
+    case 'DOMINANT_QUARTER': return ['רבע'];
+    case 'DECISIVE_RUN': case 'MAJOR_RUN': return ['ריצת', 'ריצה'];
+    case 'LATE_COLLAPSE': return ['הובילה', 'הובילו', 'יתרון'];
+    case 'TRIPLE_DOUBLE': return ['טריפל'];
+    case 'GAME_WINNER': case 'BUZZER_BEATER': case 'BIG_SCORING': case 'TOP_PERFORMER': case 'ISRAELI_ANGLE': case 'UNUSUAL_STAT_LINE': case 'EJECTION':
+      return k.player ? [sur(k.player)] : [];
+    default: return [];
+  }
 }
 
 const ORD = ['', 'ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שביעי', 'שמיני', 'תשיעי', 'עשירי'];

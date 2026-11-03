@@ -20,3 +20,31 @@ export function foulRole(type, text = '') {
   if (/ejection/i.test(t) || /\bejected\b/i.test(text)) return { kind: 'ejection', charged: [0] };
   return null;
 }
+
+// What kind of shot a scoring play was — from ESPN's play type, never guessed by the writer.
+export function shotType(type = '', text = '', value = 0) {
+  const t = `${type} ${text}`;
+  if (/free throw/i.test(type)) return /technical/i.test(type) ? 'technical-free-throw' : /flagrant/i.test(type) ? 'flagrant-free-throw' : 'free-throw';
+  if (Number(value) === 3 || /three point/i.test(text)) return 'three';
+  if (/dunk/i.test(t)) return 'dunk';
+  if (/layup|finger roll|tip shot|putback/i.test(t)) return 'layup';
+  if (/hook/i.test(t)) return 'hook';
+  if (/float/i.test(t)) return 'floater';
+  if (/jump ?shot|jumper|fade/i.test(t)) return 'jumper';
+  return 'field-goal';
+}
+export const isFreeThrow = (shot) => /free-throw/.test(shot || '');
+
+// What a scoring play did to the score, for the side that scored. Deterministic labels:
+//   tying     trailing before, level after          go-ahead  level or trailing before, leading after
+//   extends   leading before, leading by more after  cuts      trailing before, still trailing after
+export function classifyPlay(before, after, side) {
+  const o = side === 'home' ? 'away' : 'home';
+  const b = before[side] - before[o];
+  const a = after[side] - after[o];
+  if (a === 0 && b < 0) return 'tying';
+  if (b <= 0 && a > 0) return 'go-ahead';
+  if (b > 0 && a > b) return 'extends';
+  if (a < 0 && a > b) return 'cuts';
+  return 'other';
+}
