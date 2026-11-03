@@ -46,46 +46,47 @@ function render(md) {
   }).join('');
 }
 
+// status: [class, icon, words] — the icon is on the card, the words in its tooltip
 const STATUS = {
-  ok: ['ok', '✅ מוכן'], fixed: ['ok', '🔧 מוכן (תוקן אוטומטית)'], held: ['bad', '⛔ לא פורסם — לכתוב ידנית'], partial: ['warn', '⚠️ חלק מהפריטים לא פורסמו'],
-  quota: ['warn', '⏳ ממתין למכסת כתיבה'], retry: ['warn', '🔁 ניסיון חוזר'], manual: ['bad', '⛔ נכשל — לכתוב ידנית'],
-  live: ['live', '🏀 משוחק עכשיו'], upcoming: ['mute', '🕐 טרם התחיל'], final: ['mute', '⏱️ הסתיים — נכתב'],
+  ok: ['ok', '✅', 'מוכן'], fixed: ['ok', '🔧', 'מוכן (תוקן אוטומטית)'], held: ['bad', '⛔', 'לא פורסם — לכתוב ידנית'], partial: ['warn', '⚠️', 'חלק מהפריטים לא פורסמו'],
+  quota: ['warn', '⏳', 'ממתין למכסת כתיבה'], retry: ['warn', '🔁', 'ניסיון חוזר'], manual: ['bad', '⛔', 'נכשל — לכתוב ידנית'],
+  live: ['live', '🏀', 'משוחק עכשיו'], upcoming: ['mute', '', 'טרם התחיל'], final: ['mute', '', 'הסתיים'],
 };
 
 const isrTags = (list) => (list || []).map((i) => `<span class="isrtag${i.full ? ' full' : ''}">${i.full ? '★ ' : ''}${esc(i.name)}</span>`).join(' ');
 
-// "כל התוצאות" — always first; copy gives Sport5's plain list
-function resultsBox(d) {
-  if (!d.results.length) return `<div class="results"><h2>${esc(d.label)}</h2><p class="empty-day">אין משחקי NBA בתאריך הזה.</p></div>`;
+// one line above the scoreboard: the night's numbers + copy of "כל התוצאות" in Sport5's form
+function topLine(d) {
+  const finals = d.results.filter((r) => r.state === 'post');
+  const copy = ['כל התוצאות:', ...finals.map((r) => r.line)].join('\n');
+  const s = d.summary;
+  const bits = [`<b>${d.results.length}</b> משחקים`];
+  if (s) {
+    bits.push(`<b>${s.ready}</b> סיכומים מוכנים`);
+    if (s.avgMinutes != null) bits.push(`⚡ <b>${s.avgMinutes}</b> ד׳ מהבאזר לסיכום (חציון)`);
+    bits.push(`<b>${s.publishedContradictions}</b> סתירות שפורסמו`);
+    if (s.autoFixes) bits.push(`<b>${s.autoFixes}</b> תיקונים אוטומטיים`);
+    if (s.held) bits.push(`<span class="bad">${s.held} לא פורסמו</span>`);
+    if (s.waiting) bits.push(`<span class="warn">${s.waiting} ממתינים</span>`);
+  }
   const live = d.results.filter((r) => r.state === 'in').length;
-  const copy = ['כל התוצאות:', ...d.results.filter((r) => r.state === 'post').map((r) => r.line)].join('\n');
-  const title = d.future ? 'לוח המשחקים' : 'כל התוצאות';
-  return `<div class="results">${d.future ? '' : `<button class="copy" data-t="${encodeURIComponent(copy)}">העתק</button>`}<h2>${title}<span class="night">${esc(d.night)}${live ? ` · ${live} משוחקים עכשיו` : ''}</span></h2><ul>${d.results.map((r) => {
-    const st = r.state === 'post' ? '' : r.state === 'in' ? '<span class="chip live">משוחק עכשיו</span>' : `<span class="t">${esc(r.time)}</span>`;
-    return `<li class="${r.state}${r.israelis.length ? ' isr' : ''}" data-go="g${r.id}">${st}<span class="ln">${esc(r.line)}</span>${isrTags(r.israelis)}</li>`;
-  }).join('')}</ul></div>`;
+  if (live) bits.push(`<span class="livet">${live} משוחקים עכשיו</span>`);
+  return `<div class="topline"><span class="night">${esc(d.night)}</span><span class="nums">${bits.join('<i>·</i>')}</span>${finals.length ? `<button class="copy small" data-t="${encodeURIComponent(copy)}">העתק תוצאות</button>` : ''}</div>`;
 }
 
-function summary(n) {
-  const s = n.summary;
-  const cells = [
-    [s.games, 'משחקים'],
-    [s.ready, 'סיכומים מוכנים'],
-    [s.avgMinutes != null ? `${s.avgMinutes} ד׳` : '—', 'חציון: מהבאזר לסיכום'],
-    [s.publishedContradictions, 'סתירות לנתונים שפורסמו'],
-    [s.autoFixes, 'תיקונים אוטומטיים'],
-  ];
-  const extra = [s.held && `${s.held} לא פורסמו`, s.waiting && `${s.waiting} ממתינים`, s.live && `${s.live} משוחקים עכשיו`, s.upcoming && `${s.upcoming} טרם התחילו`].filter(Boolean).join(' · ');
-  return `<div class="summary">${cells.map(([v, l]) => `<div class="stat"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}</div>${extra ? `<p class="extra">${esc(extra)}</p>` : ''}`;
-}
-
-function board(n) {
-  return `<div class="board">${n.board.map((g) => {
-    const [cls, label] = STATUS[g.status] || ['mute', g.status];
-    return `<button class="card ${cls}${g.isr?.length ? ' israeli' : ''}" data-go="g${g.id}" data-teams="${esc((g.teams || []).join('|'))}">
-      <span class="score">${esc(g.line)}</span>
-      ${g.angle ? `<span class="angle">${esc(g.angle)}</span>` : ''}
-      <span class="meta"><span class="chip ${cls}">${esc(label)}</span>${g.minutes != null ? `<span class="chip mute">⚡ ${g.minutes} ד׳ מהבאזר</span>` : ''}${isrTags(g.isr)}${g.late ? '<span class="chip mute">נכתב מאוחר</span>' : g.rewritten ? '<span class="chip mute">נכתב מחדש</span>' : ''}</span>
+// the scoreboard: one compact card per game (result / live / start time), status icon, angle, Israelis
+function scoreboard(d) {
+  const byId = new Map((d.board || []).map((g) => [g.id, g]));
+  return `<div class="board">${d.results.map((r) => {
+    const g = byId.get(r.id);
+    const st = g ? g.status : r.state === 'in' ? 'live' : r.state === 'pre' ? 'upcoming' : 'final';
+    const [cls, icon, words] = STATUS[st] || ['mute', '', st];
+    const when = r.state === 'pre' ? `<span class="t">${esc(r.time)}</span>` : '';
+    const tip = [words, g?.minutes != null ? `${g.minutes} דקות מהבאזר לסיכום` : '', g?.late ? 'נכתב מאוחר' : g?.rewritten ? 'נכתב מחדש' : ''].filter(Boolean).join(' · ');
+    return `<button class="card ${cls}${r.israelis.length ? ' israeli' : ''}" data-go="g${r.id}" data-teams="${esc((g?.teams || []).join('|'))}" title="${esc(tip)}">
+      <span class="row">${when}<span class="score">${esc(r.line)}</span><span class="st">${icon}</span></span>
+      ${g?.angle ? `<span class="angle">${esc(g.angle)}</span>` : ''}
+      ${r.israelis.length || g?.minutes != null ? `<span class="meta">${isrTags(r.israelis)}${g?.minutes != null ? `<span class="chip mute">⚡ ${g.minutes} ד׳</span>` : ''}</span>` : ''}
     </button>`;
   }).join('')}</div>`;
 }
@@ -93,15 +94,12 @@ function board(n) {
 function show(i) {
   const d = DB.days[i];
   document.querySelectorAll('nav.dates button').forEach((b, k) => b.classList.toggle('on', k === i));
-  let h = resultsBox(d);
+  if (!d.results.length) { document.getElementById('app').innerHTML = `<p class="empty-day">אין משחקי NBA ב${esc(d.label)}.</p>`; return; }
+  let h = topLine(d) + scoreboard(d);
   if (d.board) {
-    // Israelis on the board: names from the board, "full" from the results list
-    const full = new Map(d.results.flatMap((r) => r.israelis.map((x) => [x.name, x.full])));
-    for (const g of d.board) g.isr = g.israelis.map((name) => ({ name, full: !!full.get(name) }));
-    h += summary(d) + board(d);
     if (d.pieces.length) h += '<h2 class="sec">כתבות</h2>' + d.pieces.map((p) => render(p.md)).join('');
     if (d.closing) h += '<h2 class="sec">סגירת הלילה</h2>' + render(d.closing);
-  } else if (!d.future && d.results.length) h += '<p class="empty-day">המערכת לא כתבה סיכומים לתאריך הזה.</p>';
+  } else if (!d.future) h += '<p class="empty-day">המערכת לא כתבה סיכומים לתאריך הזה.</p>';
   document.getElementById('app').innerHTML = h;
   // Israeli recaps / articles: highlighted wherever they appear
   const isrGames = new Map(d.results.filter((r) => r.israelis.length).map((r) => [`g${r.id}`, r.israelis.some((x) => x.full)]));

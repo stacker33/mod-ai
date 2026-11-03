@@ -113,7 +113,8 @@ function results(rows, dir) {
   return rows.map((r) => {
     const f = dir ? readJ(join(dir, `${r.id}.json`)) : null;
     const t = (x) => heTeam(x.abbr) || x.name;
-    const played = (f?.israelis || []).filter((i) => i.played).map((i) => ({ name: i.he || i.name, full: i.track === 'full' }));
+    const track = (i) => ISRAELIS.find((p) => p.id === i.id || p.name === i.name)?.track || i.track;
+    const played = (f?.israelis || []).filter((i) => i.played).map((i) => ({ name: i.he || i.name, full: track(i) === 'full' }));
     const onTeams = ISRAELIS.filter((p) => [r.home.abbr, r.away.abbr].includes(p.team)).map((p) => ({ name: p.he, full: p.track === 'full' }));
     const israelis = r.state === 'post' && f ? played : onTeams;
     return {
@@ -171,10 +172,16 @@ form button{cursor:pointer;background:#c2185b;color:#fff;border:0}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .stat b{display:block;font-size:24px;line-height:1.2;color:var(--brand)}.stat span{font-size:13px;color:var(--mute)}
 .extra{margin:0 0 12px;color:var(--mute);font-size:14px}
-.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin:8px 0 22px}
-.card{display:flex;flex-direction:column;gap:6px;text-align:start;cursor:pointer;background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--line);border-radius:10px;padding:10px 12px}
+.topline{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:2px 0 10px;font-size:14px;color:var(--mute)}
+.topline .night{font-weight:600;color:var(--ink)}.topline .nums b{color:var(--brand)}.topline i{font-style:normal;margin:0 6px;opacity:.5}
+.topline .bad{color:var(--bad)}.topline .warn{color:var(--warn)}.topline .livet{color:var(--live);font-weight:600}
+.copy.small{float:none;margin-inline-start:auto;border-radius:999px}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:0 0 22px}
+.card{display:flex;flex-direction:column;gap:3px;text-align:start;cursor:pointer;background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--line);border-radius:8px;padding:7px 10px}
+.card .row{display:flex;align-items:center;gap:6px}.card .row .score{flex:1}.card .st{font-size:14px}.card .t{font-size:13px;color:var(--mute)}
+.card .angle{font-size:12.5px;color:var(--mute);line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
 .card:hover{border-color:var(--brand)}.card.ok{border-inline-start-color:var(--ok)}.card.warn{border-inline-start-color:var(--warn)}.card.bad{border-inline-start-color:var(--bad)}.card.live{border-inline-start-color:var(--live)}
-.card .score{font-weight:700}.card .angle{font-size:14px;color:var(--mute);line-height:1.45}
+.card .score{font-weight:700;font-size:15px}
 .meta{display:flex;flex-wrap:wrap;gap:6px}
 .chip{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--ink);white-space:nowrap}
 .chip.ok{background:var(--okbg);color:var(--ok)}.chip.warn{background:var(--warnbg);color:var(--warn)}.chip.bad{background:var(--badbg);color:var(--bad)}.chip.live{background:var(--livebg);color:var(--live)}.chip.isr{background:var(--isrbg);color:var(--isr)}.chip.mute{color:var(--mute)}
