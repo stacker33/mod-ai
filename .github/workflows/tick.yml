@@ -86,6 +86,14 @@ jobs:
           GEMINI_API_KEY: unused
         run: node scripts/resend.js "${{ github.event.inputs.resend }}"
 
+      # a change to the page code republishes the page on the next run by itself (a manual run can be
+      # bumped from the queue by the 5-minute trigger, so this must not depend on one)
+      - name: Page code changed?
+        run: |
+          mkdir -p out
+          h=$(cat scripts/site.js scripts/site-client.js src/teams.js | sha1sum | cut -c1-12)
+          if [ "$h" != "$(cat out/site-hash 2>/dev/null)" ]; then echo "$h" > out/site-hash; echo yes > out/changed; echo "page code changed ($h)"; fi
+
       - name: Save state
         if: always()
         uses: actions/cache/save@v4
