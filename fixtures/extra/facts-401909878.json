@@ -1,0 +1,1537 @@
+{
+  "schema": 1,
+  "gameId": "401909878",
+  "source": {
+    "provider": "espn",
+    "fetchedAt": "2026-11-03T15:05:40.507Z",
+    "url": "https://www.espn.com/nba/game/_/gameId/401909878"
+  },
+  "date": "2026-10-28T00:00Z",
+  "seasonType": 2,
+  "note": null,
+  "venue": "Madison Square Garden",
+  "status": {
+    "final": true,
+    "state": "post",
+    "detail": "Final"
+  },
+  "teams": {
+    "home": {
+      "id": "18",
+      "abbr": "NY",
+      "name": "New York Knicks",
+      "he": "ניו יורק",
+      "heShort": "ניקס",
+      "score": 111,
+      "periods": [
+        25,
+        26,
+        37,
+        23
+      ],
+      "record": "1-3",
+      "venueRecord": "1-2"
+    },
+    "away": {
+      "id": "8",
+      "abbr": "DET",
+      "name": "Detroit Pistons",
+      "he": "דטרויט",
+      "heShort": "דטרויט",
+      "score": 97,
+      "periods": [
+        38,
+        12,
+        13,
+        34
+      ],
+      "record": "3-1",
+      "venueRecord": "2-1"
+    }
+  },
+  "players": {
+    "home": [
+      {
+        "id": "3934719",
+        "name": "OG Anunoby",
+        "pos": "F",
+        "starter": true,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 36,
+        "pts": 13,
+        "reb": 7,
+        "ast": 2,
+        "to": 2,
+        "stl": 2,
+        "blk": 2,
+        "oreb": 4,
+        "dreb": 3,
+        "pf": 5,
+        "plusMinus": 13,
+        "fg": [
+          5,
+          15
+        ],
+        "tp": [
+          1,
+          6
+        ],
+        "ft": [
+          2,
+          2
+        ],
+        "flags": [],
+        "he": "או ג'י אננובי",
+        "heStatus": "aligned"
+      },
+      {
+        "id": "3136195",
+        "name": "Karl-Anthony Towns",
+        "pos": "C",
+        "starter": true,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 33,
+        "pts": 27,
+        "reb": 20,
+        "ast": 3,
+        "to": 7,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 8,
+        "dreb": 12,
+        "pf": 5,
+        "plusMinus": -4,
+        "fg": [
+          12,
+          21
+        ],
+        "tp": [
+          1,
+          5
+        ],
+        "ft": [
+          2,
+          2
+        ],
+        "flags": [
+          "double-double",
+          "15+ rebounds"
+        ],
+        "he": "קארל אנתוני טאונס",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "3062679",
+        "name": "Josh Hart",
+        "pos": "G",
+        "starter": true,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 27,
+        "pts": 6,
+        "reb": 4,
+        "ast": 4,
+        "to": 3,
+        "stl": 5,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 4,
+        "pf": 3,
+        "plusMinus": 19,
+        "fg": [
+          2,
+          2
+        ],
+        "tp": [
+          2,
+          2
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [
+          "5+ steals"
+        ],
+        "he": "ג'וש הארט",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "3147657",
+        "name": "Mikal Bridges",
+        "pos": "G",
+        "starter": true,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 32,
+        "pts": 12,
+        "reb": 3,
+        "ast": 4,
+        "to": 2,
+        "stl": 1,
+        "blk": 0,
+        "oreb": 1,
+        "dreb": 2,
+        "pf": 0,
+        "plusMinus": 10,
+        "fg": [
+          4,
+          10
+        ],
+        "tp": [
+          4,
+          8
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "מיקל ברידג'ס",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "3934672",
+        "name": "Jalen Brunson",
+        "pos": "G",
+        "starter": true,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 36,
+        "pts": 23,
+        "reb": 1,
+        "ast": 7,
+        "to": 1,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 1,
+        "dreb": 0,
+        "pf": 1,
+        "plusMinus": 14,
+        "fg": [
+          5,
+          18
+        ],
+        "tp": [
+          0,
+          5
+        ],
+        "ft": [
+          13,
+          16
+        ],
+        "flags": [],
+        "he": "ג'יילן ברונסון",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "5211983",
+        "name": "Pacome Dadiet",
+        "pos": "F",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 1,
+        "pts": 0,
+        "reb": 1,
+        "ast": 0,
+        "to": 0,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 1,
+        "pf": 0,
+        "plusMinus": 2,
+        "fg": [
+          0,
+          0
+        ],
+        "tp": [
+          0,
+          0
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "פקום דדייה",
+        "heStatus": "draft"
+      },
+      {
+        "id": "5289900",
+        "name": "Mohamed Diawara",
+        "pos": "F",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 1,
+        "pts": 0,
+        "reb": 0,
+        "ast": 0,
+        "to": 0,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 0,
+        "pf": 0,
+        "plusMinus": 2,
+        "fg": [
+          0,
+          0
+        ],
+        "tp": [
+          0,
+          0
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "מוחמד דיאוורה",
+        "heStatus": "draft"
+      },
+      {
+        "id": "6585",
+        "name": "Andre Drummond",
+        "pos": "C",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 14,
+        "pts": 10,
+        "reb": 8,
+        "ast": 1,
+        "to": 1,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 2,
+        "dreb": 6,
+        "pf": 2,
+        "plusMinus": 16,
+        "fg": [
+          5,
+          7
+        ],
+        "tp": [
+          0,
+          1
+        ],
+        "ft": [
+          0,
+          2
+        ],
+        "flags": [],
+        "he": "אנדרה דראמונד",
+        "heStatus": "draft"
+      },
+      {
+        "id": "4432808",
+        "name": "James Wiseman",
+        "pos": "C",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 1,
+        "pts": 0,
+        "reb": 1,
+        "ast": 0,
+        "to": 1,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 1,
+        "dreb": 0,
+        "pf": 0,
+        "plusMinus": 2,
+        "fg": [
+          0,
+          0
+        ],
+        "tp": [
+          0,
+          0
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "ג'יימס וייזמן",
+        "heStatus": "draft"
+      },
+      {
+        "id": "3914044",
+        "name": "Landry Shamet",
+        "pos": "G",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 28,
+        "pts": 13,
+        "reb": 2,
+        "ast": 3,
+        "to": 1,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 2,
+        "dreb": 0,
+        "pf": 2,
+        "plusMinus": -3,
+        "fg": [
+          3,
+          8
+        ],
+        "tp": [
+          3,
+          5
+        ],
+        "ft": [
+          4,
+          4
+        ],
+        "flags": [],
+        "he": "לנדרי שאמט",
+        "heStatus": "draft"
+      },
+      {
+        "id": "4431823",
+        "name": "Miles McBride",
+        "pos": "G",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 17,
+        "pts": 5,
+        "reb": 1,
+        "ast": 1,
+        "to": 0,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 1,
+        "pf": 3,
+        "plusMinus": 0,
+        "fg": [
+          2,
+          4
+        ],
+        "tp": [
+          1,
+          3
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "מיילס מקברייד",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "4433225",
+        "name": "Tyler Kolek",
+        "pos": "G",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 11,
+        "pts": 2,
+        "reb": 1,
+        "ast": 3,
+        "to": 0,
+        "stl": 2,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 1,
+        "pf": 2,
+        "plusMinus": 0,
+        "fg": [
+          0,
+          3
+        ],
+        "tp": [
+          0,
+          1
+        ],
+        "ft": [
+          2,
+          2
+        ],
+        "flags": [],
+        "he": "טיילר קולק",
+        "heStatus": "draft"
+      },
+      {
+        "id": "4683730",
+        "name": "Jaden Akins",
+        "pos": "G",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 2,
+        "pts": 0,
+        "reb": 0,
+        "ast": 0,
+        "to": 0,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 0,
+        "pf": 0,
+        "plusMinus": -1,
+        "fg": [
+          0,
+          0
+        ],
+        "tp": [
+          0,
+          0
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "ג'יידן אייקינס",
+        "heStatus": "draft"
+      },
+      {
+        "id": "2528426",
+        "name": "Jordan Clarkson",
+        "pos": "G",
+        "starter": false,
+        "played": false,
+        "dnpReason": "COACH'S DECISION",
+        "ejected": false,
+        "flags": [],
+        "he": "ג'ורדן קלארקסון",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "4411057",
+        "name": "Kevin McCullar Jr.",
+        "pos": "G",
+        "starter": false,
+        "played": false,
+        "dnpReason": "COACH'S DECISION",
+        "ejected": false,
+        "flags": [],
+        "he": null,
+        "heStatus": "missing"
+      }
+    ],
+    "away": [
+      {
+        "id": "3157465",
+        "name": "Duncan Robinson",
+        "pos": "F",
+        "starter": true,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 33,
+        "pts": 12,
+        "reb": 0,
+        "ast": 2,
+        "to": 1,
+        "stl": 1,
+        "blk": 1,
+        "oreb": 0,
+        "dreb": 0,
+        "pf": 2,
+        "plusMinus": -15,
+        "fg": [
+          4,
+          14
+        ],
+        "tp": [
+          2,
+          10
+        ],
+        "ft": [
+          2,
+          2
+        ],
+        "flags": [],
+        "he": "דאנקן רובינסון",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "3908845",
+        "name": "John Collins",
+        "pos": "F",
+        "starter": true,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 27,
+        "pts": 2,
+        "reb": 9,
+        "ast": 1,
+        "to": 1,
+        "stl": 0,
+        "blk": 3,
+        "oreb": 3,
+        "dreb": 6,
+        "pf": 3,
+        "plusMinus": -12,
+        "fg": [
+          1,
+          4
+        ],
+        "tp": [
+          0,
+          0
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "ג'ון קולינס",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "4278562",
+        "name": "Paul Reed",
+        "pos": "F",
+        "starter": true,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 26,
+        "pts": 22,
+        "reb": 9,
+        "ast": 3,
+        "to": 2,
+        "stl": 2,
+        "blk": 1,
+        "oreb": 5,
+        "dreb": 4,
+        "pf": 5,
+        "plusMinus": 7,
+        "fg": [
+          9,
+          12
+        ],
+        "tp": [
+          1,
+          1
+        ],
+        "ft": [
+          3,
+          4
+        ],
+        "flags": [],
+        "he": "פול ריד",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "4432166",
+        "name": "Cade Cunningham",
+        "pos": "G",
+        "starter": true,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 36,
+        "pts": 19,
+        "reb": 9,
+        "ast": 8,
+        "to": 3,
+        "stl": 0,
+        "blk": 1,
+        "oreb": 1,
+        "dreb": 8,
+        "pf": 0,
+        "plusMinus": -15,
+        "fg": [
+          7,
+          18
+        ],
+        "tp": [
+          2,
+          7
+        ],
+        "ft": [
+          3,
+          5
+        ],
+        "flags": [],
+        "he": "קייד קנינגהאם",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "4684742",
+        "name": "Ausar Thompson",
+        "pos": "G",
+        "starter": true,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 25,
+        "pts": 11,
+        "reb": 6,
+        "ast": 2,
+        "to": 4,
+        "stl": 2,
+        "blk": 1,
+        "oreb": 1,
+        "dreb": 5,
+        "pf": 6,
+        "plusMinus": -4,
+        "fg": [
+          5,
+          9
+        ],
+        "tp": [
+          0,
+          1
+        ],
+        "ft": [
+          1,
+          3
+        ],
+        "flags": [
+          "fouled out"
+        ],
+        "he": "אוסר תומפסון",
+        "heStatus": "draft"
+      },
+      {
+        "id": "2990962",
+        "name": "Taurean Prince",
+        "pos": "F",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 7,
+        "pts": 3,
+        "reb": 0,
+        "ast": 0,
+        "to": 0,
+        "stl": 2,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 0,
+        "pf": 1,
+        "plusMinus": 6,
+        "fg": [
+          1,
+          3
+        ],
+        "tp": [
+          1,
+          3
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "טוריאן פרינס",
+        "heStatus": "draft"
+      },
+      {
+        "id": "4397882",
+        "name": "Tolu Smith",
+        "pos": "F",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 6,
+        "pts": 1,
+        "reb": 4,
+        "ast": 0,
+        "to": 1,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 2,
+        "dreb": 2,
+        "pf": 4,
+        "plusMinus": -18,
+        "fg": [
+          0,
+          1
+        ],
+        "tp": [
+          0,
+          0
+        ],
+        "ft": [
+          1,
+          4
+        ],
+        "flags": [],
+        "he": "טולו סמית'",
+        "heStatus": "draft"
+      },
+      {
+        "id": "4683771",
+        "name": "Ronald Holland II",
+        "pos": "F",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 12,
+        "pts": 4,
+        "reb": 3,
+        "ast": 2,
+        "to": 0,
+        "stl": 0,
+        "blk": 2,
+        "oreb": 2,
+        "dreb": 1,
+        "pf": 3,
+        "plusMinus": 3,
+        "fg": [
+          2,
+          4
+        ],
+        "tp": [
+          0,
+          1
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "רונלד הולנד השני",
+        "heStatus": "draft"
+      },
+      {
+        "id": "5107818",
+        "name": "Isaac Jones",
+        "pos": "C",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 3,
+        "pts": 0,
+        "reb": 0,
+        "ast": 1,
+        "to": 0,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 0,
+        "pf": 0,
+        "plusMinus": 5,
+        "fg": [
+          0,
+          0
+        ],
+        "tp": [
+          0,
+          0
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "אייזק ג'ונס",
+        "heStatus": "draft"
+      },
+      {
+        "id": "2596112",
+        "name": "Javonte Green",
+        "pos": "G",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 17,
+        "pts": 3,
+        "reb": 1,
+        "ast": 0,
+        "to": 0,
+        "stl": 0,
+        "blk": 1,
+        "oreb": 0,
+        "dreb": 1,
+        "pf": 3,
+        "plusMinus": -9,
+        "fg": [
+          1,
+          6
+        ],
+        "tp": [
+          1,
+          6
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "ג'בונטה גרין",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "4066372",
+        "name": "Kevin Huerter",
+        "pos": "G",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 16,
+        "pts": 7,
+        "reb": 1,
+        "ast": 0,
+        "to": 0,
+        "stl": 1,
+        "blk": 1,
+        "oreb": 1,
+        "dreb": 0,
+        "pf": 1,
+        "plusMinus": -11,
+        "fg": [
+          3,
+          5
+        ],
+        "tp": [
+          1,
+          2
+        ],
+        "ft": [
+          0,
+          2
+        ],
+        "flags": [],
+        "he": "קווין הרטר",
+        "heStatus": "draft"
+      },
+      {
+        "id": "4397449",
+        "name": "Elijah Harkless",
+        "pos": "G",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 3,
+        "pts": 0,
+        "reb": 0,
+        "ast": 0,
+        "to": 0,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 0,
+        "pf": 0,
+        "plusMinus": 2,
+        "fg": [
+          0,
+          0
+        ],
+        "tp": [
+          0,
+          0
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "אלייג'ה הרקלס",
+        "heStatus": "draft"
+      },
+      {
+        "id": "4700852",
+        "name": "Chaz Lanier",
+        "pos": "G",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 2,
+        "pts": 2,
+        "reb": 0,
+        "ast": 0,
+        "to": 0,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 0,
+        "pf": 0,
+        "plusMinus": 0,
+        "fg": [
+          1,
+          1
+        ],
+        "tp": [
+          0,
+          0
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "צ'אז לנייר",
+        "heStatus": "draft"
+      },
+      {
+        "id": "5107199",
+        "name": "Daniss Jenkins",
+        "pos": "G",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 24,
+        "pts": 11,
+        "reb": 3,
+        "ast": 2,
+        "to": 1,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 3,
+        "pf": 0,
+        "plusMinus": -14,
+        "fg": [
+          3,
+          10
+        ],
+        "tp": [
+          1,
+          6
+        ],
+        "ft": [
+          4,
+          4
+        ],
+        "flags": [],
+        "he": "דניס ג'נקינס",
+        "heStatus": "sport5"
+      },
+      {
+        "id": "5258459",
+        "name": "Ebuka Okorie",
+        "pos": "G",
+        "starter": false,
+        "played": true,
+        "dnpReason": "",
+        "ejected": false,
+        "min": 4,
+        "pts": 0,
+        "reb": 0,
+        "ast": 2,
+        "to": 1,
+        "stl": 0,
+        "blk": 0,
+        "oreb": 0,
+        "dreb": 0,
+        "pf": 0,
+        "plusMinus": 5,
+        "fg": [
+          0,
+          0
+        ],
+        "tp": [
+          0,
+          0
+        ],
+        "ft": [
+          0,
+          0
+        ],
+        "flags": [],
+        "he": "אבוקה אוקוריה",
+        "heStatus": "draft"
+      }
+    ]
+  },
+  "bench": {
+    "home": 30,
+    "away": 31
+  },
+  "teamStats": {
+    "home": {
+      "fg": [
+        38,
+        88
+      ],
+      "fgPct": 43,
+      "tp": [
+        12,
+        36
+      ],
+      "threePct": 33,
+      "ft": [
+        23,
+        28
+      ],
+      "ftPct": 82,
+      "reb": 49,
+      "oreb": 19,
+      "ast": 28,
+      "stl": 10,
+      "blk": 2,
+      "to": 18,
+      "ptsOffTurnovers": 23,
+      "fastBreakPts": 12,
+      "paintPts": 44,
+      "largestLead": 27,
+      "leadChanges": 4
+    },
+    "away": {
+      "fg": [
+        37,
+        87
+      ],
+      "fgPct": 43,
+      "tp": [
+        9,
+        37
+      ],
+      "threePct": 24,
+      "ft": [
+        14,
+        24
+      ],
+      "ftPct": 58,
+      "reb": 45,
+      "oreb": 15,
+      "ast": 23,
+      "stl": 8,
+      "blk": 11,
+      "to": 14,
+      "ptsOffTurnovers": 17,
+      "fastBreakPts": 10,
+      "paintPts": 48,
+      "largestLead": 13,
+      "leadChanges": 4
+    }
+  },
+  "result": {
+    "winner": "home",
+    "loser": "away",
+    "margin": 14,
+    "halftime": {
+      "home": 51,
+      "away": 50
+    },
+    "after3": {
+      "home": 88,
+      "away": 63
+    }
+  },
+  "flow": {
+    "available": true,
+    "quality": {
+      "reportedMismatches": 1,
+      "clockRegressions": 0
+    },
+    "largestLead": {
+      "home": {
+        "pts": 27,
+        "at": {
+          "period": 4,
+          "periodName": "Q4",
+          "clock": "11:10",
+          "secondsLeftInPeriod": 670
+        },
+        "score": {
+          "home": 90,
+          "away": 63
+        }
+      },
+      "away": {
+        "pts": 13,
+        "at": {
+          "period": 1,
+          "periodName": "Q1",
+          "clock": "2.8",
+          "secondsLeftInPeriod": 2.8
+        },
+        "score": {
+          "home": 25,
+          "away": 38
+        }
+      }
+    },
+    "leadChanges": 4,
+    "ties": 7,
+    "spurts": [
+      {
+        "side": "home",
+        "for": 22,
+        "against": 6,
+        "from": {
+          "period": 2,
+          "periodName": "Q2",
+          "clock": "2.4",
+          "secondsLeftInPeriod": 2.4
+        },
+        "to": {
+          "period": 3,
+          "periodName": "Q3",
+          "clock": "6:27",
+          "secondsLeftInPeriod": 387
+        },
+        "scoreBefore": {
+          "home": 49,
+          "away": 50
+        },
+        "scoreAfter": {
+          "home": 71,
+          "away": 56
+        }
+      },
+      {
+        "side": "away",
+        "for": 25,
+        "against": 11,
+        "from": {
+          "period": 1,
+          "periodName": "Q1",
+          "clock": "6:50",
+          "secondsLeftInPeriod": 410
+        },
+        "to": {
+          "period": 1,
+          "periodName": "Q1",
+          "clock": "1:39",
+          "secondsLeftInPeriod": 99
+        },
+        "scoreBefore": {
+          "home": 11,
+          "away": 8
+        },
+        "scoreAfter": {
+          "home": 22,
+          "away": 33
+        }
+      },
+      {
+        "side": "home",
+        "for": 16,
+        "against": 3,
+        "from": {
+          "period": 2,
+          "periodName": "Q2",
+          "clock": "8:19",
+          "secondsLeftInPeriod": 499
+        },
+        "to": {
+          "period": 2,
+          "periodName": "Q2",
+          "clock": "3:47",
+          "secondsLeftInPeriod": 227
+        },
+        "scoreBefore": {
+          "home": 30,
+          "away": 42
+        },
+        "scoreAfter": {
+          "home": 46,
+          "away": 45
+        }
+      },
+      {
+        "side": "away",
+        "for": 19,
+        "against": 6,
+        "from": {
+          "period": 4,
+          "periodName": "Q4",
+          "clock": "9:29",
+          "secondsLeftInPeriod": 569
+        },
+        "to": {
+          "period": 4,
+          "periodName": "Q4",
+          "clock": "4:54",
+          "secondsLeftInPeriod": 294
+        },
+        "scoreBefore": {
+          "home": 93,
+          "away": 67
+        },
+        "scoreAfter": {
+          "home": 99,
+          "away": 86
+        }
+      },
+      {
+        "side": "home",
+        "for": 14,
+        "against": 2,
+        "from": {
+          "period": 3,
+          "periodName": "Q3",
+          "clock": "3:32",
+          "secondsLeftInPeriod": 212
+        },
+        "to": {
+          "period": 4,
+          "periodName": "Q4",
+          "clock": "11:10",
+          "secondsLeftInPeriod": 670
+        },
+        "scoreBefore": {
+          "home": 76,
+          "away": 61
+        },
+        "scoreAfter": {
+          "home": 90,
+          "away": 63
+        }
+      }
+    ],
+    "finalScore": {
+      "home": 111,
+      "away": 97
+    }
+  },
+  "clutch": {
+    "finalPeriod": 4,
+    "finalPeriodName": "Q4",
+    "overtimes": 0,
+    "marginAt5min": {
+      "home": 99,
+      "away": 84,
+      "winnerMargin": 15
+    },
+    "marginAt2min": {
+      "home": 107,
+      "away": 93,
+      "winnerMargin": 14
+    },
+    "winningBasket": {
+      "period": 2,
+      "periodName": "Q2",
+      "clock": "2.4",
+      "secondsLeftInPeriod": 2.4,
+      "player": "Jalen Brunson",
+      "side": "home",
+      "points": 1,
+      "text": "Jalen Brunson makes free throw 2 of 2",
+      "scoreAfter": {
+        "home": 51,
+        "away": 50
+      },
+      "inFinalPeriod": false,
+      "late": false,
+      "buzzer": false
+    },
+    "tyingShotToOT": null,
+    "loserLedInLast3min": false,
+    "finalSequence": []
+  },
+  "context": {
+    "seasonSeries": [
+      "NY leads series 1-0"
+    ],
+    "injuryReport": [
+      {
+        "team": "DET",
+        "name": "Isaiah Joe",
+        "status": "Out",
+        "detail": "Bruise"
+      },
+      {
+        "team": "DET",
+        "name": "Jalen Duren",
+        "status": "Out",
+        "detail": "Strain"
+      }
+    ],
+    "source": "ESPN structured data (pre-game injury report, season series)"
+  },
+  "israelis": [],
+  "candidates": [
+    {
+      "type": "UNUSUAL_STAT_LINE",
+      "weight": 65,
+      "why": "Karl-Anthony Towns: 27 points, 20 rebounds",
+      "evidence": "box"
+    },
+    {
+      "type": "MAJOR_RUN",
+      "weight": 45,
+      "why": "NY 22-6 run (Q2 2.4 to Q3 6:27)",
+      "evidence": "pbp"
+    },
+    {
+      "type": "TOP_PERFORMER",
+      "weight": 40,
+      "why": "Karl-Anthony Towns: 27 points",
+      "evidence": "box"
+    }
+  ],
+  "research": [
+    "האם השורה של Karl-Anthony Towns (27 נק', 20 ריב', 3 אס') היא שיא קריירה או עונה?",
+    "רצפים ומשמעות בטבלה לניקס ולדטרויט."
+  ],
+  "checks": [
+    {
+      "name": "final",
+      "ok": true,
+      "detail": "Final",
+      "severity": "ok"
+    },
+    {
+      "name": "home: periods sum = score",
+      "ok": true,
+      "detail": "111 vs 111",
+      "severity": "ok"
+    },
+    {
+      "name": "home: player points sum = score",
+      "ok": true,
+      "detail": "111 vs 111",
+      "severity": "ok"
+    },
+    {
+      "name": "home: largest lead matches ESPN",
+      "ok": true,
+      "detail": "computed 27, ESPN 27",
+      "severity": "ok"
+    },
+    {
+      "name": "away: periods sum = score",
+      "ok": true,
+      "detail": "97 vs 97",
+      "severity": "ok"
+    },
+    {
+      "name": "away: player points sum = score",
+      "ok": true,
+      "detail": "97 vs 97",
+      "severity": "ok"
+    },
+    {
+      "name": "away: largest lead matches ESPN",
+      "ok": true,
+      "detail": "computed 13, ESPN 13",
+      "severity": "ok"
+    },
+    {
+      "name": "score rebuilt from play-by-play = box score",
+      "ok": true,
+      "detail": "pbp 97-111, box 97-111",
+      "severity": "ok"
+    },
+    {
+      "name": "ESPN per-play scores consistent",
+      "ok": false,
+      "detail": "1 plays with a wrong running score in the feed (ignored: score rebuilt from baskets)",
+      "severity": "info"
+    },
+    {
+      "name": "play clock in order",
+      "ok": true,
+      "detail": "0 plays out of clock order",
+      "severity": "ok"
+    },
+    {
+      "name": "lead changes match ESPN",
+      "ok": true,
+      "detail": "computed 4, ESPN 4",
+      "severity": "ok"
+    }
+  ],
+  "ok": true,
+  "namesMissing": [],
+  "color": {
+    "events": [
+      {
+        "kind": "challenge lost",
+        "team": "Pistons",
+        "player": null,
+        "period": 3,
+        "periodName": "Q3",
+        "clock": "8:30",
+        "clutch": false,
+        "score": {
+          "home": 64,
+          "away": 54
+        },
+        "text": "(08:30) [Pistons] COACH'S CHALLENGE (CALL REPLAYCENTER)"
+      },
+      {
+        "kind": "flagrant 1",
+        "player": "Paul Reed",
+        "team": "DET",
+        "period": 3,
+        "periodName": "Q3",
+        "clock": "8:30",
+        "clutch": false,
+        "score": {
+          "home": 64,
+          "away": 54
+        },
+        "text": "Paul Reed flagrant foul type 1"
+      },
+      {
+        "kind": "end-of-period buzzer basket",
+        "player": "Josh Hart",
+        "team": "NY",
+        "period": 3,
+        "periodName": "Q3",
+        "clock": "0.3",
+        "clutch": false,
+        "score": {
+          "home": 88,
+          "away": 63
+        },
+        "text": "Josh Hart makes 25-foot three point jumper (Mikal Bridges assists)"
+      },
+      {
+        "kind": "challenge won",
+        "team": "Knicks",
+        "player": null,
+        "period": 4,
+        "periodName": "Q4",
+        "clock": "8:09",
+        "clutch": false,
+        "score": {
+          "home": 95,
+          "away": 74
+        },
+        "text": "(08:09) [Knicks] COACH'S CHALLENGE (CALL OVERTURNED) [Knicks] retain their timeout"
+      }
+    ],
+    "dunks": 10,
+    "highlights": [
+      "OG Anunoby rocks the rim with powerful jam",
+      "Cade Cunningham crosses defender and slams it home",
+      "Andre Drummond throws down powerful slam vs. Detroit Pistons",
+      "Karl-Anthony Towns skies for big jam",
+      "Josh Hart hits the 3-pointer vs. Detroit Pistons",
+      "Tyler Kolek wows Spike Lee with behind-the-back dime to KAT"
+    ],
+    "highlightsSource": "ESPN video titles (leads, not verified facts)",
+    "article": {
+      "headline": "Knicks get first win of the season with a 111-97 victory over the previously unbeaten Pistons",
+      "source": "ESPN recap (not used as fact)"
+    }
+  },
+  "tracks": []
+}

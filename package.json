@@ -1,0 +1,12 @@
+{
+  "name": "mod-ai",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Mod-AI: verified NBA game facts (and later Hebrew recaps) for Sport5 editors",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "facts": "node scripts/facts.js",
+    "test": "node --test test/facts.test.js test/writer.test.js"
+  }
+}

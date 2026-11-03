@@ -1,0 +1,80 @@
+# Every few minutes: check ESPN's scoreboard; write the recap of every game that just ended, send it to the
+# Telegram channel, and publish the encrypted drafts page. The real trigger is cron-job.org (workflow_dispatch
+# every 5 minutes) because GitHub's own schedule is often late; the schedule below is only a backup.
+name: Mod-AI tick
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/10 * * * *'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# never two runs at once (they would write the same game twice); a new trigger waits for the running one
+concurrency:
+  group: tick
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # the nights written so far + Avdija's past seasons live in the Actions cache, not in the public repo
+      - name: Restore state
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            out
+            cache
+          key: mod-ai-state-${{ github.run_id }}
+          restore-keys: mod-ai-state-
+
+      - name: Fetch Sport5 style examples
+        run: bash scripts/fetch_style.sh || echo "style examples unavailable this run"
+
+      - name: Tick
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          AI_MODEL: ${{ vars.AI_MODEL || 'gemini-3.8-flash' }}
+          AI_MODEL_FALLBACK: ${{ vars.AI_MODEL_FALLBACK || 'gemini-3.7-flash,gemini-3.5-flash,gemini-flash-latest,gemini-3.5-flash-lite' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT: ${{ vars.TELEGRAM_CHAT }}
+          PAGE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+        run: node scripts/tick.js
+
+      - name: Save state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            out
+            cache
+          key: mod-ai-state-${{ github.run_id }}
+
+      - name: Did anything change?
+        id: changed
+        run: echo "yes=$(cat out/changed 2>/dev/null || echo no)" >> "$GITHUB_OUTPUT"
+
+      - name: Build encrypted page
+        if: steps.changed.outputs.yes == 'yes'
+        env:
+          PAGE_PASSWORD: ${{ secrets.PAGE_PASSWORD }}
+        run: node scripts/site.js
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.changed.outputs.yes == 'yes'
+        with:
+          path: site
+
+      - uses: actions/deploy-pages@v4
+        if: steps.changed.outputs.yes == 'yes'

@@ -1,0 +1,13 @@
+.env
+node_modules/
+cache/
+out/
+site/
+# copyrighted source texts: fetched at run time (scripts/fetch_style.sh), never committed
+style/raw/
+style/nights/
+style/avdija/
+names/raw/
+names/teams/
+names/rosters/
+names/articles/

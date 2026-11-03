@@ -1,0 +1,3128 @@
+[
+{
+"id": "4278039",
+"en": "Nickeil Alexander-Walker",
+"team": "ATL",
+"pos": "G"
+},
+{
+"id": "4869342",
+"en": "Dyson Daniels",
+"team": "ATL",
+"pos": "G"
+},
+{
+"id": "4431941",
+"en": "RayJ Dennis",
+"team": "ATL",
+"pos": "G"
+},
+{
+"id": "4397020",
+"en": "Luguentz Dort",
+"team": "ATL",
+"pos": "G"
+},
+{
+"id": "5106262",
+"en": "Zuby Ejiofor",
+"team": "ATL",
+"pos": "F"
+},
+{
+"id": "2578185",
+"en": "Dorian Finney-Smith",
+"team": "ATL",
+"pos": "F"
+},
+{
+"id": "5149077",
+"en": "Kingston Flemings",
+"team": "ATL",
+"pos": "G"
+},
+{
+"id": "4585618",
+"en": "Keshon Gilbert",
+"team": "ATL",
+"pos": "G"
+},
+{
+"id": "4712863",
+"en": "Mouhamed Gueye",
+"team": "ATL",
+"pos": "F"
+},
+{
+"id": "4701230",
+"en": "Jalen Johnson",
+"team": "ATL",
+"pos": "F"
+},
+{
+"id": "4280151",
+"en": "Corey Kispert",
+"team": "ATL",
+"pos": "F"
+},
+{
+"id": "3146557",
+"en": "Jock Landale",
+"team": "ATL",
+"pos": "C"
+},
+{
+"id": "2490149",
+"en": "CJ McCollum",
+"team": "ATL",
+"pos": "G"
+},
+{
+"id": "4873201",
+"en": "Asa Newell",
+"team": "ATL",
+"pos": "F"
+},
+{
+"id": "4431680",
+"en": "Onyeka Okongwu",
+"team": "ATL",
+"pos": "F"
+},
+{
+"id": "5105571",
+"en": "Henri Veesaar",
+"team": "ATL",
+"pos": "C"
+},
+{
+"id": "4397183",
+"en": "Aaron Wiggins",
+"team": "ATL",
+"pos": "G"
+},
+{
+"id": "4431714",
+"en": "Jalen Wilson",
+"team": "ATL",
+"pos": "F"
+},
+{
+"id": "5105626",
+"en": "Tyler Bilodeau",
+"team": "BKN",
+"pos": "F"
+},
+{
+"id": "5101761",
+"en": "Mikel Brown Jr.",
+"team": "BKN",
+"pos": "G"
+},
+{
+"id": "4712896",
+"en": "Noah Clowney",
+"team": "BKN",
+"pos": "F"
+},
+{
+"id": "5175643",
+"en": "Egor Demin",
+"team": "BKN",
+"pos": "G"
+},
+{
+"id": "4702177",
+"en": "Keon Ellis",
+"team": "BKN",
+"pos": "G"
+},
+{
+"id": "4870564",
+"en": "Joshua Jefferson",
+"team": "BKN",
+"pos": "F"
+},
+{
+"id": "5174655",
+"en": "Chaney Johnson",
+"team": "BKN",
+"pos": "F"
+},
+{
+"id": "3907823",
+"en": "Terance Mann",
+"team": "BKN",
+"pos": "G"
+},
+{
+"id": "4687718",
+"en": "Josh Minott",
+"team": "BKN",
+"pos": "F"
+},
+{
+"id": "4702670",
+"en": "Grant Nelson",
+"team": "BKN",
+"pos": "F"
+},
+{
+"id": "4278104",
+"en": "Michael Porter Jr.",
+"team": "BKN",
+"pos": "F"
+},
+{
+"id": "5037873",
+"en": "Drake Powell",
+"team": "BKN",
+"pos": "G"
+},
+{
+"id": "3064514",
+"en": "Julius Randle",
+"team": "BKN",
+"pos": "F"
+},
+{
+"id": "5242502",
+"en": "Ben Saraf",
+"team": "BKN",
+"pos": "G"
+},
+{
+"id": "4432194",
+"en": "Day'Ron Sharpe",
+"team": "BKN",
+"pos": "C"
+},
+{
+"id": "5279130",
+"en": "Nolan Traore",
+"team": "BKN",
+"pos": "G"
+},
+{
+"id": "3150844",
+"en": "Moritz Wagner",
+"team": "BKN",
+"pos": "C"
+},
+{
+"id": "5107173",
+"en": "Danny Wolf",
+"team": "BKN",
+"pos": "F"
+},
+{
+"id": "4433188",
+"en": "Devin Carter",
+"team": "BOS",
+"pos": "G"
+},
+{
+"id": "5142621",
+"en": "Chris Cenac Jr.",
+"team": "BOS",
+"pos": "F"
+},
+{
+"id": "3195",
+"en": "Mike Conley",
+"team": "BOS",
+"pos": "G"
+},
+{
+"id": "4277951",
+"en": "Luka Garza",
+"team": "BOS",
+"pos": "C"
+},
+{
+"id": "4251",
+"en": "Paul George",
+"team": "BOS",
+"pos": "F"
+},
+{
+"id": "5175647",
+"en": "Hugo Gonzalez",
+"team": "BOS",
+"pos": "G"
+},
+{
+"id": "4397251",
+"en": "Ron Harper Jr.",
+"team": "BOS",
+"pos": "G"
+},
+{
+"id": "4065804",
+"en": "Sam Hauser",
+"team": "BOS",
+"pos": "F"
+},
+{
+"id": "5106283",
+"en": "Dillon Mitchell",
+"team": "BOS",
+"pos": "F"
+},
+{
+"id": "4066354",
+"en": "Payton Pritchard",
+"team": "BOS",
+"pos": "G"
+},
+{
+"id": "4397424",
+"en": "Neemias Queta",
+"team": "BOS",
+"pos": "C"
+},
+{
+"id": "4351852",
+"en": "Mitchell Robinson",
+"team": "BOS",
+"pos": "C"
+},
+{
+"id": "4593841",
+"en": "Baylor Scheierman",
+"team": "BOS",
+"pos": "G"
+},
+{
+"id": "4065648",
+"en": "Jayson Tatum",
+"team": "BOS",
+"pos": "F"
+},
+{
+"id": "4683689",
+"en": "Jordan Walsh",
+"team": "BOS",
+"pos": "G"
+},
+{
+"id": "3078576",
+"en": "Derrick White",
+"team": "BOS",
+"pos": "G"
+},
+{
+"id": "4702745",
+"en": "Amari Williams",
+"team": "BOS",
+"pos": "F"
+},
+{
+"id": "3135045",
+"en": "Grayson Allen",
+"team": "CHA",
+"pos": "G"
+},
+{
+"id": "5060701",
+"en": "Christian Anderson",
+"team": "CHA",
+"pos": "G"
+},
+{
+"id": "4684269",
+"en": "Kylan Boswell",
+"team": "CHA",
+"pos": "G"
+},
+{
+"id": "4433249",
+"en": "Moussa Diabate",
+"team": "CHA",
+"pos": "F"
+},
+{
+"id": "4701225",
+"en": "PJ Hall",
+"team": "CHA",
+"pos": "C"
+},
+{
+"id": "4602025",
+"en": "Sion James",
+"team": "CHA",
+"pos": "G"
+},
+{
+"id": "4576060",
+"en": "Ryan Kalkbrenner",
+"team": "CHA",
+"pos": "C"
+},
+{
+"id": "5061575",
+"en": "Kon Knueppel",
+"team": "CHA",
+"pos": "G"
+},
+{
+"id": "5239590",
+"en": "Liam McNeeley",
+"team": "CHA",
+"pos": "G"
+},
+{
+"id": "4433287",
+"en": "Brandon Miller",
+"team": "CHA",
+"pos": "F"
+},
+{
+"id": "2583632",
+"en": "Royce O'Neale",
+"team": "CHA",
+"pos": "F"
+},
+{
+"id": "4396971",
+"en": "Naz Reid",
+"team": "CHA",
+"pos": "C"
+},
+{
+"id": "5211176",
+"en": "Tidjane Salaun",
+"team": "CHA",
+"pos": "F"
+},
+{
+"id": "3032979",
+"en": "Dennis Schroder",
+"team": "CHA",
+"pos": "G"
+},
+{
+"id": "5281370",
+"en": "Hannes Steinbach",
+"team": "CHA",
+"pos": "F"
+},
+{
+"id": "4395651",
+"en": "Coby White",
+"team": "CHA",
+"pos": "G"
+},
+{
+"id": "4066218",
+"en": "Grant Williams",
+"team": "CHA",
+"pos": "F"
+},
+{
+"id": "5105555",
+"en": "Tobe Awaka",
+"team": "CHI",
+"pos": "F"
+},
+{
+"id": "4711294",
+"en": "Matas Buzelis",
+"team": "CHI",
+"pos": "F"
+},
+{
+"id": "4278067",
+"en": "Nic Claxton",
+"team": "CHI",
+"pos": "C"
+},
+{
+"id": "4066650",
+"en": "Zach Collins",
+"team": "CHI",
+"pos": "F"
+},
+{
+"id": "5242496",
+"en": "Noa Essengue",
+"team": "CHI",
+"pos": "F"
+},
+{
+"id": "4871145",
+"en": "Josh Giddey",
+"team": "CHI",
+"pos": "G"
+},
+{
+"id": "4683750",
+"en": "Jordan Hawkins",
+"team": "CHI",
+"pos": "G"
+},
+{
+"id": "2990984",
+"en": "Buddy Hield",
+"team": "CHI",
+"pos": "G"
+},
+{
+"id": "4395626",
+"en": "Tre Jones",
+"team": "CHI",
+"pos": "G"
+},
+{
+"id": "5044385",
+"en": "Leonard Miller",
+"team": "CHI",
+"pos": "F"
+},
+{
+"id": "4432822",
+"en": "Isaac Okoro",
+"team": "CHI",
+"pos": "F"
+},
+{
+"id": "2595516",
+"en": "Norman Powell",
+"team": "CHI",
+"pos": "G"
+},
+{
+"id": "4898010",
+"en": "Jaylin Sellers",
+"team": "CHI",
+"pos": "G"
+},
+{
+"id": "4397189",
+"en": "Jalen Smith",
+"team": "CHI",
+"pos": "F"
+},
+{
+"id": "4848625",
+"en": "Dailyn Swain",
+"team": "CHI",
+"pos": "G"
+},
+{
+"id": "4431687",
+"en": "Patrick Williams",
+"team": "CHI",
+"pos": "F"
+},
+{
+"id": "5095151",
+"en": "Caleb Wilson",
+"team": "CHI",
+"pos": "F"
+},
+{
+"id": "4066328",
+"en": "Jarrett Allen",
+"team": "CLE",
+"pos": "C"
+},
+{
+"id": "3934723",
+"en": "Thomas Bryant",
+"team": "CLE",
+"pos": "C"
+},
+{
+"id": "4431734",
+"en": "Tristan Enaruna",
+"team": "CLE",
+"pos": "F"
+},
+{
+"id": "3992",
+"en": "James Harden",
+"team": "CLE",
+"pos": "G"
+},
+{
+"id": "2995706",
+"en": "Mario Hezonja",
+"team": "CLE",
+"pos": "F"
+},
+{
+"id": "4066757",
+"en": "Sam Merrill",
+"team": "CLE",
+"pos": "G"
+},
+{
+"id": "5177362",
+"en": "Riley Minix",
+"team": "CLE",
+"pos": "F"
+},
+{
+"id": "3908809",
+"en": "Donovan Mitchell",
+"team": "CLE",
+"pos": "G"
+},
+{
+"id": "4432158",
+"en": "Evan Mobley",
+"team": "CLE",
+"pos": "C"
+},
+{
+"id": "4701233",
+"en": "Craig Porter Jr.",
+"team": "CLE",
+"pos": "G"
+},
+{
+"id": "5023693",
+"en": "Tyrese Proctor",
+"team": "CLE",
+"pos": "G"
+},
+{
+"id": "5041951",
+"en": "Meleek Thomas",
+"team": "CLE",
+"pos": "G"
+},
+{
+"id": "4683747",
+"en": "Jaylon Tyson",
+"team": "CLE",
+"pos": "G"
+},
+{
+"id": "5106261",
+"en": "Ernest Udeh Jr.",
+"team": "CLE",
+"pos": "C"
+},
+{
+"id": "4576087",
+"en": "Peyton Watson",
+"team": "CLE",
+"pos": "G"
+},
+{
+"id": "4593125",
+"en": "Santi Aldama",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "5148538",
+"en": "Tarik Biberovic",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "4432582",
+"en": "Max Christie",
+"team": "DAL",
+"pos": "G"
+},
+{
+"id": "4701208",
+"en": "Moussa Cisse",
+"team": "DAL",
+"pos": "C"
+},
+{
+"id": "4896372",
+"en": "Walter Clayton Jr.",
+"team": "DAL",
+"pos": "G"
+},
+{
+"id": "5279129",
+"en": "Sergio de Larrea",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "5041939",
+"en": "Cooper Flagg",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "4278049",
+"en": "Daniel Gafford",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "5105806",
+"en": "Jett Howard",
+"team": "DAL",
+"pos": "G"
+},
+{
+"id": "6442",
+"en": "Kyrie Irving",
+"team": "DAL",
+"pos": "G"
+},
+{
+"id": "4873153",
+"en": "Morez Johnson Jr.",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "5106040",
+"en": "Tobi Lawal",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "4683688",
+"en": "Dereck Lively II",
+"team": "DAL",
+"pos": "C"
+},
+{
+"id": "4278594",
+"en": "Naji Marshall",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "3138160",
+"en": "Caleb Martin",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "5211175",
+"en": "Zaccharie Risacher",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "4432107",
+"en": "Marcus Sasser",
+"team": "DAL",
+"pos": "G"
+},
+{
+"id": "4278078",
+"en": "P.J. Washington",
+"team": "DAL",
+"pos": "F"
+},
+{
+"id": "4277848",
+"en": "Marvin Bagley III",
+"team": "DEN",
+"pos": "F"
+},
+{
+"id": "4431767",
+"en": "Christian Braun",
+"team": "DEN",
+"pos": "G"
+},
+{
+"id": "4698719",
+"en": "Trevon Brazile",
+"team": "DEN",
+"pos": "F"
+},
+{
+"id": "3978",
+"en": "DeMar DeRozan",
+"team": "DEN",
+"pos": "G"
+},
+{
+"id": "4065813",
+"en": "Alpha Diallo",
+"team": "DEN",
+"pos": "F"
+},
+{
+"id": "3064290",
+"en": "Aaron Gordon",
+"team": "DEN",
+"pos": "F"
+},
+{
+"id": "4433607",
+"en": "DaRon Holmes II",
+"team": "DEN",
+"pos": "F"
+},
+{
+"id": "4565698",
+"en": "Bryce Hopkins",
+"team": "DEN",
+"pos": "F"
+},
+{
+"id": "3138196",
+"en": "Cameron Johnson",
+"team": "DEN",
+"pos": "F"
+},
+{
+"id": "3112335",
+"en": "Nikola Jokic",
+"team": "DEN",
+"pos": "C"
+},
+{
+"id": "4592427",
+"en": "Spencer Jones",
+"team": "DEN",
+"pos": "F"
+},
+{
+"id": "3135046",
+"en": "Tyus Jones",
+"team": "DEN",
+"pos": "G"
+},
+{
+"id": "3936299",
+"en": "Jamal Murray",
+"team": "DEN",
+"pos": "G"
+},
+{
+"id": "4433629",
+"en": "Ryan Nembhard",
+"team": "DEN",
+"pos": "G"
+},
+{
+"id": "4431690",
+"en": "Zeke Nnaji",
+"team": "DEN",
+"pos": "F"
+},
+{
+"id": "4432181",
+"en": "Julian Strawther",
+"team": "DEN",
+"pos": "G"
+},
+{
+"id": "5105592",
+"en": "Cam Whitmore",
+"team": "DEN",
+"pos": "F"
+},
+{
+"id": "3908845",
+"en": "John Collins",
+"team": "DET",
+"pos": "F"
+},
+{
+"id": "4432166",
+"en": "Cade Cunningham",
+"team": "DET",
+"pos": "G"
+},
+{
+"id": "4433621",
+"en": "Jalen Duren",
+"team": "DET",
+"pos": "C"
+},
+{
+"id": "2596112",
+"en": "Javonte Green",
+"team": "DET",
+"pos": "G"
+},
+{
+"id": "4397449",
+"en": "Elijah Harkless",
+"team": "DET",
+"pos": "G"
+},
+{
+"id": "4683771",
+"en": "Ronald Holland II",
+"team": "DET",
+"pos": "F"
+},
+{
+"id": "4066372",
+"en": "Kevin Huerter",
+"team": "DET",
+"pos": "G"
+},
+{
+"id": "5107199",
+"en": "Daniss Jenkins",
+"team": "DET",
+"pos": "G"
+},
+{
+"id": "4395702",
+"en": "Isaiah Joe",
+"team": "DET",
+"pos": "G"
+},
+{
+"id": "5107818",
+"en": "Isaac Jones",
+"team": "DET",
+"pos": "C"
+},
+{
+"id": "4700852",
+"en": "Chaz Lanier",
+"team": "DET",
+"pos": "G"
+},
+{
+"id": "5258459",
+"en": "Ebuka Okorie",
+"team": "DET",
+"pos": "G"
+},
+{
+"id": "5037878",
+"en": "Ugonna Onyenso",
+"team": "DET",
+"pos": "C"
+},
+{
+"id": "2990962",
+"en": "Taurean Prince",
+"team": "DET",
+"pos": "F"
+},
+{
+"id": "4278562",
+"en": "Paul Reed",
+"team": "DET",
+"pos": "F"
+},
+{
+"id": "3157465",
+"en": "Duncan Robinson",
+"team": "DET",
+"pos": "F"
+},
+{
+"id": "4397882",
+"en": "Tolu Smith",
+"team": "DET",
+"pos": "F"
+},
+{
+"id": "4684742",
+"en": "Ausar Thompson",
+"team": "DET",
+"pos": "G"
+},
+{
+"id": "4397886",
+"en": "Charles Bassey",
+"team": "GS",
+"pos": "C"
+},
+{
+"id": "6430",
+"en": "Jimmy Butler III",
+"team": "GS",
+"pos": "F"
+},
+{
+"id": "4433149",
+"en": "LJ Cryer",
+"team": "GS",
+"pos": "G"
+},
+{
+"id": "3975",
+"en": "Stephen Curry",
+"team": "GS",
+"pos": "G"
+},
+{
+"id": "6589",
+"en": "Draymond Green",
+"team": "GS",
+"pos": "F"
+},
+{
+"id": "3213",
+"en": "Al Horford",
+"team": "GS",
+"pos": "C"
+},
+{
+"id": "4703396",
+"en": "Graham Ike",
+"team": "GS",
+"pos": "F"
+},
+{
+"id": "5175737",
+"en": "Yaxel Lendeborg",
+"team": "GS",
+"pos": "F"
+},
+{
+"id": "4897449",
+"en": "Malevy Leons",
+"team": "GS",
+"pos": "F"
+},
+{
+"id": "4066436",
+"en": "De'Anthony Melton",
+"team": "GS",
+"pos": "G"
+},
+{
+"id": "4432171",
+"en": "Moses Moody",
+"team": "GS",
+"pos": "G"
+},
+{
+"id": "2990969",
+"en": "Georges Niang",
+"team": "GS",
+"pos": "F"
+},
+{
+"id": "3134903",
+"en": "Gary Payton II",
+"team": "GS",
+"pos": "G"
+},
+{
+"id": "4709138",
+"en": "Brandin Podziemski",
+"team": "GS",
+"pos": "G"
+},
+{
+"id": "3102531",
+"en": "Kristaps Porzingis",
+"team": "GS",
+"pos": "C"
+},
+{
+"id": "4897262",
+"en": "Will Richard",
+"team": "GS",
+"pos": "G"
+},
+{
+"id": "4997536",
+"en": "Gui Santos",
+"team": "GS",
+"pos": "F"
+},
+{
+"id": "4397040",
+"en": "Brandon Williams",
+"team": "GS",
+"pos": "G"
+},
+{
+"id": "2991235",
+"en": "Steven Adams",
+"team": "HOU",
+"pos": "C"
+},
+{
+"id": "3037789",
+"en": "Bogdan Bogdanovic",
+"team": "HOU",
+"pos": "G"
+},
+{
+"id": "3102529",
+"en": "Clint Capela",
+"team": "HOU",
+"pos": "C"
+},
+{
+"id": "4683860",
+"en": "Quadir Copeland",
+"team": "HOU",
+"pos": "G"
+},
+{
+"id": "4592857",
+"en": "Isaiah Crawford",
+"team": "HOU",
+"pos": "F"
+},
+{
+"id": "3202",
+"en": "Kevin Durant",
+"team": "HOU",
+"pos": "F"
+},
+{
+"id": "4433192",
+"en": "Tari Eason",
+"team": "HOU",
+"pos": "F"
+},
+{
+"id": "5105553",
+"en": "Julian Phillips",
+"team": "HOU",
+"pos": "F"
+},
+{
+"id": "4871144",
+"en": "Alperen Sengun",
+"team": "HOU",
+"pos": "C"
+},
+{
+"id": "4711272",
+"en": "Reed Sheppard",
+"team": "HOU",
+"pos": "G"
+},
+{
+"id": "2990992",
+"en": "Marcus Smart",
+"team": "HOU",
+"pos": "G"
+},
+{
+"id": "4432639",
+"en": "Jabari Smith Jr.",
+"team": "HOU",
+"pos": "F"
+},
+{
+"id": "3136777",
+"en": "Jae'Sean Tate",
+"team": "HOU",
+"pos": "F"
+},
+{
+"id": "4684740",
+"en": "Amen Thompson",
+"team": "HOU",
+"pos": "G"
+},
+{
+"id": "5105837",
+"en": "Bruce Thornton",
+"team": "HOU",
+"pos": "G"
+},
+{
+"id": "4432827",
+"en": "Oscar Tshiebwe",
+"team": "HOU",
+"pos": "C"
+},
+{
+"id": "2991230",
+"en": "Fred VanVleet",
+"team": "HOU",
+"pos": "G"
+},
+{
+"id": "4431752",
+"en": "Kobe Brown",
+"team": "IND",
+"pos": "G"
+},
+{
+"id": "5157066",
+"en": "Johnny Furphy",
+"team": "IND",
+"pos": "G"
+},
+{
+"id": "4396993",
+"en": "Tyrese Haliburton",
+"team": "IND",
+"pos": "G"
+},
+{
+"id": "4065731",
+"en": "Jay Huff",
+"team": "IND",
+"pos": "C"
+},
+{
+"id": "4592829",
+"en": "Quenton Jackson",
+"team": "IND",
+"pos": "G"
+},
+{
+"id": "2530530",
+"en": "T.J. McConnell",
+"team": "IND",
+"pos": "G"
+},
+{
+"id": "2580365",
+"en": "Larry Nance Jr.",
+"team": "IND",
+"pos": "F"
+},
+{
+"id": "4395712",
+"en": "Andrew Nembhard",
+"team": "IND",
+"pos": "G"
+},
+{
+"id": "4396909",
+"en": "Aaron Nesmith",
+"team": "IND",
+"pos": "G"
+},
+{
+"id": "3133603",
+"en": "Kelly Oubre Jr.",
+"team": "IND",
+"pos": "G"
+},
+{
+"id": "4433076",
+"en": "Ben Sheppard",
+"team": "IND",
+"pos": "G"
+},
+{
+"id": "3149673",
+"en": "Pascal Siakam",
+"team": "IND",
+"pos": "F"
+},
+{
+"id": "4398207",
+"en": "Jalen Slawson",
+"team": "IND",
+"pos": "F"
+},
+{
+"id": "5105854",
+"en": "Braden Smith",
+"team": "IND",
+"pos": "G"
+},
+{
+"id": "4278355",
+"en": "Obi Toppin",
+"team": "IND",
+"pos": "F"
+},
+{
+"id": "5106060",
+"en": "Jarace Walker",
+"team": "IND",
+"pos": "F"
+},
+{
+"id": "4017837",
+"en": "Ivica Zubac",
+"team": "IND",
+"pos": "C"
+},
+{
+"id": "6580",
+"en": "Bradley Beal",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "4845363",
+"en": "Cam Christie",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "5106258",
+"en": "Gradey Dick",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "2991139",
+"en": "Kris Dunn",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "4396907",
+"en": "Darius Garland",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "4066648",
+"en": "Rui Hachimura",
+"team": "LAC",
+"pos": "F"
+},
+{
+"id": "3913176",
+"en": "Brandon Ingram",
+"team": "LAC",
+"pos": "F"
+},
+{
+"id": "4432170",
+"en": "Isaiah Jackson",
+"team": "LAC",
+"pos": "F"
+},
+{
+"id": "3936099",
+"en": "Derrick Jones Jr.",
+"team": "LAC",
+"pos": "F"
+},
+{
+"id": "3448",
+"en": "Brook Lopez",
+"team": "LAC",
+"pos": "C"
+},
+{
+"id": "5105832",
+"en": "Nick Martinelli",
+"team": "LAC",
+"pos": "F"
+},
+{
+"id": "5075626",
+"en": "Baba Miller",
+"team": "LAC",
+"pos": "F"
+},
+{
+"id": "4396818",
+"en": "Jordan Miller",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "5108024",
+"en": "Yanic Konan Niederhauser",
+"team": "LAC",
+"pos": "C"
+},
+{
+"id": "4398390",
+"en": "Jalen Pickett",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "4702352",
+"en": "Kobe Sanders",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "4065778",
+"en": "Max Strus",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "5254165",
+"en": "Keaton Wagler",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "4683935",
+"en": "Blake Wesley",
+"team": "LAC",
+"pos": "G"
+},
+{
+"id": "5113969",
+"en": "Cameron Carr",
+"team": "LAL",
+"pos": "G"
+},
+{
+"id": "3945274",
+"en": "Luka Doncic",
+"team": "LAL",
+"pos": "G"
+},
+{
+"id": "4397014",
+"en": "Quentin Grimes",
+"team": "LAL",
+"pos": "G"
+},
+{
+"id": "4868423",
+"en": "Jaden Hardy",
+"team": "LAL",
+"pos": "G"
+},
+{
+"id": "4683774",
+"en": "Bronny James",
+"team": "LAL",
+"pos": "G"
+},
+{
+"id": "4433599",
+"en": "Arthur Kaluma",
+"team": "LAL",
+"pos": "F"
+},
+{
+"id": "4433136",
+"en": "Walker Kessler",
+"team": "LAL",
+"pos": "C"
+},
+{
+"id": "4592691",
+"en": "Jake LaRavia",
+"team": "LAL",
+"pos": "F"
+},
+{
+"id": "3155535",
+"en": "Kevon Looney",
+"team": "LAL",
+"pos": "F"
+},
+{
+"id": "4596528",
+"en": "Lawson Lovering",
+"team": "LAL",
+"pos": "C"
+},
+{
+"id": "4278580",
+"en": "Sandro Mamukelashvili",
+"team": "LAL",
+"pos": "F"
+},
+{
+"id": "4702972",
+"en": "Chris Manon",
+"team": "LAL",
+"pos": "G"
+},
+{
+"id": "5114350",
+"en": "AK Okereke",
+"team": "LAL",
+"pos": "F"
+},
+{
+"id": "4066457",
+"en": "Austin Reaves",
+"team": "LAL",
+"pos": "G"
+},
+{
+"id": "4277811",
+"en": "Collin Sexton",
+"team": "LAL",
+"pos": "G"
+},
+{
+"id": "5060631",
+"en": "Adou Thiero",
+"team": "LAL",
+"pos": "F"
+},
+{
+"id": "3907498",
+"en": "Matisse Thybulle",
+"team": "LAL",
+"pos": "G"
+},
+{
+"id": "4278077",
+"en": "Jarred Vanderbilt",
+"team": "LAL",
+"pos": "F"
+},
+{
+"id": "4433137",
+"en": "Ziaire Williams",
+"team": "LAL",
+"pos": "F"
+},
+{
+"id": "5041935",
+"en": "Cameron Boozer",
+"team": "MEM",
+"pos": "F"
+},
+{
+"id": "5105817",
+"en": "Carson Cooper",
+"team": "MEM",
+"pos": "C"
+},
+{
+"id": "4903027",
+"en": "Cedric Coward",
+"team": "MEM",
+"pos": "F"
+},
+{
+"id": "4600663",
+"en": "Zach Edey",
+"team": "MEM",
+"pos": "C"
+},
+{
+"id": "2991070",
+"en": "Jerami Grant",
+"team": "MEM",
+"pos": "F"
+},
+{
+"id": "4684806",
+"en": "Taylor Hendricks",
+"team": "MEM",
+"pos": "F"
+},
+{
+"id": "5105550",
+"en": "GG Jackson",
+"team": "MEM",
+"pos": "F"
+},
+{
+"id": "4065733",
+"en": "Ty Jerome",
+"team": "MEM",
+"pos": "G"
+},
+{
+"id": "5231919",
+"en": "Karim Lopez",
+"team": "MEM",
+"pos": "F"
+},
+{
+"id": "4683934",
+"en": "Jahmai Mashack",
+"team": "MEM",
+"pos": "G"
+},
+{
+"id": "4594326",
+"en": "Kris Murray",
+"team": "MEM",
+"pos": "F"
+},
+{
+"id": "4431785",
+"en": "Scotty Pippen Jr.",
+"team": "MEM",
+"pos": "G"
+},
+{
+"id": "4593016",
+"en": "Quinten Post",
+"team": "MEM",
+"pos": "C"
+},
+{
+"id": "4595400",
+"en": "Olivier-Maxence Prosper",
+"team": "MEM",
+"pos": "F"
+},
+{
+"id": "4781746",
+"en": "Javon Small",
+"team": "MEM",
+"pos": "G"
+},
+{
+"id": "4433083",
+"en": "Cam Spencer",
+"team": "MEM",
+"pos": "G"
+},
+{
+"id": "4432810",
+"en": "Isaiah Stewart",
+"team": "MEM",
+"pos": "C"
+},
+{
+"id": "5112087",
+"en": "Jaylen Wells",
+"team": "MEM",
+"pos": "F"
+},
+{
+"id": "4066261",
+"en": "Bam Adebayo",
+"team": "MIA",
+"pos": "C"
+},
+{
+"id": "3032977",
+"en": "Giannis Antetokounmpo",
+"team": "MIA",
+"pos": "F"
+},
+{
+"id": "5107157",
+"en": "Ryan Conwell",
+"team": "MIA",
+"pos": "G"
+},
+{
+"id": "4837356",
+"en": "Tre Donaldson",
+"team": "MIA",
+"pos": "G"
+},
+{
+"id": "3899664",
+"en": "Simone Fontecchio",
+"team": "MIA",
+"pos": "F"
+},
+{
+"id": "4431772",
+"en": "Myron Gardner",
+"team": "MIA",
+"pos": "F"
+},
+{
+"id": "4700818",
+"en": "Vladislav Goldin",
+"team": "MIA",
+"pos": "C"
+},
+{
+"id": "2528210",
+"en": "Tim Hardaway Jr.",
+"team": "MIA",
+"pos": "G"
+},
+{
+"id": "4431786",
+"en": "Keshad Johnson",
+"team": "MIA",
+"pos": "F"
+},
+{
+"id": "4997528",
+"en": "Nikola Jovic",
+"team": "MIA",
+"pos": "F"
+},
+{
+"id": "4601025",
+"en": "Pelle Larsson",
+"team": "MIA",
+"pos": "G"
+},
+{
+"id": "4278053",
+"en": "Davion Mitchell",
+"team": "MIA",
+"pos": "G"
+},
+{
+"id": "3064482",
+"en": "Bobby Portis",
+"team": "MIA",
+"pos": "F"
+},
+{
+"id": "4278076",
+"en": "Nick Richards",
+"team": "MIA",
+"pos": "C"
+},
+{
+"id": "4066993",
+"en": "Dru Smith",
+"team": "MIA",
+"pos": "G"
+},
+{
+"id": "6475",
+"en": "Klay Thompson",
+"team": "MIA",
+"pos": "G"
+},
+{
+"id": "3059319",
+"en": "Andrew Wiggins",
+"team": "MIA",
+"pos": "F"
+},
+{
+"id": "5164559",
+"en": "Nate Ament",
+"team": "MIL",
+"pos": "F"
+},
+{
+"id": "5082206",
+"en": "Brayden Burries",
+"team": "MIL",
+"pos": "G"
+},
+{
+"id": "4997526",
+"en": "Ousmane Dieng",
+"team": "MIL",
+"pos": "F"
+},
+{
+"id": "4397475",
+"en": "AJ Green",
+"team": "MIL",
+"pos": "G"
+},
+{
+"id": "4395725",
+"en": "Tyler Herro",
+"team": "MIL",
+"pos": "G"
+},
+{
+"id": "5214640",
+"en": "Kasparas Jakucionis",
+"team": "MIL",
+"pos": "G"
+},
+{
+"id": "4432848",
+"en": "Jaime Jaquez Jr.",
+"team": "MIL",
+"pos": "F"
+},
+{
+"id": "4697268",
+"en": "Kam Jones",
+"team": "MIL",
+"pos": "G"
+},
+{
+"id": "3134907",
+"en": "Kyle Kuzma",
+"team": "MIL",
+"pos": "F"
+},
+{
+"id": "2991043",
+"en": "Caris LeVert",
+"team": "MIL",
+"pos": "G"
+},
+{
+"id": "5214989",
+"en": "Bogoljub Markovic",
+"team": "MIL",
+"pos": "F"
+},
+{
+"id": "4397233",
+"en": "Pete Nance",
+"team": "MIL",
+"pos": "F"
+},
+{
+"id": "4591725",
+"en": "Ryan Rollins",
+"team": "MIL",
+"pos": "G"
+},
+{
+"id": "4397114",
+"en": "Cormac Ryan",
+"team": "MIL",
+"pos": "G"
+},
+{
+"id": "4277922",
+"en": "Jericho Sims",
+"team": "MIL",
+"pos": "C"
+},
+{
+"id": "4277843",
+"en": "Gary Trent Jr.",
+"team": "MIL",
+"pos": "G"
+},
+{
+"id": "3133628",
+"en": "Myles Turner",
+"team": "MIL",
+"pos": "C"
+},
+{
+"id": "5105623",
+"en": "Kel'el Ware",
+"team": "MIL",
+"pos": "C"
+},
+{
+"id": "4432816",
+"en": "LaMelo Ball",
+"team": "MIN",
+"pos": "G"
+},
+{
+"id": "5279133",
+"en": "Joan Beringer",
+"team": "MIN",
+"pos": "F"
+},
+{
+"id": "4432247",
+"en": "Jaylen Clark",
+"team": "MIN",
+"pos": "G"
+},
+{
+"id": "3934673",
+"en": "Donte DiVincenzo",
+"team": "MIN",
+"pos": "G"
+},
+{
+"id": "4397002",
+"en": "Ayo Dosunmu",
+"team": "MIN",
+"pos": "G"
+},
+{
+"id": "4594268",
+"en": "Anthony Edwards",
+"team": "MIN",
+"pos": "G"
+},
+{
+"id": "5061585",
+"en": "Isaiah Evans",
+"team": "MIN",
+"pos": "F"
+},
+{
+"id": "4592699",
+"en": "Enrique Freeman",
+"team": "MIN",
+"pos": "F"
+},
+{
+"id": "3032976",
+"en": "Rudy Gobert",
+"team": "MIN",
+"pos": "C"
+},
+{
+"id": "4592492",
+"en": "Bones Hyland",
+"team": "MIN",
+"pos": "G"
+},
+{
+"id": "4433247",
+"en": "Jonathan Kuminga",
+"team": "MIN",
+"pos": "F"
+},
+{
+"id": "3136196",
+"en": "Trey Lyles",
+"team": "MIN",
+"pos": "F"
+},
+{
+"id": "4431671",
+"en": "Jaden McDaniels",
+"team": "MIN",
+"pos": "F"
+},
+{
+"id": "4592979",
+"en": "Zyon Pullin",
+"team": "MIN",
+"pos": "G"
+},
+{
+"id": "4432847",
+"en": "Terrence Shannon Jr.",
+"team": "MIN",
+"pos": "G"
+},
+{
+"id": "4895758",
+"en": "Cody Williams",
+"team": "MIN",
+"pos": "F"
+},
+{
+"id": "5157587",
+"en": "Rocco Zikarsky",
+"team": "MIN",
+"pos": "C"
+},
+{
+"id": "4397136",
+"en": "Saddiq Bey",
+"team": "NO",
+"pos": "F"
+},
+{
+"id": "4712862",
+"en": "Malik Dia",
+"team": "NO",
+"pos": "F"
+},
+{
+"id": "5144091",
+"en": "Jeremiah Fears",
+"team": "NO",
+"pos": "G"
+},
+{
+"id": "5170947",
+"en": "AJ Johnson",
+"team": "NO",
+"pos": "G"
+},
+{
+"id": "4277813",
+"en": "Herbert Jones",
+"team": "NO",
+"pos": "F"
+},
+{
+"id": "3442",
+"en": "DeAndre Jordan",
+"team": "NO",
+"pos": "C"
+},
+{
+"id": "4683634",
+"en": "Bennedict Mathurin",
+"team": "NO",
+"pos": "G"
+},
+{
+"id": "4997538",
+"en": "Karlo Matkovic",
+"team": "NO",
+"pos": "F"
+},
+{
+"id": "4576086",
+"en": "Bryce McGowens",
+"team": "NO",
+"pos": "G"
+},
+{
+"id": "5061589",
+"en": "Yves Missi",
+"team": "NO",
+"pos": "C"
+},
+{
+"id": "4397688",
+"en": "Trey Murphy III",
+"team": "NO",
+"pos": "F"
+},
+{
+"id": "3907497",
+"en": "Dejounte Murray",
+"team": "NO",
+"pos": "G"
+},
+{
+"id": "4703115",
+"en": "Jaron Pierre Jr.",
+"team": "NO",
+"pos": "G"
+},
+{
+"id": "4277956",
+"en": "Jordan Poole",
+"team": "NO",
+"pos": "G"
+},
+{
+"id": "4869780",
+"en": "Derik Queen",
+"team": "NO",
+"pos": "C"
+},
+{
+"id": "4683742",
+"en": "Julian Reese",
+"team": "NO",
+"pos": "F"
+},
+{
+"id": "4431675",
+"en": "Trendon Watford",
+"team": "NO",
+"pos": "F"
+},
+{
+"id": "4395628",
+"en": "Zion Williamson",
+"team": "NO",
+"pos": "F"
+},
+{
+"id": "4683730",
+"en": "Jaden Akins",
+"team": "NY",
+"pos": "G"
+},
+{
+"id": "4277869",
+"en": "Jose Alvarado",
+"team": "NY",
+"pos": "G"
+},
+{
+"id": "3934719",
+"en": "OG Anunoby",
+"team": "NY",
+"pos": "F"
+},
+{
+"id": "3147657",
+"en": "Mikal Bridges",
+"team": "NY",
+"pos": "G"
+},
+{
+"id": "3934672",
+"en": "Jalen Brunson",
+"team": "NY",
+"pos": "G"
+},
+{
+"id": "2528426",
+"en": "Jordan Clarkson",
+"team": "NY",
+"pos": "G"
+},
+{
+"id": "5211983",
+"en": "Pacome Dadiet",
+"team": "NY",
+"pos": "F"
+},
+{
+"id": "5289900",
+"en": "Mohamed Diawara",
+"team": "NY",
+"pos": "F"
+},
+{
+"id": "6585",
+"en": "Andre Drummond",
+"team": "NY",
+"pos": "C"
+},
+{
+"id": "3062679",
+"en": "Josh Hart",
+"team": "NY",
+"pos": "G"
+},
+{
+"id": "4897943",
+"en": "Dalton Knecht",
+"team": "NY",
+"pos": "F"
+},
+{
+"id": "4433225",
+"en": "Tyler Kolek",
+"team": "NY",
+"pos": "G"
+},
+{
+"id": "4431823",
+"en": "Miles McBride",
+"team": "NY",
+"pos": "G"
+},
+{
+"id": "4838721",
+"en": "Tyler Nickel",
+"team": "NY",
+"pos": "F"
+},
+{
+"id": "3914044",
+"en": "Landry Shamet",
+"team": "NY",
+"pos": "G"
+},
+{
+"id": "3136195",
+"en": "Karl-Anthony Towns",
+"team": "NY",
+"pos": "C"
+},
+{
+"id": "4432808",
+"en": "James Wiseman",
+"team": "NY",
+"pos": "C"
+},
+{
+"id": "4684208",
+"en": "Brooks Barnhizer",
+"team": "OKC",
+"pos": "F"
+},
+{
+"id": "2991350",
+"en": "Alex Caruso",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "5105800",
+"en": "Josh Dix",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "4278073",
+"en": "Shai Gilgeous-Alexander",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "4222252",
+"en": "Isaiah Hartenstein",
+"team": "OKC",
+"pos": "C"
+},
+{
+"id": "4433255",
+"en": "Chet Holmgren",
+"team": "OKC",
+"pos": "C"
+},
+{
+"id": "5174983",
+"en": "Aday Mara",
+"team": "OKC",
+"pos": "C"
+},
+{
+"id": "4683778",
+"en": "Jared McCain",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "4900671",
+"en": "Ajay Mitchell",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "4432185",
+"en": "Micah Peavy",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "5061603",
+"en": "Thomas Sorber",
+"team": "OKC",
+"pos": "C"
+},
+{
+"id": "5241364",
+"en": "Bennett Stirtz",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "5159925",
+"en": "Nikola Topic",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "4683692",
+"en": "Cason Wallace",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "4593803",
+"en": "Jalen Williams",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "4432823",
+"en": "Jaylin Williams",
+"team": "OKC",
+"pos": "F"
+},
+{
+"id": "3133626",
+"en": "Kenrich Williams",
+"team": "OKC",
+"pos": "G"
+},
+{
+"id": "4432573",
+"en": "Paolo Banchero",
+"team": "ORL",
+"pos": "F"
+},
+{
+"id": "4066320",
+"en": "Desmond Bane",
+"team": "ORL",
+"pos": "G"
+},
+{
+"id": "4348700",
+"en": "Goga Bitadze",
+"team": "ORL",
+"pos": "C"
+},
+{
+"id": "4712849",
+"en": "Anthony Black",
+"team": "ORL",
+"pos": "G"
+},
+{
+"id": "4278572",
+"en": "Jamal Cain",
+"team": "ORL",
+"pos": "F"
+},
+{
+"id": "3133635",
+"en": "Jevon Carter",
+"team": "ORL",
+"pos": "G"
+},
+{
+"id": "4277847",
+"en": "Wendell Carter Jr.",
+"team": "ORL",
+"pos": "C"
+},
+{
+"id": "4397204",
+"en": "Colin Castleton",
+"team": "ORL",
+"pos": "C"
+},
+{
+"id": "4702382",
+"en": "Tristan da Silva",
+"team": "ORL",
+"pos": "F"
+},
+{
+"id": "4065654",
+"en": "Jonathan Isaac",
+"team": "ORL",
+"pos": "F"
+},
+{
+"id": "4593034",
+"en": "Alex Morales",
+"team": "ORL",
+"pos": "G"
+},
+{
+"id": "5107251",
+"en": "Izaiyah Nelson",
+"team": "ORL",
+"pos": "F"
+},
+{
+"id": "5214637",
+"en": "Noah Penda",
+"team": "ORL",
+"pos": "F"
+},
+{
+"id": "5239561",
+"en": "Jase Richardson",
+"team": "ORL",
+"pos": "G"
+},
+{
+"id": "4432165",
+"en": "Jalen Suggs",
+"team": "ORL",
+"pos": "G"
+},
+{
+"id": "6478",
+"en": "Nikola Vucevic",
+"team": "ORL",
+"pos": "C"
+},
+{
+"id": "4566434",
+"en": "Franz Wagner",
+"team": "ORL",
+"pos": "F"
+},
+{
+"id": "4870562",
+"en": "Dominick Barlow",
+"team": "PHI",
+"pos": "F"
+},
+{
+"id": "5105637",
+"en": "Adem Bona",
+"team": "PHI",
+"pos": "C"
+},
+{
+"id": "3917376",
+"en": "Jaylen Brown",
+"team": "PHI",
+"pos": "G"
+},
+{
+"id": "2581018",
+"en": "Kentavious Caldwell-Pope",
+"team": "PHI",
+"pos": "G"
+},
+{
+"id": "5124612",
+"en": "VJ Edgecombe",
+"team": "PHI",
+"pos": "G"
+},
+{
+"id": "4711297",
+"en": "Justin Edwards",
+"team": "PHI",
+"pos": "F"
+},
+{
+"id": "3059318",
+"en": "Joel Embiid",
+"team": "PHI",
+"pos": "C"
+},
+{
+"id": "3904625",
+"en": "Tacko Fall",
+"team": "PHI",
+"pos": "C"
+},
+{
+"id": "4871141",
+"en": "Ariel Hukporti",
+"team": "PHI",
+"pos": "C"
+},
+{
+"id": "1966",
+"en": "LeBron James",
+"team": "PHI",
+"pos": "F"
+},
+{
+"id": "4433144",
+"en": "Caleb Love",
+"team": "PHI",
+"pos": "G"
+},
+{
+"id": "4431678",
+"en": "Tyrese Maxey",
+"team": "PHI",
+"pos": "G"
+},
+{
+"id": "4873090",
+"en": "Labaron Philon Jr.",
+"team": "PHI",
+"pos": "G"
+},
+{
+"id": "5099752",
+"en": "Rayan Rupert",
+"team": "PHI",
+"pos": "G"
+},
+{
+"id": "4351851",
+"en": "Anfernee Simons",
+"team": "PHI",
+"pos": "G"
+},
+{
+"id": "3912848",
+"en": "Dean Wade",
+"team": "PHI",
+"pos": "F"
+},
+{
+"id": "4432446",
+"en": "Jabari Walker",
+"team": "PHI",
+"pos": "F"
+},
+{
+"id": "3136193",
+"en": "Devin Booker",
+"team": "PHX",
+"pos": "G"
+},
+{
+"id": "4280245",
+"en": "Jamaree Bouyea",
+"team": "PHX",
+"pos": "G"
+},
+{
+"id": "4066383",
+"en": "Miles Bridges",
+"team": "PHX",
+"pos": "F"
+},
+{
+"id": "3155526",
+"en": "Dillon Brooks",
+"team": "PHX",
+"pos": "F"
+},
+{
+"id": "4888725",
+"en": "Ryan Dunn",
+"team": "PHX",
+"pos": "F"
+},
+{
+"id": "5105977",
+"en": "Rasheer Fleming",
+"team": "PHX",
+"pos": "F"
+},
+{
+"id": "4278585",
+"en": "Collin Gillespie",
+"team": "PHX",
+"pos": "G"
+},
+{
+"id": "4278402",
+"en": "Jordan Goodwin",
+"team": "PHX",
+"pos": "G"
+},
+{
+"id": "4437244",
+"en": "Jalen Green",
+"team": "PHX",
+"pos": "G"
+},
+{
+"id": "4601023",
+"en": "Oso Ighodaro",
+"team": "PHX",
+"pos": "F"
+},
+{
+"id": "3913174",
+"en": "Luke Kennard",
+"team": "PHX",
+"pos": "G"
+},
+{
+"id": "5203685",
+"en": "Khaman Maluach",
+"team": "PHX",
+"pos": "C"
+},
+{
+"id": "5041953",
+"en": "Koa Peat",
+"team": "PHX",
+"pos": "F"
+},
+{
+"id": "4066268",
+"en": "Duop Reath",
+"team": "PHX",
+"pos": "C"
+},
+{
+"id": "4592714",
+"en": "Pat Spencer",
+"team": "PHX",
+"pos": "G"
+},
+{
+"id": "4431695",
+"en": "Drew Timme",
+"team": "PHX",
+"pos": "F"
+},
+{
+"id": "4701232",
+"en": "Mark Williams",
+"team": "PHX",
+"pos": "C"
+},
+{
+"id": "4683021",
+"en": "Deni Avdija",
+"team": "POR",
+"pos": "F"
+},
+{
+"id": "4431736",
+"en": "Toumani Camara",
+"team": "POR",
+"pos": "F"
+},
+{
+"id": "4592435",
+"en": "Branden Carlson",
+"team": "POR",
+"pos": "C"
+},
+{
+"id": "5081727",
+"en": "Sidy Cissoko",
+"team": "POR",
+"pos": "G"
+},
+{
+"id": "5105565",
+"en": "Donovan Clingan",
+"team": "POR",
+"pos": "C"
+},
+{
+"id": "5217746",
+"en": "Yang Hansen",
+"team": "POR",
+"pos": "C"
+},
+{
+"id": "4683678",
+"en": "Scoot Henderson",
+"team": "POR",
+"pos": "G"
+},
+{
+"id": "3995",
+"en": "Jrue Holiday",
+"team": "POR",
+"pos": "G"
+},
+{
+"id": "4703889",
+"en": "Jayson Kent",
+"team": "POR",
+"pos": "G"
+},
+{
+"id": "4578893",
+"en": "Vit Krejci",
+"team": "POR",
+"pos": "G"
+},
+{
+"id": "6606",
+"en": "Damian Lillard",
+"team": "POR",
+"pos": "G"
+},
+{
+"id": "4279888",
+"en": "Ja Morant",
+"team": "POR",
+"pos": "G"
+},
+{
+"id": "4066399",
+"en": "Micah Potter",
+"team": "POR",
+"pos": "C"
+},
+{
+"id": "4914336",
+"en": "Shaedon Sharpe",
+"team": "POR",
+"pos": "G"
+},
+{
+"id": "4593043",
+"en": "John Tonje",
+"team": "POR",
+"pos": "F"
+},
+{
+"id": "4066211",
+"en": "Robert Williams III",
+"team": "POR",
+"pos": "C"
+},
+{
+"id": "4706557",
+"en": "Chris Youngblood",
+"team": "POR",
+"pos": "G"
+},
+{
+"id": "6578",
+"en": "Harrison Barnes",
+"team": "SA",
+"pos": "F"
+},
+{
+"id": "5105337",
+"en": "Maliq Brown",
+"team": "SA",
+"pos": "F"
+},
+{
+"id": "5061568",
+"en": "Carter Bryant",
+"team": "SA",
+"pos": "F"
+},
+{
+"id": "4845367",
+"en": "Stephon Castle",
+"team": "SA",
+"pos": "G"
+},
+{
+"id": "4592479",
+"en": "Julian Champagnie",
+"team": "SA",
+"pos": "F"
+},
+{
+"id": "4066259",
+"en": "De'Aaron Fox",
+"team": "SA",
+"pos": "G"
+},
+{
+"id": "5107968",
+"en": "Ja'Kobi Gillespie",
+"team": "SA",
+"pos": "G"
+},
+{
+"id": "5037871",
+"en": "Dylan Harper",
+"team": "SA",
+"pos": "G"
+},
+{
+"id": "6440",
+"en": "Tobias Harris",
+"team": "SA",
+"pos": "F"
+},
+{
+"id": "4395723",
+"en": "Keldon Johnson",
+"team": "SA",
+"pos": "F"
+},
+{
+"id": "4713010",
+"en": "David Jones Garcia",
+"team": "SA",
+"pos": "F"
+},
+{
+"id": "3064560",
+"en": "Luke Kornet",
+"team": "SA",
+"pos": "C"
+},
+{
+"id": "3134916",
+"en": "Jordan McLaughlin",
+"team": "SA",
+"pos": "G"
+},
+{
+"id": "5101845",
+"en": "Jayden Quaintance",
+"team": "SA",
+"pos": "F"
+},
+{
+"id": "5105809",
+"en": "Tarris Reed Jr.",
+"team": "SA",
+"pos": "C"
+},
+{
+"id": "4395630",
+"en": "Devin Vassell",
+"team": "SA",
+"pos": "G"
+},
+{
+"id": "5104157",
+"en": "Victor Wembanyama",
+"team": "SA",
+"pos": "F"
+},
+{
+"id": "4431679",
+"en": "Precious Achiuwa",
+"team": "SAC",
+"pos": "F"
+},
+{
+"id": "5142620",
+"en": "Darius Acuff Jr.",
+"team": "SAC",
+"pos": "G"
+},
+{
+"id": "4395650",
+"en": "Leaky Black",
+"team": "SAC",
+"pos": "F"
+},
+{
+"id": "4433174",
+"en": "Dylan Cardwell",
+"team": "SAC",
+"pos": "C"
+},
+{
+"id": "4702384",
+"en": "Nique Clifford",
+"team": "SAC",
+"pos": "G"
+},
+{
+"id": "4065732",
+"en": "De'Andre Hunter",
+"team": "SAC",
+"pos": "F"
+},
+{
+"id": "4917149",
+"en": "Alex Karaban",
+"team": "SAC",
+"pos": "F"
+},
+{
+"id": "3064440",
+"en": "Zach LaVine",
+"team": "SAC",
+"pos": "G"
+},
+{
+"id": "5107897",
+"en": "Jonathan Mogbo",
+"team": "SAC",
+"pos": "F"
+},
+{
+"id": "4066262",
+"en": "Malik Monk",
+"team": "SAC",
+"pos": "G"
+},
+{
+"id": "4594327",
+"en": "Keegan Murray",
+"team": "SAC",
+"pos": "F"
+},
+{
+"id": "4709131",
+"en": "Sean Pedulla",
+"team": "SAC",
+"pos": "G"
+},
+{
+"id": "4279318",
+"en": "Daeqwon Plowden",
+"team": "SAC",
+"pos": "G"
+},
+{
+"id": "4898371",
+"en": "Maxime Raynaud",
+"team": "SAC",
+"pos": "C"
+},
+{
+"id": "3155942",
+"en": "Domantas Sabonis",
+"team": "SAC",
+"pos": "F"
+},
+{
+"id": "5106058",
+"en": "Emanuel Sharp",
+"team": "SAC",
+"pos": "G"
+},
+{
+"id": "3907387",
+"en": "Ben Simmons",
+"team": "SAC",
+"pos": "G"
+},
+{
+"id": "2993874",
+"en": "Kyle Anderson",
+"team": "TOR",
+"pos": "F"
+},
+{
+"id": "4433134",
+"en": "Scottie Barnes",
+"team": "TOR",
+"pos": "F"
+},
+{
+"id": "4395625",
+"en": "RJ Barrett",
+"team": "TOR",
+"pos": "F"
+},
+{
+"id": "4431893",
+"en": "Jamison Battle",
+"team": "TOR",
+"pos": "F"
+},
+{
+"id": "4432586",
+"en": "Nate Bittle",
+"team": "TOR",
+"pos": "C"
+},
+{
+"id": "4432737",
+"en": "Jaden Bradley",
+"team": "TOR",
+"pos": "G"
+},
+{
+"id": "5149115",
+"en": "Allen Graves",
+"team": "TOR",
+"pos": "F"
+},
+{
+"id": "4431684",
+"en": "Trayce Jackson-Davis",
+"team": "TOR",
+"pos": "F"
+},
+{
+"id": "6450",
+"en": "Kawhi Leonard",
+"team": "TOR",
+"pos": "F"
+},
+{
+"id": "4702656",
+"en": "Alijah Martin",
+"team": "TOR",
+"pos": "G"
+},
+{
+"id": "5093267",
+"en": "Collin Murray-Boyles",
+"team": "TOR",
+"pos": "F"
+},
+{
+"id": "3134908",
+"en": "Jakob Poeltl",
+"team": "TOR",
+"pos": "C"
+},
+{
+"id": "4395724",
+"en": "Immanuel Quickley",
+"team": "TOR",
+"pos": "G"
+},
+{
+"id": "4432241",
+"en": "Jamal Shead",
+"team": "TOR",
+"pos": "G"
+},
+{
+"id": "4397784",
+"en": "Malachi Smith",
+"team": "TOR",
+"pos": "G"
+},
+{
+"id": "4684272",
+"en": "Ja'Kobe Walter",
+"team": "TOR",
+"pos": "G"
+},
+{
+"id": "4433268",
+"en": "Trey Alexander",
+"team": "UTAH",
+"pos": "G"
+},
+{
+"id": "4873138",
+"en": "Ace Bailey",
+"team": "UTAH",
+"pos": "G"
+},
+{
+"id": "4277919",
+"en": "Mo Bamba",
+"team": "UTAH",
+"pos": "C"
+},
+{
+"id": "4065673",
+"en": "Tony Bradley",
+"team": "UTAH",
+"pos": "C"
+},
+{
+"id": "4683736",
+"en": "Kobe Bufkin",
+"team": "UTAH",
+"pos": "G"
+},
+{
+"id": "4683766",
+"en": "Isaiah Collier",
+"team": "UTAH",
+"pos": "G"
+},
+{
+"id": "4684793",
+"en": "Kyle Filipowski",
+"team": "UTAH",
+"pos": "F"
+},
+{
+"id": "4433627",
+"en": "Keyonte George",
+"team": "UTAH",
+"pos": "G"
+},
+{
+"id": "4432811",
+"en": "Josh Green",
+"team": "UTAH",
+"pos": "G"
+},
+{
+"id": "4397077",
+"en": "Jaxson Hayes",
+"team": "UTAH",
+"pos": "C"
+},
+{
+"id": "4433618",
+"en": "Harrison Ingram",
+"team": "UTAH",
+"pos": "F"
+},
+{
+"id": "4277961",
+"en": "Jaren Jackson Jr.",
+"team": "UTAH",
+"pos": "F"
+},
+{
+"id": "4066336",
+"en": "Lauri Markkanen",
+"team": "UTAH",
+"pos": "F"
+},
+{
+"id": "3133602",
+"en": "Svi Mykhailiuk",
+"team": "UTAH",
+"pos": "G"
+},
+{
+"id": "3102530",
+"en": "Jusuf Nurkic",
+"team": "UTAH",
+"pos": "C"
+},
+{
+"id": "4065663",
+"en": "Josh Okogie",
+"team": "UTAH",
+"pos": "G"
+},
+{
+"id": "5041955",
+"en": "Darryn Peterson",
+"team": "UTAH",
+"pos": "G"
+},
+{
+"id": "5105839",
+"en": "Brice Sensabaugh",
+"team": "UTAH",
+"pos": "F"
+},
+{
+"id": "4278129",
+"en": "Deandre Ayton",
+"team": "WSH",
+"pos": "C"
+},
+{
+"id": "4432187",
+"en": "Reece Beekman",
+"team": "WSH",
+"pos": "G"
+},
+{
+"id": "4845374",
+"en": "Bub Carrington",
+"team": "WSH",
+"pos": "G"
+},
+{
+"id": "4432907",
+"en": "Justin Champagnie",
+"team": "WSH",
+"pos": "F"
+},
+{
+"id": "5104155",
+"en": "Bilal Coulibaly",
+"team": "WSH",
+"pos": "G"
+},
+{
+"id": "6583",
+"en": "Anthony Davis",
+"team": "WSH",
+"pos": "F"
+},
+{
+"id": "5142718",
+"en": "AJ Dybantsa",
+"team": "WSH",
+"pos": "F"
+},
+{
+"id": "5174563",
+"en": "Kyshawn George",
+"team": "WSH",
+"pos": "F"
+},
+{
+"id": "2581184",
+"en": "Anthony Gill",
+"team": "WSH",
+"pos": "F"
+},
+{
+"id": "5238230",
+"en": "Tre Johnson",
+"team": "WSH",
+"pos": "G"
+},
+{
+"id": "4432819",
+"en": "Tre Mann",
+"team": "WSH",
+"pos": "G"
+},
+{
+"id": "6609",
+"en": "Khris Middleton",
+"team": "WSH",
+"pos": "F"
+},
+{
+"id": "5105841",
+"en": "Felix Okpara",
+"team": "WSH",
+"pos": "F"
+},
+{
+"id": "5144126",
+"en": "Will Riley",
+"team": "WSH",
+"pos": "G"
+},
+{
+"id": "5160992",
+"en": "Alex Sarr",
+"team": "WSH",
+"pos": "C"
+},
+{
+"id": "4997537",
+"en": "Tristan Vukcevic",
+"team": "WSH",
+"pos": "F"
+},
+{
+"id": "4606840",
+"en": "Jamir Watkins",
+"team": "WSH",
+"pos": "G"
+},
+{
+"id": "4277905",
+"en": "Trae Young",
+"team": "WSH",
+"pos": "G"
+}
+]

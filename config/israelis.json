@@ -1,0 +1,8 @@
+{
+  "_comment": "Israeli players Sport5 covers game by game. id = ESPN athlete id. track: full = own article every game; short = short item.",
+  "players": [
+    { "id": "4683021", "name": "Deni Avdija", "he": "דני אבדיה", "team": "POR", "track": "full" },
+    { "id": "5242502", "name": "Ben Saraf", "he": "בן שרף", "team": "BKN", "track": "short" },
+    { "id": "5107173", "name": "Danny Wolf", "he": "דני וולף", "team": "BKN", "track": "short" }
+  ]
+}

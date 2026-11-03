@@ -1,0 +1,6243 @@
+{
+ "_comment": "ESPN id -> Hebrew name. status: sport5 (seen in Sport5 texts) / aligned (Sport5 spelling found by matching a roundup to its box score) / draft (needs approval). approved: set true after a human check.",
+ "builtAt": "2026-11-03T00:49:51.024Z",
+ "players": [
+  {
+   "id": "4278039",
+   "en": "Nickeil Alexander-Walker",
+   "he": "ניקיל אלכסנדר-ווקר",
+   "status": "sport5",
+   "team": "ATL",
+   "pos": "G",
+   "surname": "אלכסנדר-ווקר",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4869342",
+   "en": "Dyson Daniels",
+   "he": "דייסון דניאלס",
+   "status": "sport5",
+   "team": "ATL",
+   "pos": "G",
+   "surname": "דניאלס",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4431941",
+   "en": "RayJ Dennis",
+   "he": "ריי ג'יי דניס",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "G",
+   "surname": "ג'יי דניס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397020",
+   "en": "Luguentz Dort",
+   "he": "לוגנץ דורט",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "G",
+   "surname": "דורט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5106262",
+   "en": "Zuby Ejiofor",
+   "he": "זובי אג'יופור",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "F",
+   "surname": "אג'יופור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2578185",
+   "en": "Dorian Finney-Smith",
+   "he": "דוריאן פיני-סמית'",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "F",
+   "surname": "פיני-סמית'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5149077",
+   "en": "Kingston Flemings",
+   "he": "קינגסטון פלמינגס",
+   "status": "sport5",
+   "team": "ATL",
+   "pos": "G",
+   "surname": "פלמינגס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4585618",
+   "en": "Keshon Gilbert",
+   "he": "קשון גילברט",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "G",
+   "surname": "גילברט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4712863",
+   "en": "Mouhamed Gueye",
+   "he": "מוחמד גיי",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "F",
+   "surname": "גיי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4701230",
+   "en": "Jalen Johnson",
+   "he": "ג'יילן ג'ונסון",
+   "status": "sport5",
+   "team": "ATL",
+   "pos": "F",
+   "surname": "ג'ונסון",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4280151",
+   "en": "Corey Kispert",
+   "he": "קורי קיספרט",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "F",
+   "surname": "קיספרט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3146557",
+   "en": "Jock Landale",
+   "he": "ג'וק לנדייל",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "C",
+   "surname": "לנדייל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2490149",
+   "en": "CJ McCollum",
+   "he": "סי ג'יי מקולום",
+   "status": "sport5",
+   "team": "ATL",
+   "pos": "G",
+   "surname": "ג'יי מקולום",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4873201",
+   "en": "Asa Newell",
+   "he": "אסה ניואל",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "F",
+   "surname": "ניואל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431680",
+   "en": "Onyeka Okongwu",
+   "he": "אוניקה אוקונגוו",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "F",
+   "surname": "אוקונגוו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105571",
+   "en": "Henri Veesaar",
+   "he": "הנרי ויסאר",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "C",
+   "surname": "ויסאר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397183",
+   "en": "Aaron Wiggins",
+   "he": "ארון וויגינס",
+   "status": "sport5",
+   "team": "ATL",
+   "pos": "G",
+   "surname": "וויגינס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4431714",
+   "en": "Jalen Wilson",
+   "he": "ג'יילן ווילסון",
+   "status": "draft",
+   "team": "ATL",
+   "pos": "F",
+   "surname": "ווילסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105626",
+   "en": "Tyler Bilodeau",
+   "he": "טיילר בילודו",
+   "status": "draft",
+   "team": "BKN",
+   "pos": "F",
+   "surname": "בילודו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5101761",
+   "en": "Mikel Brown Jr.",
+   "he": "מייקל בראון ג'וניור",
+   "status": "sport5",
+   "team": "BKN",
+   "pos": "G",
+   "surname": "בראון ג'וניור",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4712896",
+   "en": "Noah Clowney",
+   "he": "נואה קלאוני",
+   "status": "draft",
+   "team": "BKN",
+   "pos": "F",
+   "surname": "קלאוני",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5175643",
+   "en": "Egor Demin",
+   "he": "יגור דמין",
+   "status": "draft",
+   "team": "BKN",
+   "pos": "G",
+   "surname": "דמין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4702177",
+   "en": "Keon Ellis",
+   "he": "קיאון אליס",
+   "status": "sport5",
+   "team": "BKN",
+   "pos": "G",
+   "surname": "אליס",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4870564",
+   "en": "Joshua Jefferson",
+   "he": "ג'ושוע ג'פרסון",
+   "status": "draft",
+   "team": "BKN",
+   "pos": "F",
+   "surname": "ג'פרסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5174655",
+   "en": "Chaney Johnson",
+   "he": "צ'ייני ג'ונסון",
+   "status": "draft",
+   "team": "BKN",
+   "pos": "F",
+   "surname": "ג'ונסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3907823",
+   "en": "Terance Mann",
+   "he": "טרנס מאן",
+   "status": "sport5",
+   "team": "BKN",
+   "pos": "G",
+   "surname": "מאן",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4687718",
+   "en": "Josh Minott",
+   "he": "ג'וש מינוט",
+   "status": "draft",
+   "team": "BKN",
+   "pos": "F",
+   "surname": "מינוט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4702670",
+   "en": "Grant Nelson",
+   "he": "גרנט נלסון",
+   "status": "draft",
+   "team": "BKN",
+   "pos": "F",
+   "surname": "נלסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4278104",
+   "en": "Michael Porter Jr.",
+   "he": "מייקל פורטר ג'וניור",
+   "status": "sport5",
+   "team": "BKN",
+   "pos": "F",
+   "surname": "פורטר ג'וניור",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5037873",
+   "en": "Drake Powell",
+   "he": "דרייק פאוול",
+   "status": "draft",
+   "team": "BKN",
+   "pos": "G",
+   "surname": "פאוול",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3064514",
+   "en": "Julius Randle",
+   "he": "ג'וליוס רנדל",
+   "status": "sport5",
+   "team": "BKN",
+   "pos": "F",
+   "surname": "רנדל",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "5242502",
+   "en": "Ben Saraf",
+   "he": "בן שרף",
+   "status": "sport5",
+   "team": "BKN",
+   "pos": "G",
+   "surname": "שרף",
+   "evidence": {
+    "sport5": 8
+   },
+   "approved": false
+  },
+  {
+   "id": "4432194",
+   "en": "Day'Ron Sharpe",
+   "he": "דיירון שארפ",
+   "status": "sport5",
+   "team": "BKN",
+   "pos": "C",
+   "surname": "שארפ",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5279130",
+   "en": "Nolan Traore",
+   "he": "נולאן טראורה",
+   "status": "sport5",
+   "team": "BKN",
+   "pos": "G",
+   "surname": "טראורה",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "3150844",
+   "en": "Moritz Wagner",
+   "he": "מוריץ ואגנר",
+   "status": "draft",
+   "team": "BKN",
+   "pos": "C",
+   "surname": "ואגנר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5107173",
+   "en": "Danny Wolf",
+   "he": "דני וולף",
+   "status": "sport5",
+   "team": "BKN",
+   "pos": "F",
+   "surname": "וולף",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4433188",
+   "en": "Devin Carter",
+   "he": "דווין קרטר",
+   "status": "draft",
+   "team": "BOS",
+   "pos": "G",
+   "surname": "קרטר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5142621",
+   "en": "Chris Cenac Jr.",
+   "he": "כריס סנאק ג'וניור",
+   "status": "draft",
+   "team": "BOS",
+   "pos": "F",
+   "surname": "סנאק ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3195",
+   "en": "Mike Conley",
+   "he": "מייק קונלי",
+   "status": "draft",
+   "team": "BOS",
+   "pos": "G",
+   "surname": "קונלי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4277951",
+   "en": "Luka Garza",
+   "he": "לוקה גרזה",
+   "status": "sport5",
+   "team": "BOS",
+   "pos": "C",
+   "surname": "גרזה",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4251",
+   "en": "Paul George",
+   "he": "פול ג'ורג'",
+   "status": "sport5",
+   "team": "BOS",
+   "pos": "F",
+   "surname": "ג'ורג'",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "5175647",
+   "en": "Hugo Gonzalez",
+   "he": "הוגו גונסאלס",
+   "status": "draft",
+   "team": "BOS",
+   "pos": "G",
+   "surname": "גונסאלס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397251",
+   "en": "Ron Harper Jr.",
+   "he": "רון הארפר ג'וניור",
+   "status": "draft",
+   "team": "BOS",
+   "pos": "G",
+   "surname": "הארפר ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4065804",
+   "en": "Sam Hauser",
+   "he": "סם האוזר",
+   "status": "sport5",
+   "team": "BOS",
+   "pos": "F",
+   "surname": "האוזר",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5106283",
+   "en": "Dillon Mitchell",
+   "he": "דילון מיטשל",
+   "status": "draft",
+   "team": "BOS",
+   "pos": "F",
+   "surname": "מיטשל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066354",
+   "en": "Payton Pritchard",
+   "he": "פייטון פריצ'רד",
+   "status": "aligned",
+   "team": "BOS",
+   "pos": "G",
+   "surname": "פריצ'רד",
+   "evidence": {
+    "sport5": 2,
+    "draft": "פייטון פריצ'ארד",
+    "draftHits": 0,
+    "sim": 0.92
+   },
+   "approved": false
+  },
+  {
+   "id": "4397424",
+   "en": "Neemias Queta",
+   "he": "נימיאש קייטה",
+   "status": "aligned",
+   "team": "BOS",
+   "pos": "C",
+   "surname": "קייטה",
+   "evidence": {
+    "sport5": 1,
+    "draft": "נמיאש קייטה",
+    "draftHits": 0,
+    "sim": 0.91
+   },
+   "approved": false
+  },
+  {
+   "id": "4351852",
+   "en": "Mitchell Robinson",
+   "he": "מיצ'ל רובינסון",
+   "status": "sport5",
+   "team": "BOS",
+   "pos": "C",
+   "surname": "רובינסון",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4593841",
+   "en": "Baylor Scheierman",
+   "he": "ביילור שיירמן",
+   "status": "draft",
+   "team": "BOS",
+   "pos": "G",
+   "surname": "שיירמן",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4065648",
+   "en": "Jayson Tatum",
+   "he": "ג'ייסון טייטום",
+   "status": "sport5",
+   "team": "BOS",
+   "pos": "F",
+   "surname": "טייטום",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "4683689",
+   "en": "Jordan Walsh",
+   "he": "ג'ורדן וולש",
+   "status": "draft",
+   "team": "BOS",
+   "pos": "G",
+   "surname": "וולש",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3078576",
+   "en": "Derrick White",
+   "he": "דריק וייט",
+   "status": "draft",
+   "team": "BOS",
+   "pos": "G",
+   "surname": "וייט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4702745",
+   "en": "Amari Williams",
+   "he": "אמארי וויליאמס",
+   "status": "draft",
+   "team": "BOS",
+   "pos": "F",
+   "surname": "וויליאמס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3135045",
+   "en": "Grayson Allen",
+   "he": "גרייסון אלן",
+   "status": "sport5",
+   "team": "CHA",
+   "pos": "G",
+   "surname": "אלן",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "5060701",
+   "en": "Christian Anderson",
+   "he": "כריסטיאן אנדרסון",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "G",
+   "surname": "אנדרסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4684269",
+   "en": "Kylan Boswell",
+   "he": "קיילן בוזוול",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "G",
+   "surname": "בוזוול",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433249",
+   "en": "Moussa Diabate",
+   "he": "מוסא דיאבאטה",
+   "status": "aligned",
+   "team": "CHA",
+   "pos": "F",
+   "surname": "דיאבאטה",
+   "evidence": {
+    "sport5": 1,
+    "draft": "מוסה דיאבטה",
+    "draftHits": 0,
+    "sim": 0.82
+   },
+   "approved": false
+  },
+  {
+   "id": "4701225",
+   "en": "PJ Hall",
+   "he": "פי ג'יי הול",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "C",
+   "surname": "ג'יי הול",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4602025",
+   "en": "Sion James",
+   "he": "סיון ג'יימס",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "G",
+   "surname": "ג'יימס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4576060",
+   "en": "Ryan Kalkbrenner",
+   "he": "ראיין קלקברנר",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "C",
+   "surname": "קלקברנר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5061575",
+   "en": "Kon Knueppel",
+   "he": "קון קניפל",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "G",
+   "surname": "קניפל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5239590",
+   "en": "Liam McNeeley",
+   "he": "ליאם מקנילי",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "G",
+   "surname": "מקנילי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433287",
+   "en": "Brandon Miller",
+   "he": "ברנדון מילר",
+   "status": "sport5",
+   "team": "CHA",
+   "pos": "F",
+   "surname": "מילר",
+   "evidence": {
+    "sport5": 6
+   },
+   "approved": false
+  },
+  {
+   "id": "2583632",
+   "en": "Royce O'Neale",
+   "he": "רויס אוניל",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "F",
+   "surname": "אוניל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4396971",
+   "en": "Naz Reid",
+   "he": "נאז ריד",
+   "status": "sport5",
+   "team": "CHA",
+   "pos": "C",
+   "surname": "ריד",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "5211176",
+   "en": "Tidjane Salaun",
+   "he": "טיג'אן סלאון",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "F",
+   "surname": "סלאון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3032979",
+   "en": "Dennis Schroder",
+   "he": "דניס שרודר",
+   "status": "sport5",
+   "team": "CHA",
+   "pos": "G",
+   "surname": "שרודר",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5281370",
+   "en": "Hannes Steinbach",
+   "he": "האנס שטיינבך",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "F",
+   "surname": "שטיינבך",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4395651",
+   "en": "Coby White",
+   "he": "קובי וייט",
+   "status": "draft",
+   "team": "CHA",
+   "pos": "G",
+   "surname": "וייט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066218",
+   "en": "Grant Williams",
+   "he": "גרנט וויליאמס",
+   "status": "sport5",
+   "team": "CHA",
+   "pos": "F",
+   "surname": "וויליאמס",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5105555",
+   "en": "Tobe Awaka",
+   "he": "טובה אוואקה",
+   "status": "draft",
+   "team": "CHI",
+   "pos": "F",
+   "surname": "אוואקה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4711294",
+   "en": "Matas Buzelis",
+   "he": "מטאס בוזליס",
+   "status": "sport5",
+   "team": "CHI",
+   "pos": "F",
+   "surname": "בוזליס",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4278067",
+   "en": "Nic Claxton",
+   "he": "ניק קלקסטון",
+   "status": "draft",
+   "team": "CHI",
+   "pos": "C",
+   "surname": "קלקסטון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066650",
+   "en": "Zach Collins",
+   "he": "זאק קולינס",
+   "status": "draft",
+   "team": "CHI",
+   "pos": "F",
+   "surname": "קולינס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5242496",
+   "en": "Noa Essengue",
+   "he": "נואה אסנג",
+   "status": "draft",
+   "team": "CHI",
+   "pos": "F",
+   "surname": "אסנג",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4871145",
+   "en": "Josh Giddey",
+   "he": "ג'וש גידי",
+   "status": "sport5",
+   "team": "CHI",
+   "pos": "G",
+   "surname": "גידי",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4683750",
+   "en": "Jordan Hawkins",
+   "he": "ג'ורדן הוקינס",
+   "status": "draft",
+   "team": "CHI",
+   "pos": "G",
+   "surname": "הוקינס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2990984",
+   "en": "Buddy Hield",
+   "he": "באדי הילד",
+   "status": "draft",
+   "team": "CHI",
+   "pos": "G",
+   "surname": "הילד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4395626",
+   "en": "Tre Jones",
+   "he": "טרה ג'ונס",
+   "status": "sport5",
+   "team": "CHI",
+   "pos": "G",
+   "surname": "ג'ונס",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5044385",
+   "en": "Leonard Miller",
+   "he": "לנארד מילר",
+   "status": "sport5",
+   "team": "CHI",
+   "pos": "F",
+   "surname": "מילר",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4432822",
+   "en": "Isaac Okoro",
+   "he": "אייזק אוקורו",
+   "status": "draft",
+   "team": "CHI",
+   "pos": "F",
+   "surname": "אוקורו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2595516",
+   "en": "Norman Powell",
+   "he": "נורמן פאוול",
+   "status": "sport5",
+   "team": "CHI",
+   "pos": "G",
+   "surname": "פאוול",
+   "evidence": {
+    "sport5": 4
+   },
+   "approved": false
+  },
+  {
+   "id": "4898010",
+   "en": "Jaylin Sellers",
+   "he": "ג'יילין סלרס",
+   "status": "draft",
+   "team": "CHI",
+   "pos": "G",
+   "surname": "סלרס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397189",
+   "en": "Jalen Smith",
+   "he": "ג'יילן סמית'",
+   "status": "sport5",
+   "team": "CHI",
+   "pos": "F",
+   "surname": "סמית'",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4848625",
+   "en": "Dailyn Swain",
+   "he": "דיילין סוויין",
+   "status": "draft",
+   "team": "CHI",
+   "pos": "G",
+   "surname": "סוויין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431687",
+   "en": "Patrick Williams",
+   "he": "פטריק וויליאמס",
+   "status": "draft",
+   "team": "CHI",
+   "pos": "F",
+   "surname": "וויליאמס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5095151",
+   "en": "Caleb Wilson",
+   "he": "קיילב ווילסון",
+   "status": "sport5",
+   "team": "CHI",
+   "pos": "F",
+   "surname": "ווילסון",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4066328",
+   "en": "Jarrett Allen",
+   "he": "ג'רט אלן",
+   "status": "sport5",
+   "team": "CLE",
+   "pos": "C",
+   "surname": "אלן",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "3934723",
+   "en": "Thomas Bryant",
+   "he": "תומאס בראיינט",
+   "status": "draft",
+   "team": "CLE",
+   "pos": "C",
+   "surname": "בראיינט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431734",
+   "en": "Tristan Enaruna",
+   "he": "טריסטן אנארונה",
+   "status": "draft",
+   "team": "CLE",
+   "pos": "F",
+   "surname": "אנארונה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3992",
+   "en": "James Harden",
+   "he": "ג'יימס הארדן",
+   "status": "sport5",
+   "team": "CLE",
+   "pos": "G",
+   "surname": "הארדן",
+   "evidence": {
+    "sport5": 4
+   },
+   "approved": false
+  },
+  {
+   "id": "2995706",
+   "en": "Mario Hezonja",
+   "he": "מריו הזוניה",
+   "status": "draft",
+   "team": "CLE",
+   "pos": "F",
+   "surname": "הזוניה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066757",
+   "en": "Sam Merrill",
+   "he": "סם מריל",
+   "status": "sport5",
+   "team": "CLE",
+   "pos": "G",
+   "surname": "מריל",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "5177362",
+   "en": "Riley Minix",
+   "he": "ריילי מיניקס",
+   "status": "draft",
+   "team": "CLE",
+   "pos": "F",
+   "surname": "מיניקס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3908809",
+   "en": "Donovan Mitchell",
+   "he": "דונובן מיטשל",
+   "status": "sport5",
+   "team": "CLE",
+   "pos": "G",
+   "surname": "מיטשל",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4432158",
+   "en": "Evan Mobley",
+   "he": "אוון מובלי",
+   "status": "sport5",
+   "team": "CLE",
+   "pos": "C",
+   "surname": "מובלי",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "4701233",
+   "en": "Craig Porter Jr.",
+   "he": "קרייג פורטר ג'וניור",
+   "status": "draft",
+   "team": "CLE",
+   "pos": "G",
+   "surname": "פורטר ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5023693",
+   "en": "Tyrese Proctor",
+   "he": "טייריס פרוקטור",
+   "status": "draft",
+   "team": "CLE",
+   "pos": "G",
+   "surname": "פרוקטור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5041951",
+   "en": "Meleek Thomas",
+   "he": "מליק תומאס",
+   "status": "sport5",
+   "team": "CLE",
+   "pos": "G",
+   "surname": "תומאס",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4683747",
+   "en": "Jaylon Tyson",
+   "he": "ג'יילון טייסון",
+   "status": "draft",
+   "team": "CLE",
+   "pos": "G",
+   "surname": "טייסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5106261",
+   "en": "Ernest Udeh Jr.",
+   "he": "ארנסט אודה ג'וניור",
+   "status": "draft",
+   "team": "CLE",
+   "pos": "C",
+   "surname": "אודה ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4576087",
+   "en": "Peyton Watson",
+   "he": "פייטון ווטסון",
+   "status": "sport5",
+   "team": "CLE",
+   "pos": "G",
+   "surname": "ווטסון",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4593125",
+   "en": "Santi Aldama",
+   "he": "סנטי אלדמה",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "אלדמה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5148538",
+   "en": "Tarik Biberovic",
+   "he": "טאריק ביברוביץ'",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "ביברוביץ'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432582",
+   "en": "Max Christie",
+   "he": "מקס כריסטי",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "G",
+   "surname": "כריסטי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4701208",
+   "en": "Moussa Cisse",
+   "he": "מוסה סיסה",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "C",
+   "surname": "סיסה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4896372",
+   "en": "Walter Clayton Jr.",
+   "he": "וולטר קלייטון ג'וניור",
+   "status": "sport5",
+   "team": "DAL",
+   "pos": "G",
+   "surname": "קלייטון ג'וניור",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5279129",
+   "en": "Sergio de Larrea",
+   "he": "סרחיו דה לארה",
+   "status": "sport5",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "דה לארה",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5041939",
+   "en": "Cooper Flagg",
+   "he": "קופר פלאג",
+   "status": "sport5",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "פלאג",
+   "evidence": {
+    "sport5": 10
+   },
+   "approved": false
+  },
+  {
+   "id": "4278049",
+   "en": "Daniel Gafford",
+   "he": "דניאל גאפורד",
+   "status": "sport5",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "גאפורד",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5105806",
+   "en": "Jett Howard",
+   "he": "ג'ט הווארד",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "G",
+   "surname": "הווארד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "6442",
+   "en": "Kyrie Irving",
+   "he": "קיירי אירווינג",
+   "status": "aligned",
+   "team": "DAL",
+   "pos": "G",
+   "surname": "אירווינג",
+   "evidence": {
+    "sport5": 3,
+    "draft": "קיירי ארווינג",
+    "draftHits": 2,
+    "sim": 0.92
+   },
+   "approved": false
+  },
+  {
+   "id": "4873153",
+   "en": "Morez Johnson Jr.",
+   "he": "מורז ג'ונסון ג'וניור",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "ג'ונסון ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5106040",
+   "en": "Tobi Lawal",
+   "he": "טובי לאוואל",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "לאוואל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683688",
+   "en": "Dereck Lively II",
+   "he": "דרק לייבלי השני",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "C",
+   "surname": "לייבלי השני",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4278594",
+   "en": "Naji Marshall",
+   "he": "נאג'י מרשל",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "מרשל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3138160",
+   "en": "Caleb Martin",
+   "he": "קיילב מרטין",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "מרטין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5211175",
+   "en": "Zaccharie Risacher",
+   "he": "זאקרי ריסאשה",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "ריסאשה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432107",
+   "en": "Marcus Sasser",
+   "he": "מרקוס סאסר",
+   "status": "draft",
+   "team": "DAL",
+   "pos": "G",
+   "surname": "סאסר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4278078",
+   "en": "P.J. Washington",
+   "he": "פי ג'יי וושינגטון",
+   "status": "sport5",
+   "team": "DAL",
+   "pos": "F",
+   "surname": "ג'יי וושינגטון",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4277848",
+   "en": "Marvin Bagley III",
+   "he": "מרווין באגלי השלישי",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "F",
+   "surname": "באגלי השלישי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431767",
+   "en": "Christian Braun",
+   "he": "כריסטיאן בראון",
+   "status": "sport5",
+   "team": "DEN",
+   "pos": "G",
+   "surname": "בראון",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4698719",
+   "en": "Trevon Brazile",
+   "he": "טרבון ברזיל",
+   "status": "aligned",
+   "team": "DEN",
+   "pos": "F",
+   "surname": "ברזיל",
+   "evidence": {
+    "sport5": 1,
+    "draft": "טריבון בראזיל",
+    "draftHits": 0,
+    "sim": 0.83
+   },
+   "approved": false
+  },
+  {
+   "id": "3978",
+   "en": "DeMar DeRozan",
+   "he": "דמאר דרוזן",
+   "status": "sport5",
+   "team": "DEN",
+   "pos": "G",
+   "surname": "דרוזן",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4065813",
+   "en": "Alpha Diallo",
+   "he": "אלפא דיאלו",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "F",
+   "surname": "דיאלו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3064290",
+   "en": "Aaron Gordon",
+   "he": "ארון גורדון",
+   "status": "sport5",
+   "team": "DEN",
+   "pos": "F",
+   "surname": "גורדון",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4433607",
+   "en": "DaRon Holmes II",
+   "he": "דרון הולמס השני",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "F",
+   "surname": "הולמס השני",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4565698",
+   "en": "Bryce Hopkins",
+   "he": "בראייס הופקינס",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "F",
+   "surname": "הופקינס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3138196",
+   "en": "Cameron Johnson",
+   "he": "קמרון ג'ונסון",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "F",
+   "surname": "ג'ונסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3112335",
+   "en": "Nikola Jokic",
+   "he": "ניקולה יוקיץ'",
+   "status": "sport5",
+   "team": "DEN",
+   "pos": "C",
+   "surname": "יוקיץ'",
+   "evidence": {
+    "sport5": 7
+   },
+   "approved": false
+  },
+  {
+   "id": "4592427",
+   "en": "Spencer Jones",
+   "he": "ספנסר ג'ונס",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "F",
+   "surname": "ג'ונס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3135046",
+   "en": "Tyus Jones",
+   "he": "טאיוס ג'ונס",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "G",
+   "surname": "ג'ונס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3936299",
+   "en": "Jamal Murray",
+   "he": "ג'מאל מארי",
+   "status": "sport5",
+   "team": "DEN",
+   "pos": "G",
+   "surname": "מארי",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "4433629",
+   "en": "Ryan Nembhard",
+   "he": "ראיין נמהרד",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "G",
+   "surname": "נמהרד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431690",
+   "en": "Zeke Nnaji",
+   "he": "זיק נאג'י",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "F",
+   "surname": "נאג'י",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432181",
+   "en": "Julian Strawther",
+   "he": "ג'וליאן סטרות'ר",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "G",
+   "surname": "סטרות'ר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105592",
+   "en": "Cam Whitmore",
+   "he": "קאם וויטמור",
+   "status": "draft",
+   "team": "DEN",
+   "pos": "F",
+   "surname": "וויטמור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3908845",
+   "en": "John Collins",
+   "he": "ג'ון קולינס",
+   "status": "sport5",
+   "team": "DET",
+   "pos": "F",
+   "surname": "קולינס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4432166",
+   "en": "Cade Cunningham",
+   "he": "קייד קנינגהאם",
+   "status": "sport5",
+   "team": "DET",
+   "pos": "G",
+   "surname": "קנינגהאם",
+   "evidence": {
+    "sport5": 7
+   },
+   "approved": false
+  },
+  {
+   "id": "4433621",
+   "en": "Jalen Duren",
+   "he": "ג'יילן דורן",
+   "status": "sport5",
+   "team": "DET",
+   "pos": "C",
+   "surname": "דורן",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "2596112",
+   "en": "Javonte Green",
+   "he": "ג'בונטה גרין",
+   "status": "sport5",
+   "team": "DET",
+   "pos": "G",
+   "surname": "גרין",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4397449",
+   "en": "Elijah Harkless",
+   "he": "אלייג'ה הרקלס",
+   "status": "draft",
+   "team": "DET",
+   "pos": "G",
+   "surname": "הרקלס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683771",
+   "en": "Ronald Holland II",
+   "he": "רונלד הולנד השני",
+   "status": "draft",
+   "team": "DET",
+   "pos": "F",
+   "surname": "הולנד השני",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066372",
+   "en": "Kevin Huerter",
+   "he": "קווין הרטר",
+   "status": "draft",
+   "team": "DET",
+   "pos": "G",
+   "surname": "הרטר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5107199",
+   "en": "Daniss Jenkins",
+   "he": "דניס ג'נקינס",
+   "status": "sport5",
+   "team": "DET",
+   "pos": "G",
+   "surname": "ג'נקינס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4395702",
+   "en": "Isaiah Joe",
+   "he": "אייזאה ג'ו",
+   "status": "draft",
+   "team": "DET",
+   "pos": "G",
+   "surname": "ג'ו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5107818",
+   "en": "Isaac Jones",
+   "he": "אייזק ג'ונס",
+   "status": "draft",
+   "team": "DET",
+   "pos": "C",
+   "surname": "ג'ונס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4700852",
+   "en": "Chaz Lanier",
+   "he": "צ'אז לנייר",
+   "status": "draft",
+   "team": "DET",
+   "pos": "G",
+   "surname": "לנייר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5258459",
+   "en": "Ebuka Okorie",
+   "he": "אבוקה אוקוריה",
+   "status": "draft",
+   "team": "DET",
+   "pos": "G",
+   "surname": "אוקוריה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5037878",
+   "en": "Ugonna Onyenso",
+   "he": "אוגונה אוניינסו",
+   "status": "draft",
+   "team": "DET",
+   "pos": "C",
+   "surname": "אוניינסו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2990962",
+   "en": "Taurean Prince",
+   "he": "טוריאן פרינס",
+   "status": "draft",
+   "team": "DET",
+   "pos": "F",
+   "surname": "פרינס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4278562",
+   "en": "Paul Reed",
+   "he": "פול ריד",
+   "status": "sport5",
+   "team": "DET",
+   "pos": "F",
+   "surname": "ריד",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "3157465",
+   "en": "Duncan Robinson",
+   "he": "דאנקן רובינסון",
+   "status": "sport5",
+   "team": "DET",
+   "pos": "F",
+   "surname": "רובינסון",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4397882",
+   "en": "Tolu Smith",
+   "he": "טולו סמית'",
+   "status": "draft",
+   "team": "DET",
+   "pos": "F",
+   "surname": "סמית'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4684742",
+   "en": "Ausar Thompson",
+   "he": "אוסר תומפסון",
+   "status": "draft",
+   "team": "DET",
+   "pos": "G",
+   "surname": "תומפסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397886",
+   "en": "Charles Bassey",
+   "he": "צ'ארלס באסי",
+   "status": "draft",
+   "team": "GS",
+   "pos": "C",
+   "surname": "באסי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "6430",
+   "en": "Jimmy Butler III",
+   "he": "ג'ימי באטלר",
+   "status": "sport5",
+   "team": "GS",
+   "pos": "F",
+   "surname": "באטלר",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4433149",
+   "en": "LJ Cryer",
+   "he": "אל ג'יי קרייר",
+   "status": "draft",
+   "team": "GS",
+   "pos": "G",
+   "surname": "ג'יי קרייר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3975",
+   "en": "Stephen Curry",
+   "he": "סטף קרי",
+   "status": "sport5",
+   "team": "GS",
+   "pos": "G",
+   "surname": "קרי",
+   "evidence": {
+    "sport5": 11
+   },
+   "approved": false
+  },
+  {
+   "id": "6589",
+   "en": "Draymond Green",
+   "he": "דריימונד גרין",
+   "status": "sport5",
+   "team": "GS",
+   "pos": "F",
+   "surname": "גרין",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "3213",
+   "en": "Al Horford",
+   "he": "אל הורפורד",
+   "status": "draft",
+   "team": "GS",
+   "pos": "C",
+   "surname": "הורפורד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4703396",
+   "en": "Graham Ike",
+   "he": "גרהאם אייק",
+   "status": "draft",
+   "team": "GS",
+   "pos": "F",
+   "surname": "אייק",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5175737",
+   "en": "Yaxel Lendeborg",
+   "he": "יקסל לנדבורג",
+   "status": "sport5",
+   "team": "GS",
+   "pos": "F",
+   "surname": "לנדבורג",
+   "evidence": {
+    "sport5": 8
+   },
+   "approved": false
+  },
+  {
+   "id": "4897449",
+   "en": "Malevy Leons",
+   "he": "מלווי ליאונס",
+   "status": "draft",
+   "team": "GS",
+   "pos": "F",
+   "surname": "ליאונס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066436",
+   "en": "De'Anthony Melton",
+   "he": "דיאנטוני מלטון",
+   "status": "aligned",
+   "team": "GS",
+   "pos": "G",
+   "surname": "מלטון",
+   "evidence": {
+    "sport5": 1,
+    "draft": "דיאנתוני מלטון",
+    "draftHits": 0,
+    "sim": 0.92
+   },
+   "approved": false
+  },
+  {
+   "id": "4432171",
+   "en": "Moses Moody",
+   "he": "מוזס מודי",
+   "status": "draft",
+   "team": "GS",
+   "pos": "G",
+   "surname": "מודי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2990969",
+   "en": "Georges Niang",
+   "he": "ז'ורז' ניאנג",
+   "status": "draft",
+   "team": "GS",
+   "pos": "F",
+   "surname": "ניאנג",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3134903",
+   "en": "Gary Payton II",
+   "he": "גארי פייטון השני",
+   "status": "draft",
+   "team": "GS",
+   "pos": "G",
+   "surname": "פייטון השני",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4709138",
+   "en": "Brandin Podziemski",
+   "he": "ברנדין פודז'מסקי",
+   "status": "sport5",
+   "team": "GS",
+   "pos": "G",
+   "surname": "פודז'מסקי",
+   "evidence": {
+    "sport5": 4
+   },
+   "approved": false
+  },
+  {
+   "id": "3102531",
+   "en": "Kristaps Porzingis",
+   "he": "קריסטפס פורזינגיס",
+   "status": "draft",
+   "team": "GS",
+   "pos": "C",
+   "surname": "פורזינגיס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4897262",
+   "en": "Will Richard",
+   "he": "וויל ריצ'רד",
+   "status": "sport5",
+   "team": "GS",
+   "pos": "G",
+   "surname": "ריצ'רד",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4997536",
+   "en": "Gui Santos",
+   "he": "גי סנטוס",
+   "status": "draft",
+   "team": "GS",
+   "pos": "F",
+   "surname": "סנטוס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397040",
+   "en": "Brandon Williams",
+   "he": "ברנדון וויליאמס",
+   "status": "draft",
+   "team": "GS",
+   "pos": "G",
+   "surname": "וויליאמס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2991235",
+   "en": "Steven Adams",
+   "he": "סטיבן אדמס",
+   "status": "draft",
+   "team": "HOU",
+   "pos": "C",
+   "surname": "אדמס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3037789",
+   "en": "Bogdan Bogdanovic",
+   "he": "בוגדן בוגדנוביץ'",
+   "status": "sport5",
+   "team": "HOU",
+   "pos": "G",
+   "surname": "בוגדנוביץ'",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "3102529",
+   "en": "Clint Capela",
+   "he": "קלינט קאפלה",
+   "status": "draft",
+   "team": "HOU",
+   "pos": "C",
+   "surname": "קאפלה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683860",
+   "en": "Quadir Copeland",
+   "he": "קאדיר קופלנד",
+   "status": "draft",
+   "team": "HOU",
+   "pos": "G",
+   "surname": "קופלנד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4592857",
+   "en": "Isaiah Crawford",
+   "he": "אייזאה קרופורד",
+   "status": "draft",
+   "team": "HOU",
+   "pos": "F",
+   "surname": "קרופורד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3202",
+   "en": "Kevin Durant",
+   "he": "קווין דוראנט",
+   "status": "sport5",
+   "team": "HOU",
+   "pos": "F",
+   "surname": "דוראנט",
+   "evidence": {
+    "sport5": 9
+   },
+   "approved": false
+  },
+  {
+   "id": "4433192",
+   "en": "Tari Eason",
+   "he": "טארי איסון",
+   "status": "sport5",
+   "team": "HOU",
+   "pos": "F",
+   "surname": "איסון",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "5105553",
+   "en": "Julian Phillips",
+   "he": "ג'וליאן פיליפס",
+   "status": "draft",
+   "team": "HOU",
+   "pos": "F",
+   "surname": "פיליפס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4871144",
+   "en": "Alperen Sengun",
+   "he": "אלפרן שנגון",
+   "status": "sport5",
+   "team": "HOU",
+   "pos": "C",
+   "surname": "שנגון",
+   "evidence": {
+    "sport5": 8
+   },
+   "approved": false
+  },
+  {
+   "id": "4711272",
+   "en": "Reed Sheppard",
+   "he": "ריד שפרד",
+   "status": "sport5",
+   "team": "HOU",
+   "pos": "G",
+   "surname": "שפרד",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "2990992",
+   "en": "Marcus Smart",
+   "he": "מרכוס סמארט",
+   "status": "aligned",
+   "team": "HOU",
+   "pos": "G",
+   "surname": "סמארט",
+   "evidence": {
+    "sport5": 1,
+    "draft": "מרקוס סמארט",
+    "draftHits": 0,
+    "sim": 0.9
+   },
+   "approved": false
+  },
+  {
+   "id": "4432639",
+   "en": "Jabari Smith Jr.",
+   "he": "ג'בארי סמית' ג'וניור",
+   "status": "aligned",
+   "team": "HOU",
+   "pos": "F",
+   "surname": "סמית' ג'וניור",
+   "evidence": {
+    "sport5": 4,
+    "draft": "ג'אברי סמית' ג'וניור",
+    "draftHits": 0,
+    "sim": 0.87
+   },
+   "approved": false
+  },
+  {
+   "id": "3136777",
+   "en": "Jae'Sean Tate",
+   "he": "ג'ישון טייט",
+   "status": "draft",
+   "team": "HOU",
+   "pos": "F",
+   "surname": "טייט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4684740",
+   "en": "Amen Thompson",
+   "he": "אמן תומפסון",
+   "status": "sport5",
+   "team": "HOU",
+   "pos": "G",
+   "surname": "תומפסון",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "5105837",
+   "en": "Bruce Thornton",
+   "he": "ברוס ת'ורנטון",
+   "status": "draft",
+   "team": "HOU",
+   "pos": "G",
+   "surname": "ת'ורנטון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432827",
+   "en": "Oscar Tshiebwe",
+   "he": "אוסקר צ'יבווה",
+   "status": "draft",
+   "team": "HOU",
+   "pos": "C",
+   "surname": "צ'יבווה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2991230",
+   "en": "Fred VanVleet",
+   "he": "פרד ואן וליט",
+   "status": "sport5",
+   "team": "HOU",
+   "pos": "G",
+   "surname": "ואן וליט",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4431752",
+   "en": "Kobe Brown",
+   "he": "קובי בראון",
+   "status": "draft",
+   "team": "IND",
+   "pos": "G",
+   "surname": "בראון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5157066",
+   "en": "Johnny Furphy",
+   "he": "ג'וני פרפי",
+   "status": "draft",
+   "team": "IND",
+   "pos": "G",
+   "surname": "פרפי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4396993",
+   "en": "Tyrese Haliburton",
+   "he": "טייריס הליברטון",
+   "status": "sport5",
+   "team": "IND",
+   "pos": "G",
+   "surname": "הליברטון",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "4065731",
+   "en": "Jay Huff",
+   "he": "ג'יי האף",
+   "status": "draft",
+   "team": "IND",
+   "pos": "C",
+   "surname": "האף",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4592829",
+   "en": "Quenton Jackson",
+   "he": "קוונטון ג'קסון",
+   "status": "sport5",
+   "team": "IND",
+   "pos": "G",
+   "surname": "ג'קסון",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "2530530",
+   "en": "T.J. McConnell",
+   "he": "טי ג'יי מקונל",
+   "status": "draft",
+   "team": "IND",
+   "pos": "G",
+   "surname": "ג'יי מקונל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2580365",
+   "en": "Larry Nance Jr.",
+   "he": "לארי ננס ג'וניור",
+   "status": "draft",
+   "team": "IND",
+   "pos": "F",
+   "surname": "ננס ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4395712",
+   "en": "Andrew Nembhard",
+   "he": "אנדרו נימהרד",
+   "status": "aligned",
+   "team": "IND",
+   "pos": "G",
+   "surname": "נימהרד",
+   "evidence": {
+    "sport5": 2,
+    "draft": "אנדרו נמהרד",
+    "draftHits": 0,
+    "sim": 0.91
+   },
+   "approved": false
+  },
+  {
+   "id": "4396909",
+   "en": "Aaron Nesmith",
+   "he": "ארון ניסמית'",
+   "status": "aligned",
+   "team": "IND",
+   "pos": "G",
+   "surname": "ניסמית'",
+   "evidence": {
+    "sport5": 1,
+    "draft": "ארון נסמית'",
+    "draftHits": 0,
+    "sim": 0.9
+   },
+   "approved": false
+  },
+  {
+   "id": "3133603",
+   "en": "Kelly Oubre Jr.",
+   "he": "קלי אובר ג'וניור",
+   "status": "draft",
+   "team": "IND",
+   "pos": "G",
+   "surname": "אובר ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433076",
+   "en": "Ben Sheppard",
+   "he": "בן שפרד",
+   "status": "draft",
+   "team": "IND",
+   "pos": "G",
+   "surname": "שפרד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3149673",
+   "en": "Pascal Siakam",
+   "he": "פסקל סיאקם",
+   "status": "sport5",
+   "team": "IND",
+   "pos": "F",
+   "surname": "סיאקם",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4398207",
+   "en": "Jalen Slawson",
+   "he": "ג'יילן סלוסון",
+   "status": "draft",
+   "team": "IND",
+   "pos": "F",
+   "surname": "סלוסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105854",
+   "en": "Braden Smith",
+   "he": "בריידן סמית'",
+   "status": "draft",
+   "team": "IND",
+   "pos": "G",
+   "surname": "סמית'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4278355",
+   "en": "Obi Toppin",
+   "he": "אובי טופין",
+   "status": "sport5",
+   "team": "IND",
+   "pos": "F",
+   "surname": "טופין",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5106060",
+   "en": "Jarace Walker",
+   "he": "ג'ארייס ווקר",
+   "status": "draft",
+   "team": "IND",
+   "pos": "F",
+   "surname": "ווקר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4017837",
+   "en": "Ivica Zubac",
+   "he": "איביצה זובאץ",
+   "status": "sport5",
+   "team": "IND",
+   "pos": "C",
+   "surname": "זובאץ",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "6580",
+   "en": "Bradley Beal",
+   "he": "ברדלי ביל",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "ביל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4845363",
+   "en": "Cam Christie",
+   "he": "קאם כריסטי",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "כריסטי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5106258",
+   "en": "Gradey Dick",
+   "he": "גריידי דיק",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "דיק",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2991139",
+   "en": "Kris Dunn",
+   "he": "קריס דאן",
+   "status": "sport5",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "דאן",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4396907",
+   "en": "Darius Garland",
+   "he": "דריוס גרלנד",
+   "status": "sport5",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "גרלנד",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4066648",
+   "en": "Rui Hachimura",
+   "he": "רוי האצ'ימורה",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "F",
+   "surname": "האצ'ימורה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3913176",
+   "en": "Brandon Ingram",
+   "he": "ברנדון אינגרם",
+   "status": "sport5",
+   "team": "LAC",
+   "pos": "F",
+   "surname": "אינגרם",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4432170",
+   "en": "Isaiah Jackson",
+   "he": "אייזאה ג'קסון",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "F",
+   "surname": "ג'קסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3936099",
+   "en": "Derrick Jones Jr.",
+   "he": "דריק ג'ונס ג'וניור",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "F",
+   "surname": "ג'ונס ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3448",
+   "en": "Brook Lopez",
+   "he": "ברוק לופז",
+   "status": "aligned",
+   "team": "LAC",
+   "pos": "C",
+   "surname": "לופז",
+   "evidence": {
+    "sport5": 2,
+    "draft": "ברוק לופס",
+    "draftHits": 0,
+    "sim": 0.88
+   },
+   "approved": false
+  },
+  {
+   "id": "5105832",
+   "en": "Nick Martinelli",
+   "he": "ניק מרטינלי",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "F",
+   "surname": "מרטינלי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5075626",
+   "en": "Baba Miller",
+   "he": "באבא מילר",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "F",
+   "surname": "מילר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4396818",
+   "en": "Jordan Miller",
+   "he": "ג'ורדן מילר",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "מילר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5108024",
+   "en": "Yanic Konan Niederhauser",
+   "he": "יאניק קונאן נידרהאוזר",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "C",
+   "surname": "קונאן נידרהאוזר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4398390",
+   "en": "Jalen Pickett",
+   "he": "ג'יילן פיקט",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "פיקט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4702352",
+   "en": "Kobe Sanders",
+   "he": "קובי סנדרס",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "סנדרס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4065778",
+   "en": "Max Strus",
+   "he": "מקס סטרוס",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "סטרוס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5254165",
+   "en": "Keaton Wagler",
+   "he": "קייטון ווגלר",
+   "status": "aligned",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "ווגלר",
+   "evidence": {
+    "sport5": 1,
+    "draft": "קיטון וואגלר",
+    "draftHits": 0,
+    "sim": 0.82
+   },
+   "approved": false
+  },
+  {
+   "id": "4683935",
+   "en": "Blake Wesley",
+   "he": "בלייק וסלי",
+   "status": "draft",
+   "team": "LAC",
+   "pos": "G",
+   "surname": "וסלי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5113969",
+   "en": "Cameron Carr",
+   "he": "קמרון קאר",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "G",
+   "surname": "קאר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3945274",
+   "en": "Luka Doncic",
+   "he": "לוקה דונצ'יץ'",
+   "status": "sport5",
+   "team": "LAL",
+   "pos": "G",
+   "surname": "דונצ'יץ'",
+   "evidence": {
+    "sport5": 14
+   },
+   "approved": false
+  },
+  {
+   "id": "4397014",
+   "en": "Quentin Grimes",
+   "he": "קוונטין גריימס",
+   "status": "sport5",
+   "team": "LAL",
+   "pos": "G",
+   "surname": "גריימס",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4868423",
+   "en": "Jaden Hardy",
+   "he": "ג'יידן הארדי",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "G",
+   "surname": "הארדי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683774",
+   "en": "Bronny James",
+   "he": "ברוני ג'יימס",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "G",
+   "surname": "ג'יימס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433599",
+   "en": "Arthur Kaluma",
+   "he": "ארתור קאלומה",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "F",
+   "surname": "קאלומה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433136",
+   "en": "Walker Kessler",
+   "he": "ווקר קסלר",
+   "status": "sport5",
+   "team": "LAL",
+   "pos": "C",
+   "surname": "קסלר",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4592691",
+   "en": "Jake LaRavia",
+   "he": "ג'ייק לרביה",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "F",
+   "surname": "לרביה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3155535",
+   "en": "Kevon Looney",
+   "he": "קבון לוני",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "F",
+   "surname": "לוני",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4596528",
+   "en": "Lawson Lovering",
+   "he": "לוסון לאברינג",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "C",
+   "surname": "לאברינג",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4278580",
+   "en": "Sandro Mamukelashvili",
+   "he": "סנדרו ממוקלשווילי",
+   "status": "sport5",
+   "team": "LAL",
+   "pos": "F",
+   "surname": "ממוקלשווילי",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4702972",
+   "en": "Chris Manon",
+   "he": "כריס מנון",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "G",
+   "surname": "מנון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5114350",
+   "en": "AK Okereke",
+   "he": "איי קיי אוקרקה",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "F",
+   "surname": "קיי אוקרקה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066457",
+   "en": "Austin Reaves",
+   "he": "אוסטין ריבס",
+   "status": "sport5",
+   "team": "LAL",
+   "pos": "G",
+   "surname": "ריבס",
+   "evidence": {
+    "sport5": 9
+   },
+   "approved": false
+  },
+  {
+   "id": "4277811",
+   "en": "Collin Sexton",
+   "he": "קולין סקסטון",
+   "status": "sport5",
+   "team": "LAL",
+   "pos": "G",
+   "surname": "סקסטון",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "5060631",
+   "en": "Adou Thiero",
+   "he": "אדו טיירו",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "F",
+   "surname": "טיירו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3907498",
+   "en": "Matisse Thybulle",
+   "he": "מאתיס טייבול",
+   "status": "aligned",
+   "team": "LAL",
+   "pos": "G",
+   "surname": "טייבול",
+   "evidence": {
+    "sport5": 1,
+    "draft": "מאטיס תיבול",
+    "draftHits": 0,
+    "sim": 0.73
+   },
+   "approved": false
+  },
+  {
+   "id": "4278077",
+   "en": "Jarred Vanderbilt",
+   "he": "ג'ארד ונדרבילט",
+   "status": "draft",
+   "team": "LAL",
+   "pos": "F",
+   "surname": "ונדרבילט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433137",
+   "en": "Ziaire Williams",
+   "he": "זאיר וויליאמס",
+   "status": "sport5",
+   "team": "LAL",
+   "pos": "F",
+   "surname": "וויליאמס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "5041935",
+   "en": "Cameron Boozer",
+   "he": "קאם בוזר",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "F",
+   "surname": "בוזר",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "5105817",
+   "en": "Carson Cooper",
+   "he": "קרסון קופר",
+   "status": "draft",
+   "team": "MEM",
+   "pos": "C",
+   "surname": "קופר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4903027",
+   "en": "Cedric Coward",
+   "he": "סדריק קווארד",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "F",
+   "surname": "קווארד",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4600663",
+   "en": "Zach Edey",
+   "he": "זאק אידי",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "C",
+   "surname": "אידי",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "2991070",
+   "en": "Jerami Grant",
+   "he": "ג'רמי גרנט",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "F",
+   "surname": "גרנט",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4684806",
+   "en": "Taylor Hendricks",
+   "he": "טיילור הנדריקס",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "F",
+   "surname": "הנדריקס",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5105550",
+   "en": "GG Jackson",
+   "he": "ג'י ג'י ג'קסון",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "F",
+   "surname": "ג'י ג'קסון",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4065733",
+   "en": "Ty Jerome",
+   "he": "טיי ג'רום",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "G",
+   "surname": "ג'רום",
+   "evidence": {
+    "sport5": 6
+   },
+   "approved": false
+  },
+  {
+   "id": "5231919",
+   "en": "Karim Lopez",
+   "he": "קרים לופס",
+   "status": "draft",
+   "team": "MEM",
+   "pos": "F",
+   "surname": "לופס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683934",
+   "en": "Jahmai Mashack",
+   "he": "ג'מאי מאשאק",
+   "status": "draft",
+   "team": "MEM",
+   "pos": "G",
+   "surname": "מאשאק",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4594326",
+   "en": "Kris Murray",
+   "he": "קריס מארי",
+   "status": "draft",
+   "team": "MEM",
+   "pos": "F",
+   "surname": "מארי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431785",
+   "en": "Scotty Pippen Jr.",
+   "he": "סקוטי פיפן ג'וניור",
+   "status": "draft",
+   "team": "MEM",
+   "pos": "G",
+   "surname": "פיפן ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4593016",
+   "en": "Quinten Post",
+   "he": "קווינטן פוסט",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "C",
+   "surname": "פוסט",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4595400",
+   "en": "Olivier-Maxence Prosper",
+   "he": "אוליבייה-מקסנס פרוספר",
+   "status": "draft",
+   "team": "MEM",
+   "pos": "F",
+   "surname": "פרוספר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4781746",
+   "en": "Javon Small",
+   "he": "ג'בון סמול",
+   "status": "draft",
+   "team": "MEM",
+   "pos": "G",
+   "surname": "סמול",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433083",
+   "en": "Cam Spencer",
+   "he": "קאם ספנסר",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "G",
+   "surname": "ספנסר",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4432810",
+   "en": "Isaiah Stewart",
+   "he": "אייזאה סטיוארט",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "C",
+   "surname": "סטיוארט",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "5112087",
+   "en": "Jaylen Wells",
+   "he": "ג'יילן וולס",
+   "status": "sport5",
+   "team": "MEM",
+   "pos": "F",
+   "surname": "וולס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4066261",
+   "en": "Bam Adebayo",
+   "he": "באם אדבאיו",
+   "status": "sport5",
+   "team": "MIA",
+   "pos": "C",
+   "surname": "אדבאיו",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "3032977",
+   "en": "Giannis Antetokounmpo",
+   "he": "יאניס אנטטוקומפו",
+   "status": "sport5",
+   "team": "MIA",
+   "pos": "F",
+   "surname": "אנטטוקומפו",
+   "evidence": {
+    "sport5": 7
+   },
+   "approved": false
+  },
+  {
+   "id": "5107157",
+   "en": "Ryan Conwell",
+   "he": "ראיין קונוול",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "G",
+   "surname": "קונוול",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4837356",
+   "en": "Tre Donaldson",
+   "he": "טרה דונלדסון",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "G",
+   "surname": "דונלדסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3899664",
+   "en": "Simone Fontecchio",
+   "he": "סימונה פונטקיו",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "F",
+   "surname": "פונטקיו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431772",
+   "en": "Myron Gardner",
+   "he": "מיירון גרדנר",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "F",
+   "surname": "גרדנר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4700818",
+   "en": "Vladislav Goldin",
+   "he": "ולדיסלב גולדין",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "C",
+   "surname": "גולדין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2528210",
+   "en": "Tim Hardaway Jr.",
+   "he": "טים הארדוויי ג'וניור",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "G",
+   "surname": "הארדוויי ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431786",
+   "en": "Keshad Johnson",
+   "he": "קשאד ג'ונסון",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "F",
+   "surname": "ג'ונסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4997528",
+   "en": "Nikola Jovic",
+   "he": "ניקולה יוביץ'",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "F",
+   "surname": "יוביץ'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4601025",
+   "en": "Pelle Larsson",
+   "he": "פלה לארסון",
+   "status": "aligned",
+   "team": "MIA",
+   "pos": "G",
+   "surname": "לארסון",
+   "evidence": {
+    "sport5": 2,
+    "draft": "פלה לרסון",
+    "draftHits": 0,
+    "sim": 0.89
+   },
+   "approved": false
+  },
+  {
+   "id": "4278053",
+   "en": "Davion Mitchell",
+   "he": "דביון מיצ'ל",
+   "status": "sport5",
+   "team": "MIA",
+   "pos": "G",
+   "surname": "מיצ'ל",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "3064482",
+   "en": "Bobby Portis",
+   "he": "בובי פורטיס",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "F",
+   "surname": "פורטיס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4278076",
+   "en": "Nick Richards",
+   "he": "ניק ריצ'רדס",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "C",
+   "surname": "ריצ'רדס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066993",
+   "en": "Dru Smith",
+   "he": "דרו סמית'",
+   "status": "draft",
+   "team": "MIA",
+   "pos": "G",
+   "surname": "סמית'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "6475",
+   "en": "Klay Thompson",
+   "he": "קליי תומפסון",
+   "status": "sport5",
+   "team": "MIA",
+   "pos": "G",
+   "surname": "תומפסון",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "3059319",
+   "en": "Andrew Wiggins",
+   "he": "אנדרו וויגינס",
+   "status": "sport5",
+   "team": "MIA",
+   "pos": "F",
+   "surname": "וויגינס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "5164559",
+   "en": "Nate Ament",
+   "he": "נייט אמנט",
+   "status": "sport5",
+   "team": "MIL",
+   "pos": "F",
+   "surname": "אמנט",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5082206",
+   "en": "Brayden Burries",
+   "he": "בריידן בריס",
+   "status": "draft",
+   "team": "MIL",
+   "pos": "G",
+   "surname": "בריס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4997526",
+   "en": "Ousmane Dieng",
+   "he": "אוסמן דיינג",
+   "status": "draft",
+   "team": "MIL",
+   "pos": "F",
+   "surname": "דיינג",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397475",
+   "en": "AJ Green",
+   "he": "איי ג'יי גרין",
+   "status": "draft",
+   "team": "MIL",
+   "pos": "G",
+   "surname": "ג'יי גרין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4395725",
+   "en": "Tyler Herro",
+   "he": "טיילר הירו",
+   "status": "sport5",
+   "team": "MIL",
+   "pos": "G",
+   "surname": "הירו",
+   "evidence": {
+    "sport5": 4
+   },
+   "approved": false
+  },
+  {
+   "id": "5214640",
+   "en": "Kasparas Jakucionis",
+   "he": "קספראס יאקוצ'יוניס",
+   "status": "aligned",
+   "team": "MIL",
+   "pos": "G",
+   "surname": "יאקוצ'יוניס",
+   "evidence": {
+    "sport5": 1,
+    "draft": "קספרס יאקוצ'יוניס",
+    "draftHits": 0,
+    "sim": 0.94
+   },
+   "approved": false
+  },
+  {
+   "id": "4432848",
+   "en": "Jaime Jaquez Jr.",
+   "he": "חאימה חאקז ג'וניור",
+   "status": "aligned",
+   "team": "MIL",
+   "pos": "F",
+   "surname": "חאקז ג'וניור",
+   "evidence": {
+    "sport5": 1,
+    "draft": "חיימה חאקז ג'וניור",
+    "draftHits": 0,
+    "sim": 0.93
+   },
+   "approved": false
+  },
+  {
+   "id": "4697268",
+   "en": "Kam Jones",
+   "he": "קאם ג'ונס",
+   "status": "draft",
+   "team": "MIL",
+   "pos": "G",
+   "surname": "ג'ונס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3134907",
+   "en": "Kyle Kuzma",
+   "he": "קייל קוזמה",
+   "status": "sport5",
+   "team": "MIL",
+   "pos": "F",
+   "surname": "קוזמה",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "2991043",
+   "en": "Caris LeVert",
+   "he": "קאריס לברט",
+   "status": "draft",
+   "team": "MIL",
+   "pos": "G",
+   "surname": "לברט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5214989",
+   "en": "Bogoljub Markovic",
+   "he": "בוגוליוב מרקוביץ'",
+   "status": "draft",
+   "team": "MIL",
+   "pos": "F",
+   "surname": "מרקוביץ'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397233",
+   "en": "Pete Nance",
+   "he": "פיט ננס",
+   "status": "draft",
+   "team": "MIL",
+   "pos": "F",
+   "surname": "ננס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4591725",
+   "en": "Ryan Rollins",
+   "he": "ראיין רולינס",
+   "status": "sport5",
+   "team": "MIL",
+   "pos": "G",
+   "surname": "רולינס",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4397114",
+   "en": "Cormac Ryan",
+   "he": "קורמק ראיין",
+   "status": "draft",
+   "team": "MIL",
+   "pos": "G",
+   "surname": "ראיין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4277922",
+   "en": "Jericho Sims",
+   "he": "ג'ריקו סימס",
+   "status": "draft",
+   "team": "MIL",
+   "pos": "C",
+   "surname": "סימס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4277843",
+   "en": "Gary Trent Jr.",
+   "he": "גארי טרנט ג'וניור",
+   "status": "draft",
+   "team": "MIL",
+   "pos": "G",
+   "surname": "טרנט ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3133628",
+   "en": "Myles Turner",
+   "he": "מיילס טרנר",
+   "status": "sport5",
+   "team": "MIL",
+   "pos": "C",
+   "surname": "טרנר",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5105623",
+   "en": "Kel'el Ware",
+   "he": "קאל'אל וור",
+   "status": "aligned",
+   "team": "MIL",
+   "pos": "C",
+   "surname": "וור",
+   "evidence": {
+    "sport5": 1,
+    "draft": "קלאל וור",
+    "draftHits": 0,
+    "sim": 0.88
+   },
+   "approved": false
+  },
+  {
+   "id": "4432816",
+   "en": "LaMelo Ball",
+   "he": "לאמלו בול",
+   "status": "sport5",
+   "team": "MIN",
+   "pos": "G",
+   "surname": "בול",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "5279133",
+   "en": "Joan Beringer",
+   "he": "ז'ואן ברינז'ה",
+   "status": "draft",
+   "team": "MIN",
+   "pos": "F",
+   "surname": "ברינז'ה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432247",
+   "en": "Jaylen Clark",
+   "he": "ג'יילן קלארק",
+   "status": "draft",
+   "team": "MIN",
+   "pos": "G",
+   "surname": "קלארק",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3934673",
+   "en": "Donte DiVincenzo",
+   "he": "דונטה דיווינצ'נזו",
+   "status": "draft",
+   "team": "MIN",
+   "pos": "G",
+   "surname": "דיווינצ'נזו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397002",
+   "en": "Ayo Dosunmu",
+   "he": "איו דוסומו",
+   "status": "sport5",
+   "team": "MIN",
+   "pos": "G",
+   "surname": "דוסומו",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4594268",
+   "en": "Anthony Edwards",
+   "he": "אנתוני אדוורדס",
+   "status": "aligned",
+   "team": "MIN",
+   "pos": "G",
+   "surname": "אדוורדס",
+   "evidence": {
+    "sport5": 5,
+    "draft": "אנתוני אדוארדס",
+    "draftHits": 2,
+    "sim": 0.92
+   },
+   "approved": false
+  },
+  {
+   "id": "5061585",
+   "en": "Isaiah Evans",
+   "he": "אייזאה אוונס",
+   "status": "draft",
+   "team": "MIN",
+   "pos": "F",
+   "surname": "אוונס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4592699",
+   "en": "Enrique Freeman",
+   "he": "אנריקה פרימן",
+   "status": "draft",
+   "team": "MIN",
+   "pos": "F",
+   "surname": "פרימן",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3032976",
+   "en": "Rudy Gobert",
+   "he": "רודי גובר",
+   "status": "sport5",
+   "team": "MIN",
+   "pos": "C",
+   "surname": "גובר",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4592492",
+   "en": "Bones Hyland",
+   "he": "בונז היילנד",
+   "status": "sport5",
+   "team": "MIN",
+   "pos": "G",
+   "surname": "היילנד",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4433247",
+   "en": "Jonathan Kuminga",
+   "he": "ג'ונתן קומינגה",
+   "status": "sport5",
+   "team": "MIN",
+   "pos": "F",
+   "surname": "קומינגה",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "3136196",
+   "en": "Trey Lyles",
+   "he": "טריי ליילס",
+   "status": "draft",
+   "team": "MIN",
+   "pos": "F",
+   "surname": "ליילס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431671",
+   "en": "Jaden McDaniels",
+   "he": "ג'יידן מקדניאלס",
+   "status": "sport5",
+   "team": "MIN",
+   "pos": "F",
+   "surname": "מקדניאלס",
+   "evidence": {
+    "sport5": 4
+   },
+   "approved": false
+  },
+  {
+   "id": "4592979",
+   "en": "Zyon Pullin",
+   "he": "זאיון פולין",
+   "status": "draft",
+   "team": "MIN",
+   "pos": "G",
+   "surname": "פולין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432847",
+   "en": "Terrence Shannon Jr.",
+   "he": "טרנס שאנון ג'וניור",
+   "status": "sport5",
+   "team": "MIN",
+   "pos": "G",
+   "surname": "שאנון ג'וניור",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4895758",
+   "en": "Cody Williams",
+   "he": "קודי וויליאמס",
+   "status": "sport5",
+   "team": "MIN",
+   "pos": "F",
+   "surname": "וויליאמס",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "5157587",
+   "en": "Rocco Zikarsky",
+   "he": "רוקו זיקרסקי",
+   "status": "draft",
+   "team": "MIN",
+   "pos": "C",
+   "surname": "זיקרסקי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397136",
+   "en": "Saddiq Bey",
+   "he": "סדיק ביי",
+   "status": "aligned",
+   "team": "NO",
+   "pos": "F",
+   "surname": "ביי",
+   "evidence": {
+    "sport5": 1,
+    "draft": "סאדיק ביי",
+    "draftHits": 0,
+    "sim": 0.88
+   },
+   "approved": false
+  },
+  {
+   "id": "4712862",
+   "en": "Malik Dia",
+   "he": "מאליק דיה",
+   "status": "draft",
+   "team": "NO",
+   "pos": "F",
+   "surname": "דיה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5144091",
+   "en": "Jeremiah Fears",
+   "he": "ג'רמייה פירז",
+   "status": "aligned",
+   "team": "NO",
+   "pos": "G",
+   "surname": "פירז",
+   "evidence": {
+    "sport5": 1,
+    "draft": "ג'רמיה פירס",
+    "draftHits": 0,
+    "sim": 0.8
+   },
+   "approved": false
+  },
+  {
+   "id": "5170947",
+   "en": "AJ Johnson",
+   "he": "איי ג'יי ג'ונסון",
+   "status": "draft",
+   "team": "NO",
+   "pos": "G",
+   "surname": "ג'יי ג'ונסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4277813",
+   "en": "Herbert Jones",
+   "he": "הרברט ג'ונס",
+   "status": "draft",
+   "team": "NO",
+   "pos": "F",
+   "surname": "ג'ונס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3442",
+   "en": "DeAndre Jordan",
+   "he": "דיאנדרה ג'ורדן",
+   "status": "draft",
+   "team": "NO",
+   "pos": "C",
+   "surname": "ג'ורדן",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683634",
+   "en": "Bennedict Mathurin",
+   "he": "בנדיקט מת'ורין",
+   "status": "draft",
+   "team": "NO",
+   "pos": "G",
+   "surname": "מת'ורין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4997538",
+   "en": "Karlo Matkovic",
+   "he": "קרלו מטקוביץ'",
+   "status": "draft",
+   "team": "NO",
+   "pos": "F",
+   "surname": "מטקוביץ'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4576086",
+   "en": "Bryce McGowens",
+   "he": "בראייס מקגואנס",
+   "status": "draft",
+   "team": "NO",
+   "pos": "G",
+   "surname": "מקגואנס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5061589",
+   "en": "Yves Missi",
+   "he": "איב מיסי",
+   "status": "draft",
+   "team": "NO",
+   "pos": "C",
+   "surname": "מיסי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397688",
+   "en": "Trey Murphy III",
+   "he": "טריי מרפי השלישי",
+   "status": "draft",
+   "team": "NO",
+   "pos": "F",
+   "surname": "מרפי השלישי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3907497",
+   "en": "Dejounte Murray",
+   "he": "דז'ונטה מארי",
+   "status": "sport5",
+   "team": "NO",
+   "pos": "G",
+   "surname": "מארי",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4703115",
+   "en": "Jaron Pierre Jr.",
+   "he": "ג'רון פייר ג'וניור",
+   "status": "draft",
+   "team": "NO",
+   "pos": "G",
+   "surname": "פייר ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4277956",
+   "en": "Jordan Poole",
+   "he": "ג'ורדן פול",
+   "status": "draft",
+   "team": "NO",
+   "pos": "G",
+   "surname": "פול",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4869780",
+   "en": "Derik Queen",
+   "he": "דריק קווין",
+   "status": "draft",
+   "team": "NO",
+   "pos": "C",
+   "surname": "קווין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683742",
+   "en": "Julian Reese",
+   "he": "ג'וליאן ריס",
+   "status": "draft",
+   "team": "NO",
+   "pos": "F",
+   "surname": "ריס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431675",
+   "en": "Trendon Watford",
+   "he": "טרנדון ווטפורד",
+   "status": "draft",
+   "team": "NO",
+   "pos": "F",
+   "surname": "ווטפורד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4395628",
+   "en": "Zion Williamson",
+   "he": "זאיון וויליאמסון",
+   "status": "sport5",
+   "team": "NO",
+   "pos": "F",
+   "surname": "וויליאמסון",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4683730",
+   "en": "Jaden Akins",
+   "he": "ג'יידן אייקינס",
+   "status": "draft",
+   "team": "NY",
+   "pos": "G",
+   "surname": "אייקינס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4277869",
+   "en": "Jose Alvarado",
+   "he": "חוסה אלוורדו",
+   "status": "draft",
+   "team": "NY",
+   "pos": "G",
+   "surname": "אלוורדו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3934719",
+   "en": "OG Anunoby",
+   "he": "או ג'י אננובי",
+   "status": "aligned",
+   "team": "NY",
+   "pos": "F",
+   "surname": "ג'י אננובי",
+   "evidence": {
+    "sport5": 2,
+    "draft": "או ג'י אנונובי",
+    "draftHits": 0,
+    "sim": 0.91
+   },
+   "approved": false
+  },
+  {
+   "id": "3147657",
+   "en": "Mikal Bridges",
+   "he": "מיקל ברידג'ס",
+   "status": "sport5",
+   "team": "NY",
+   "pos": "G",
+   "surname": "ברידג'ס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "3934672",
+   "en": "Jalen Brunson",
+   "he": "ג'יילן ברונסון",
+   "status": "sport5",
+   "team": "NY",
+   "pos": "G",
+   "surname": "ברונסון",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "2528426",
+   "en": "Jordan Clarkson",
+   "he": "ג'ורדן קלארקסון",
+   "status": "sport5",
+   "team": "NY",
+   "pos": "G",
+   "surname": "קלארקסון",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5211983",
+   "en": "Pacome Dadiet",
+   "he": "פקום דדייה",
+   "status": "draft",
+   "team": "NY",
+   "pos": "F",
+   "surname": "דדייה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5289900",
+   "en": "Mohamed Diawara",
+   "he": "מוחמד דיאוורה",
+   "status": "draft",
+   "team": "NY",
+   "pos": "F",
+   "surname": "דיאוורה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "6585",
+   "en": "Andre Drummond",
+   "he": "אנדרה דראמונד",
+   "status": "draft",
+   "team": "NY",
+   "pos": "C",
+   "surname": "דראמונד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3062679",
+   "en": "Josh Hart",
+   "he": "ג'וש הארט",
+   "status": "sport5",
+   "team": "NY",
+   "pos": "G",
+   "surname": "הארט",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4897943",
+   "en": "Dalton Knecht",
+   "he": "דלטון קנכט",
+   "status": "draft",
+   "team": "NY",
+   "pos": "F",
+   "surname": "קנכט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433225",
+   "en": "Tyler Kolek",
+   "he": "טיילר קולק",
+   "status": "draft",
+   "team": "NY",
+   "pos": "G",
+   "surname": "קולק",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431823",
+   "en": "Miles McBride",
+   "he": "מיילס מקברייד",
+   "status": "sport5",
+   "team": "NY",
+   "pos": "G",
+   "surname": "מקברייד",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4838721",
+   "en": "Tyler Nickel",
+   "he": "טיילר ניקל",
+   "status": "draft",
+   "team": "NY",
+   "pos": "F",
+   "surname": "ניקל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3914044",
+   "en": "Landry Shamet",
+   "he": "לנדרי שאמט",
+   "status": "draft",
+   "team": "NY",
+   "pos": "G",
+   "surname": "שאמט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3136195",
+   "en": "Karl-Anthony Towns",
+   "he": "קארל אנתוני טאונס",
+   "status": "sport5",
+   "team": "NY",
+   "pos": "C",
+   "surname": "אנתוני טאונס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4432808",
+   "en": "James Wiseman",
+   "he": "ג'יימס וייזמן",
+   "status": "draft",
+   "team": "NY",
+   "pos": "C",
+   "surname": "וייזמן",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4684208",
+   "en": "Brooks Barnhizer",
+   "he": "ברוקס ברנהייזר",
+   "status": "draft",
+   "team": "OKC",
+   "pos": "F",
+   "surname": "ברנהייזר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2991350",
+   "en": "Alex Caruso",
+   "he": "אלכס קרוסו",
+   "status": "draft",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "קרוסו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105800",
+   "en": "Josh Dix",
+   "he": "ג'וש דיקס",
+   "status": "draft",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "דיקס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4278073",
+   "en": "Shai Gilgeous-Alexander",
+   "he": "שיי גילג'ס-אלכסנדר",
+   "status": "sport5",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "גילג'ס-אלכסנדר",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "4222252",
+   "en": "Isaiah Hartenstein",
+   "he": "אייזאה הרטנשטיין",
+   "status": "draft",
+   "team": "OKC",
+   "pos": "C",
+   "surname": "הרטנשטיין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433255",
+   "en": "Chet Holmgren",
+   "he": "צ'ט הולמגרן",
+   "status": "sport5",
+   "team": "OKC",
+   "pos": "C",
+   "surname": "הולמגרן",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "5174983",
+   "en": "Aday Mara",
+   "he": "אדאי מארה",
+   "status": "draft",
+   "team": "OKC",
+   "pos": "C",
+   "surname": "מארה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683778",
+   "en": "Jared McCain",
+   "he": "ג'ארד מקיין",
+   "status": "sport5",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "מקיין",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4900671",
+   "en": "Ajay Mitchell",
+   "he": "אג'יי מיצ'ל",
+   "status": "aligned",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "מיצ'ל",
+   "evidence": {
+    "sport5": 2,
+    "draft": "אג'יי מיטשל",
+    "draftHits": 0,
+    "sim": 0.78
+   },
+   "approved": false
+  },
+  {
+   "id": "4432185",
+   "en": "Micah Peavy",
+   "he": "מיכה פיבי",
+   "status": "draft",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "פיבי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5061603",
+   "en": "Thomas Sorber",
+   "he": "תומאס סורבר",
+   "status": "draft",
+   "team": "OKC",
+   "pos": "C",
+   "surname": "סורבר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5241364",
+   "en": "Bennett Stirtz",
+   "he": "בנט סטירץ",
+   "status": "draft",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "סטירץ",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5159925",
+   "en": "Nikola Topic",
+   "he": "ניקולה טופיץ'",
+   "status": "draft",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "טופיץ'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683692",
+   "en": "Cason Wallace",
+   "he": "קייסון וואלאס",
+   "status": "sport5",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "וואלאס",
+   "evidence": {
+    "sport5": 4
+   },
+   "approved": false
+  },
+  {
+   "id": "4593803",
+   "en": "Jalen Williams",
+   "he": "ג'יילן וויליאמס",
+   "status": "sport5",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "וויליאמס",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "4432823",
+   "en": "Jaylin Williams",
+   "he": "ג'יילין וויליאמס",
+   "status": "sport5",
+   "team": "OKC",
+   "pos": "F",
+   "surname": "וויליאמס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "3133626",
+   "en": "Kenrich Williams",
+   "he": "קנריץ' וויליאמס",
+   "status": "draft",
+   "team": "OKC",
+   "pos": "G",
+   "surname": "וויליאמס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432573",
+   "en": "Paolo Banchero",
+   "he": "פאולו באנקרו",
+   "status": "sport5",
+   "team": "ORL",
+   "pos": "F",
+   "surname": "באנקרו",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4066320",
+   "en": "Desmond Bane",
+   "he": "דזמונד ביין",
+   "status": "sport5",
+   "team": "ORL",
+   "pos": "G",
+   "surname": "ביין",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4348700",
+   "en": "Goga Bitadze",
+   "he": "גוגה ביטדזה",
+   "status": "draft",
+   "team": "ORL",
+   "pos": "C",
+   "surname": "ביטדזה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4712849",
+   "en": "Anthony Black",
+   "he": "אנתוני בלאק",
+   "status": "sport5",
+   "team": "ORL",
+   "pos": "G",
+   "surname": "בלאק",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4278572",
+   "en": "Jamal Cain",
+   "he": "ג'מאל קיין",
+   "status": "draft",
+   "team": "ORL",
+   "pos": "F",
+   "surname": "קיין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3133635",
+   "en": "Jevon Carter",
+   "he": "ג'בון קרטר",
+   "status": "draft",
+   "team": "ORL",
+   "pos": "G",
+   "surname": "קרטר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4277847",
+   "en": "Wendell Carter Jr.",
+   "he": "וונדל קרטר ג'וניור",
+   "status": "sport5",
+   "team": "ORL",
+   "pos": "C",
+   "surname": "קרטר ג'וניור",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4397204",
+   "en": "Colin Castleton",
+   "he": "קולין קאסלטון",
+   "status": "draft",
+   "team": "ORL",
+   "pos": "C",
+   "surname": "קאסלטון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4702382",
+   "en": "Tristan da Silva",
+   "he": "טריסטן דה סילבה",
+   "status": "sport5",
+   "team": "ORL",
+   "pos": "F",
+   "surname": "דה סילבה",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4065654",
+   "en": "Jonathan Isaac",
+   "he": "ג'ונתן אייזק",
+   "status": "draft",
+   "team": "ORL",
+   "pos": "F",
+   "surname": "אייזק",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4593034",
+   "en": "Alex Morales",
+   "he": "אלכס מוראלס",
+   "status": "draft",
+   "team": "ORL",
+   "pos": "G",
+   "surname": "מוראלס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5107251",
+   "en": "Izaiyah Nelson",
+   "he": "אייזאה נלסון",
+   "status": "draft",
+   "team": "ORL",
+   "pos": "F",
+   "surname": "נלסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5214637",
+   "en": "Noah Penda",
+   "he": "נואה פנדה",
+   "status": "draft",
+   "team": "ORL",
+   "pos": "F",
+   "surname": "פנדה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5239561",
+   "en": "Jase Richardson",
+   "he": "ג'ייס ריצ'רדסון",
+   "status": "draft",
+   "team": "ORL",
+   "pos": "G",
+   "surname": "ריצ'רדסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432165",
+   "en": "Jalen Suggs",
+   "he": "ג'יילן סאגס",
+   "status": "sport5",
+   "team": "ORL",
+   "pos": "G",
+   "surname": "סאגס",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "6478",
+   "en": "Nikola Vucevic",
+   "he": "ניקולה וצ'ביץ'",
+   "status": "draft",
+   "team": "ORL",
+   "pos": "C",
+   "surname": "וצ'ביץ'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4566434",
+   "en": "Franz Wagner",
+   "he": "פרנץ ואגנר",
+   "status": "sport5",
+   "team": "ORL",
+   "pos": "F",
+   "surname": "ואגנר",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4870562",
+   "en": "Dominick Barlow",
+   "he": "דומיניק בארלו",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "F",
+   "surname": "בארלו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105637",
+   "en": "Adem Bona",
+   "he": "אדם בונה",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "C",
+   "surname": "בונה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3917376",
+   "en": "Jaylen Brown",
+   "he": "ג'יילן בראון",
+   "status": "sport5",
+   "team": "PHI",
+   "pos": "G",
+   "surname": "בראון",
+   "evidence": {
+    "sport5": 9
+   },
+   "approved": false
+  },
+  {
+   "id": "2581018",
+   "en": "Kentavious Caldwell-Pope",
+   "he": "קנטביוס קולדוול-פופ",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "G",
+   "surname": "קולדוול-פופ",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5124612",
+   "en": "VJ Edgecombe",
+   "he": "וי ג'יי אדג'קום",
+   "status": "aligned",
+   "team": "PHI",
+   "pos": "G",
+   "surname": "ג'יי אדג'קום",
+   "evidence": {
+    "sport5": 3,
+    "draft": "וי ג'יי אדג'קומב",
+    "draftHits": 0,
+    "sim": 0.92
+   },
+   "approved": false
+  },
+  {
+   "id": "4711297",
+   "en": "Justin Edwards",
+   "he": "ג'סטין אדוארדס",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "F",
+   "surname": "אדוארדס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3059318",
+   "en": "Joel Embiid",
+   "he": "ג'ואל אמביד",
+   "status": "sport5",
+   "team": "PHI",
+   "pos": "C",
+   "surname": "אמביד",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "3904625",
+   "en": "Tacko Fall",
+   "he": "טאקו פול",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "C",
+   "surname": "פול",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4871141",
+   "en": "Ariel Hukporti",
+   "he": "אריאל הוקפורטי",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "C",
+   "surname": "הוקפורטי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "1966",
+   "en": "LeBron James",
+   "he": "לברון ג'יימס",
+   "status": "sport5",
+   "team": "PHI",
+   "pos": "F",
+   "surname": "ג'יימס",
+   "evidence": {
+    "sport5": 7
+   },
+   "approved": false
+  },
+  {
+   "id": "4433144",
+   "en": "Caleb Love",
+   "he": "קיילב לאב",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "G",
+   "surname": "לאב",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431678",
+   "en": "Tyrese Maxey",
+   "he": "טייריס מקסי",
+   "status": "sport5",
+   "team": "PHI",
+   "pos": "G",
+   "surname": "מקסי",
+   "evidence": {
+    "sport5": 8
+   },
+   "approved": false
+  },
+  {
+   "id": "4873090",
+   "en": "Labaron Philon Jr.",
+   "he": "לבארון פיילון ג'וניור",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "G",
+   "surname": "פיילון ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5099752",
+   "en": "Rayan Rupert",
+   "he": "ראיין רופר",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "G",
+   "surname": "רופר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4351851",
+   "en": "Anfernee Simons",
+   "he": "אנפרני סיימונס",
+   "status": "sport5",
+   "team": "PHI",
+   "pos": "G",
+   "surname": "סיימונס",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "3912848",
+   "en": "Dean Wade",
+   "he": "דין וייד",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "F",
+   "surname": "וייד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432446",
+   "en": "Jabari Walker",
+   "he": "ג'אברי ווקר",
+   "status": "draft",
+   "team": "PHI",
+   "pos": "F",
+   "surname": "ווקר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3136193",
+   "en": "Devin Booker",
+   "he": "דווין בוקר",
+   "status": "sport5",
+   "team": "PHX",
+   "pos": "G",
+   "surname": "בוקר",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "4280245",
+   "en": "Jamaree Bouyea",
+   "he": "ג'מארי בויה",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "G",
+   "surname": "בויה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066383",
+   "en": "Miles Bridges",
+   "he": "מיילס ברידג'ס",
+   "status": "sport5",
+   "team": "PHX",
+   "pos": "F",
+   "surname": "ברידג'ס",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "3155526",
+   "en": "Dillon Brooks",
+   "he": "דילון ברוקס",
+   "status": "sport5",
+   "team": "PHX",
+   "pos": "F",
+   "surname": "ברוקס",
+   "evidence": {
+    "sport5": 4
+   },
+   "approved": false
+  },
+  {
+   "id": "4888725",
+   "en": "Ryan Dunn",
+   "he": "ראיין דאן",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "F",
+   "surname": "דאן",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105977",
+   "en": "Rasheer Fleming",
+   "he": "ראשיר פלמינג",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "F",
+   "surname": "פלמינג",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4278585",
+   "en": "Collin Gillespie",
+   "he": "קולין גילספי",
+   "status": "sport5",
+   "team": "PHX",
+   "pos": "G",
+   "surname": "גילספי",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4278402",
+   "en": "Jordan Goodwin",
+   "he": "ג'ורדן גודווין",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "G",
+   "surname": "גודווין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4437244",
+   "en": "Jalen Green",
+   "he": "ג'יילן גרין",
+   "status": "sport5",
+   "team": "PHX",
+   "pos": "G",
+   "surname": "גרין",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4601023",
+   "en": "Oso Ighodaro",
+   "he": "אוסו איגודארו",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "F",
+   "surname": "איגודארו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3913174",
+   "en": "Luke Kennard",
+   "he": "לוק קנארד",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "G",
+   "surname": "קנארד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5203685",
+   "en": "Khaman Maluach",
+   "he": "קאמאן מלואך",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "C",
+   "surname": "מלואך",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5041953",
+   "en": "Koa Peat",
+   "he": "קואה פיט",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "F",
+   "surname": "פיט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066268",
+   "en": "Duop Reath",
+   "he": "דואופ ריית'",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "C",
+   "surname": "ריית'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4592714",
+   "en": "Pat Spencer",
+   "he": "פאט ספנסר",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "G",
+   "surname": "ספנסר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431695",
+   "en": "Drew Timme",
+   "he": "דרו טימי",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "F",
+   "surname": "טימי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4701232",
+   "en": "Mark Williams",
+   "he": "מארק וויליאמס",
+   "status": "draft",
+   "team": "PHX",
+   "pos": "C",
+   "surname": "וויליאמס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683021",
+   "en": "Deni Avdija",
+   "he": "דני אבדיה",
+   "status": "sport5",
+   "team": "POR",
+   "pos": "F",
+   "surname": "אבדיה",
+   "evidence": {
+    "sport5": 34
+   },
+   "approved": false
+  },
+  {
+   "id": "4431736",
+   "en": "Toumani Camara",
+   "he": "טומאני קמארה",
+   "status": "sport5",
+   "team": "POR",
+   "pos": "F",
+   "surname": "קמארה",
+   "evidence": {
+    "sport5": 6
+   },
+   "approved": false
+  },
+  {
+   "id": "4592435",
+   "en": "Branden Carlson",
+   "he": "ברנדן קרלסון",
+   "status": "draft",
+   "team": "POR",
+   "pos": "C",
+   "surname": "קרלסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5081727",
+   "en": "Sidy Cissoko",
+   "he": "סידי סיסוקו",
+   "status": "draft",
+   "team": "POR",
+   "pos": "G",
+   "surname": "סיסוקו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105565",
+   "en": "Donovan Clingan",
+   "he": "דונובן קלינגן",
+   "status": "sport5",
+   "team": "POR",
+   "pos": "C",
+   "surname": "קלינגן",
+   "evidence": {
+    "sport5": 6
+   },
+   "approved": false
+  },
+  {
+   "id": "5217746",
+   "en": "Yang Hansen",
+   "he": "יאנג הנסן",
+   "status": "draft",
+   "team": "POR",
+   "pos": "C",
+   "surname": "הנסן",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683678",
+   "en": "Scoot Henderson",
+   "he": "סקוט הנדרסון",
+   "status": "sport5",
+   "team": "POR",
+   "pos": "G",
+   "surname": "הנדרסון",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "3995",
+   "en": "Jrue Holiday",
+   "he": "ג'רו הולידיי",
+   "status": "sport5",
+   "team": "POR",
+   "pos": "G",
+   "surname": "הולידיי",
+   "evidence": {
+    "sport5": 7
+   },
+   "approved": false
+  },
+  {
+   "id": "4703889",
+   "en": "Jayson Kent",
+   "he": "ג'ייסון קנט",
+   "status": "draft",
+   "team": "POR",
+   "pos": "G",
+   "surname": "קנט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4578893",
+   "en": "Vit Krejci",
+   "he": "ויט קרייצ'י",
+   "status": "draft",
+   "team": "POR",
+   "pos": "G",
+   "surname": "קרייצ'י",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "6606",
+   "en": "Damian Lillard",
+   "he": "דמיאן לילארד",
+   "status": "sport5",
+   "team": "POR",
+   "pos": "G",
+   "surname": "לילארד",
+   "evidence": {
+    "sport5": 7
+   },
+   "approved": false
+  },
+  {
+   "id": "4279888",
+   "en": "Ja Morant",
+   "he": "ג'ה מוראנט",
+   "status": "sport5",
+   "team": "POR",
+   "pos": "G",
+   "surname": "מוראנט",
+   "evidence": {
+    "sport5": 11
+   },
+   "approved": false
+  },
+  {
+   "id": "4066399",
+   "en": "Micah Potter",
+   "he": "מיכה פוטר",
+   "status": "draft",
+   "team": "POR",
+   "pos": "C",
+   "surname": "פוטר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4914336",
+   "en": "Shaedon Sharpe",
+   "he": "שיידון שארפ",
+   "status": "sport5",
+   "team": "POR",
+   "pos": "G",
+   "surname": "שארפ",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4593043",
+   "en": "John Tonje",
+   "he": "ג'ון טונג'ה",
+   "status": "draft",
+   "team": "POR",
+   "pos": "F",
+   "surname": "טונג'ה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066211",
+   "en": "Robert Williams III",
+   "he": "רוברט וויליאמס",
+   "status": "sport5",
+   "team": "POR",
+   "pos": "C",
+   "surname": "וויליאמס",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4706557",
+   "en": "Chris Youngblood",
+   "he": "כריס יאנגבלאד",
+   "status": "draft",
+   "team": "POR",
+   "pos": "G",
+   "surname": "יאנגבלאד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "6578",
+   "en": "Harrison Barnes",
+   "he": "הריסון בארנס",
+   "status": "draft",
+   "team": "SA",
+   "pos": "F",
+   "surname": "בארנס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105337",
+   "en": "Maliq Brown",
+   "he": "מאליק בראון",
+   "status": "draft",
+   "team": "SA",
+   "pos": "F",
+   "surname": "בראון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5061568",
+   "en": "Carter Bryant",
+   "he": "קרטר בראיינט",
+   "status": "draft",
+   "team": "SA",
+   "pos": "F",
+   "surname": "בראיינט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4845367",
+   "en": "Stephon Castle",
+   "he": "סטפון קאסל",
+   "status": "draft",
+   "team": "SA",
+   "pos": "G",
+   "surname": "קאסל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4592479",
+   "en": "Julian Champagnie",
+   "he": "ג'וליאן שמפני",
+   "status": "draft",
+   "team": "SA",
+   "pos": "F",
+   "surname": "שמפני",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066259",
+   "en": "De'Aaron Fox",
+   "he": "דיארון פוקס",
+   "status": "sport5",
+   "team": "SA",
+   "pos": "G",
+   "surname": "פוקס",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "5107968",
+   "en": "Ja'Kobi Gillespie",
+   "he": "ג'קובי גילספי",
+   "status": "draft",
+   "team": "SA",
+   "pos": "G",
+   "surname": "גילספי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5037871",
+   "en": "Dylan Harper",
+   "he": "דילן הארפר",
+   "status": "sport5",
+   "team": "SA",
+   "pos": "G",
+   "surname": "הארפר",
+   "evidence": {
+    "sport5": 4
+   },
+   "approved": false
+  },
+  {
+   "id": "6440",
+   "en": "Tobias Harris",
+   "he": "טוביאס האריס",
+   "status": "draft",
+   "team": "SA",
+   "pos": "F",
+   "surname": "האריס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4395723",
+   "en": "Keldon Johnson",
+   "he": "קלדון ג'ונסון",
+   "status": "draft",
+   "team": "SA",
+   "pos": "F",
+   "surname": "ג'ונסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4713010",
+   "en": "David Jones Garcia",
+   "he": "דייוויד ג'ונס גרסיה",
+   "status": "draft",
+   "team": "SA",
+   "pos": "F",
+   "surname": "ג'ונס גרסיה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3064560",
+   "en": "Luke Kornet",
+   "he": "לוק קורנט",
+   "status": "draft",
+   "team": "SA",
+   "pos": "C",
+   "surname": "קורנט",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3134916",
+   "en": "Jordan McLaughlin",
+   "he": "ג'ורדן מקלפלין",
+   "status": "draft",
+   "team": "SA",
+   "pos": "G",
+   "surname": "מקלפלין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5101845",
+   "en": "Jayden Quaintance",
+   "he": "ג'יידן קוויינטנס",
+   "status": "draft",
+   "team": "SA",
+   "pos": "F",
+   "surname": "קוויינטנס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105809",
+   "en": "Tarris Reed Jr.",
+   "he": "טאריס ריד ג'וניור",
+   "status": "draft",
+   "team": "SA",
+   "pos": "C",
+   "surname": "ריד ג'וניור",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4395630",
+   "en": "Devin Vassell",
+   "he": "דווין ואסל",
+   "status": "sport5",
+   "team": "SA",
+   "pos": "G",
+   "surname": "ואסל",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "5104157",
+   "en": "Victor Wembanyama",
+   "he": "ויקטור וומבניאמה",
+   "status": "sport5",
+   "team": "SA",
+   "pos": "F",
+   "surname": "וומבניאמה",
+   "evidence": {
+    "sport5": 7
+   },
+   "approved": false
+  },
+  {
+   "id": "4431679",
+   "en": "Precious Achiuwa",
+   "he": "פרשס אצ'יווה",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "F",
+   "surname": "אצ'יווה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5142620",
+   "en": "Darius Acuff Jr.",
+   "he": "דריוס אייקאף ג'וניור",
+   "status": "aligned",
+   "team": "SAC",
+   "pos": "G",
+   "surname": "אייקאף ג'וניור",
+   "evidence": {
+    "sport5": 6,
+    "draft": "דריוס אקוף ג'וניור",
+    "draftHits": 0,
+    "sim": 0.82
+   },
+   "approved": false
+  },
+  {
+   "id": "4395650",
+   "en": "Leaky Black",
+   "he": "ליקי בלאק",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "F",
+   "surname": "בלאק",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433174",
+   "en": "Dylan Cardwell",
+   "he": "דילן קרדוול",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "C",
+   "surname": "קרדוול",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4702384",
+   "en": "Nique Clifford",
+   "he": "ניק קליפורד",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "G",
+   "surname": "קליפורד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4065732",
+   "en": "De'Andre Hunter",
+   "he": "דיאנדרה האנטר",
+   "status": "sport5",
+   "team": "SAC",
+   "pos": "F",
+   "surname": "האנטר",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4917149",
+   "en": "Alex Karaban",
+   "he": "אלכס קרבן",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "F",
+   "surname": "קרבן",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3064440",
+   "en": "Zach LaVine",
+   "he": "זאק לאבין",
+   "status": "aligned",
+   "team": "SAC",
+   "pos": "G",
+   "surname": "לאבין",
+   "evidence": {
+    "sport5": 1,
+    "draft": "זאק לאווין",
+    "draftHits": 0,
+    "sim": 0.78
+   },
+   "approved": false
+  },
+  {
+   "id": "5107897",
+   "en": "Jonathan Mogbo",
+   "he": "ג'ונתן מוגבו",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "F",
+   "surname": "מוגבו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4066262",
+   "en": "Malik Monk",
+   "he": "מאליק מונק",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "G",
+   "surname": "מונק",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4594327",
+   "en": "Keegan Murray",
+   "he": "קיגן מארי",
+   "status": "sport5",
+   "team": "SAC",
+   "pos": "F",
+   "surname": "מארי",
+   "evidence": {
+    "sport5": 2
+   },
+   "approved": false
+  },
+  {
+   "id": "4709131",
+   "en": "Sean Pedulla",
+   "he": "שון פדולה",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "G",
+   "surname": "פדולה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4279318",
+   "en": "Daeqwon Plowden",
+   "he": "דקוון פלאודן",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "G",
+   "surname": "פלאודן",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4898371",
+   "en": "Maxime Raynaud",
+   "he": "מקסים ריינו",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "C",
+   "surname": "ריינו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3155942",
+   "en": "Domantas Sabonis",
+   "he": "דומנטאס סאבוניס",
+   "status": "aligned",
+   "team": "SAC",
+   "pos": "F",
+   "surname": "סאבוניס",
+   "evidence": {
+    "sport5": 3,
+    "draft": "דומנטס סאבוניס",
+    "draftHits": 0,
+    "sim": 0.93
+   },
+   "approved": false
+  },
+  {
+   "id": "5106058",
+   "en": "Emanuel Sharp",
+   "he": "עמנואל שארפ",
+   "status": "sport5",
+   "team": "SAC",
+   "pos": "G",
+   "surname": "שארפ",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "3907387",
+   "en": "Ben Simmons",
+   "he": "בן סימונס",
+   "status": "draft",
+   "team": "SAC",
+   "pos": "G",
+   "surname": "סימונס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "2993874",
+   "en": "Kyle Anderson",
+   "he": "קייל אנדרסון",
+   "status": "draft",
+   "team": "TOR",
+   "pos": "F",
+   "surname": "אנדרסון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433134",
+   "en": "Scottie Barnes",
+   "he": "סקוטי בארנס",
+   "status": "sport5",
+   "team": "TOR",
+   "pos": "F",
+   "surname": "בארנס",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  },
+  {
+   "id": "4395625",
+   "en": "RJ Barrett",
+   "he": "אר ג'יי בארט",
+   "status": "sport5",
+   "team": "TOR",
+   "pos": "F",
+   "surname": "ג'יי בארט",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4431893",
+   "en": "Jamison Battle",
+   "he": "ג'מיסון באטל",
+   "status": "sport5",
+   "team": "TOR",
+   "pos": "F",
+   "surname": "באטל",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4432586",
+   "en": "Nate Bittle",
+   "he": "נייט ביטל",
+   "status": "draft",
+   "team": "TOR",
+   "pos": "C",
+   "surname": "ביטל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432737",
+   "en": "Jaden Bradley",
+   "he": "ג'יידן בראדלי",
+   "status": "draft",
+   "team": "TOR",
+   "pos": "G",
+   "surname": "בראדלי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5149115",
+   "en": "Allen Graves",
+   "he": "אלן גרייבס",
+   "status": "draft",
+   "team": "TOR",
+   "pos": "F",
+   "surname": "גרייבס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4431684",
+   "en": "Trayce Jackson-Davis",
+   "he": "טרייס ג'קסון-דייוויס",
+   "status": "draft",
+   "team": "TOR",
+   "pos": "F",
+   "surname": "ג'קסון-דייוויס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "6450",
+   "en": "Kawhi Leonard",
+   "he": "קוואי לנארד",
+   "status": "sport5",
+   "team": "TOR",
+   "pos": "F",
+   "surname": "לנארד",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4702656",
+   "en": "Alijah Martin",
+   "he": "אלייג'ה מרטין",
+   "status": "draft",
+   "team": "TOR",
+   "pos": "G",
+   "surname": "מרטין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5093267",
+   "en": "Collin Murray-Boyles",
+   "he": "קולין מארי-בוילס",
+   "status": "aligned",
+   "team": "TOR",
+   "pos": "F",
+   "surname": "מארי-בוילס",
+   "evidence": {
+    "sport5": 1,
+    "draft": "קולין מארי-בויילס",
+    "draftHits": 0,
+    "sim": 0.93
+   },
+   "approved": false
+  },
+  {
+   "id": "3134908",
+   "en": "Jakob Poeltl",
+   "he": "יאקוב פרטל",
+   "status": "aligned",
+   "team": "TOR",
+   "pos": "C",
+   "surname": "פרטל",
+   "evidence": {
+    "sport5": 1,
+    "draft": "יאקוב פלטל",
+    "draftHits": 0,
+    "sim": 0.89
+   },
+   "approved": false
+  },
+  {
+   "id": "4395724",
+   "en": "Immanuel Quickley",
+   "he": "עמנואל קוויקלי",
+   "status": "sport5",
+   "team": "TOR",
+   "pos": "G",
+   "surname": "קוויקלי",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4432241",
+   "en": "Jamal Shead",
+   "he": "ג'מאל שיד",
+   "status": "draft",
+   "team": "TOR",
+   "pos": "G",
+   "surname": "שיד",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397784",
+   "en": "Malachi Smith",
+   "he": "מלאכי סמית'",
+   "status": "draft",
+   "team": "TOR",
+   "pos": "G",
+   "surname": "סמית'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4684272",
+   "en": "Ja'Kobe Walter",
+   "he": "ג'קובי וולטר",
+   "status": "sport5",
+   "team": "TOR",
+   "pos": "G",
+   "surname": "וולטר",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4433268",
+   "en": "Trey Alexander",
+   "he": "טריי אלכסנדר",
+   "status": "draft",
+   "team": "UTAH",
+   "pos": "G",
+   "surname": "אלכסנדר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4873138",
+   "en": "Ace Bailey",
+   "he": "אייס ביילי",
+   "status": "sport5",
+   "team": "UTAH",
+   "pos": "G",
+   "surname": "ביילי",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4277919",
+   "en": "Mo Bamba",
+   "he": "מו במבה",
+   "status": "sport5",
+   "team": "UTAH",
+   "pos": "C",
+   "surname": "במבה",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4065673",
+   "en": "Tony Bradley",
+   "he": "טוני בראדלי",
+   "status": "draft",
+   "team": "UTAH",
+   "pos": "C",
+   "surname": "בראדלי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683736",
+   "en": "Kobe Bufkin",
+   "he": "קובי באפקין",
+   "status": "draft",
+   "team": "UTAH",
+   "pos": "G",
+   "surname": "באפקין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4683766",
+   "en": "Isaiah Collier",
+   "he": "אייזאה קולייר",
+   "status": "sport5",
+   "team": "UTAH",
+   "pos": "G",
+   "surname": "קולייר",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "4684793",
+   "en": "Kyle Filipowski",
+   "he": "קייל פיליפובסקי",
+   "status": "draft",
+   "team": "UTAH",
+   "pos": "F",
+   "surname": "פיליפובסקי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4433627",
+   "en": "Keyonte George",
+   "he": "קיונטה ג'ורג'",
+   "status": "sport5",
+   "team": "UTAH",
+   "pos": "G",
+   "surname": "ג'ורג'",
+   "evidence": {
+    "sport5": 14
+   },
+   "approved": false
+  },
+  {
+   "id": "4432811",
+   "en": "Josh Green",
+   "he": "ג'וש גרין",
+   "status": "draft",
+   "team": "UTAH",
+   "pos": "G",
+   "surname": "גרין",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4397077",
+   "en": "Jaxson Hayes",
+   "he": "ג'קסון הייז",
+   "status": "sport5",
+   "team": "UTAH",
+   "pos": "C",
+   "surname": "הייז",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4433618",
+   "en": "Harrison Ingram",
+   "he": "הריסון אינגרם",
+   "status": "draft",
+   "team": "UTAH",
+   "pos": "F",
+   "surname": "אינגרם",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4277961",
+   "en": "Jaren Jackson Jr.",
+   "he": "ג'ארן ג'קסון ג'וניור",
+   "status": "sport5",
+   "team": "UTAH",
+   "pos": "F",
+   "surname": "ג'קסון ג'וניור",
+   "evidence": {
+    "sport5": 6
+   },
+   "approved": false
+  },
+  {
+   "id": "4066336",
+   "en": "Lauri Markkanen",
+   "he": "לאורי מארקנן",
+   "status": "sport5",
+   "team": "UTAH",
+   "pos": "F",
+   "surname": "מארקנן",
+   "evidence": {
+    "sport5": 8
+   },
+   "approved": false
+  },
+  {
+   "id": "3133602",
+   "en": "Svi Mykhailiuk",
+   "he": "סבי מיכאיליוק",
+   "status": "draft",
+   "team": "UTAH",
+   "pos": "G",
+   "surname": "מיכאיליוק",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "3102530",
+   "en": "Jusuf Nurkic",
+   "he": "יוסוף נורקיץ'",
+   "status": "sport5",
+   "team": "UTAH",
+   "pos": "C",
+   "surname": "נורקיץ'",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4065663",
+   "en": "Josh Okogie",
+   "he": "ג'וש אוקוגי",
+   "status": "draft",
+   "team": "UTAH",
+   "pos": "G",
+   "surname": "אוקוגי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5041955",
+   "en": "Darryn Peterson",
+   "he": "דארין פיטרסון",
+   "status": "aligned",
+   "team": "UTAH",
+   "pos": "G",
+   "surname": "פיטרסון",
+   "evidence": {
+    "sport5": 2,
+    "draft": "דרין פיטרסון",
+    "draftHits": 1,
+    "sim": 0.92
+   },
+   "approved": false
+  },
+  {
+   "id": "5105839",
+   "en": "Brice Sensabaugh",
+   "he": "בראייס סנסבו",
+   "status": "draft",
+   "team": "UTAH",
+   "pos": "F",
+   "surname": "סנסבו",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4278129",
+   "en": "Deandre Ayton",
+   "he": "דיאנדרה אייטון",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "C",
+   "surname": "אייטון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432187",
+   "en": "Reece Beekman",
+   "he": "ריס ביקמן",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "G",
+   "surname": "ביקמן",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4845374",
+   "en": "Bub Carrington",
+   "he": "באב קרינגטון",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "G",
+   "surname": "קרינגטון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4432907",
+   "en": "Justin Champagnie",
+   "he": "ג'סטין שמפני",
+   "status": "sport5",
+   "team": "WSH",
+   "pos": "F",
+   "surname": "שמפני",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "5104155",
+   "en": "Bilal Coulibaly",
+   "he": "בילאל קוליבלי",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "G",
+   "surname": "קוליבלי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "6583",
+   "en": "Anthony Davis",
+   "he": "אנתוני דייויס",
+   "status": "sport5",
+   "team": "WSH",
+   "pos": "F",
+   "surname": "דייויס",
+   "evidence": {
+    "sport5": 3
+   },
+   "approved": false
+  },
+  {
+   "id": "5142718",
+   "en": "AJ Dybantsa",
+   "he": "איי ג'יי דיבאנצה",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "F",
+   "surname": "ג'יי דיבאנצה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5174563",
+   "en": "Kyshawn George",
+   "he": "קיישון ג'ורג'",
+   "status": "aligned",
+   "team": "WSH",
+   "pos": "F",
+   "surname": "ג'ורג'",
+   "evidence": {
+    "sport5": 2,
+    "draft": "קישון ג'ורג'",
+    "draftHits": 0,
+    "sim": 0.9
+   },
+   "approved": false
+  },
+  {
+   "id": "2581184",
+   "en": "Anthony Gill",
+   "he": "אנתוני גיל",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "F",
+   "surname": "גיל",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5238230",
+   "en": "Tre Johnson",
+   "he": "טרה ג'ונסון",
+   "status": "sport5",
+   "team": "WSH",
+   "pos": "G",
+   "surname": "ג'ונסון",
+   "evidence": {
+    "sport5": 1
+   },
+   "approved": false
+  },
+  {
+   "id": "4432819",
+   "en": "Tre Mann",
+   "he": "טרה מאן",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "G",
+   "surname": "מאן",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "6609",
+   "en": "Khris Middleton",
+   "he": "קריס מידלטון",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "F",
+   "surname": "מידלטון",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5105841",
+   "en": "Felix Okpara",
+   "he": "פליקס אוקפרה",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "F",
+   "surname": "אוקפרה",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5144126",
+   "en": "Will Riley",
+   "he": "וויל ריילי",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "G",
+   "surname": "ריילי",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "5160992",
+   "en": "Alex Sarr",
+   "he": "אלכס סאר",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "C",
+   "surname": "סאר",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4997537",
+   "en": "Tristan Vukcevic",
+   "he": "טריסטן ווקצ'ביץ'",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "F",
+   "surname": "ווקצ'ביץ'",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4606840",
+   "en": "Jamir Watkins",
+   "he": "ג'מיר ווטקינס",
+   "status": "draft",
+   "team": "WSH",
+   "pos": "G",
+   "surname": "ווטקינס",
+   "evidence": null,
+   "approved": false
+  },
+  {
+   "id": "4277905",
+   "en": "Trae Young",
+   "he": "טריי יאנג",
+   "status": "sport5",
+   "team": "WSH",
+   "pos": "G",
+   "surname": "יאנג",
+   "evidence": {
+    "sport5": 5
+   },
+   "approved": false
+  }
+ ]
+}
