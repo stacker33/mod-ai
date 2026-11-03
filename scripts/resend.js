@@ -16,7 +16,7 @@ const items = readdirSync(dir).filter((f) => f.endsWith('.json')).flatMap((f) =>
 const end = (it) => items.find((x) => x.gameId === it.gameId && x.mode === 'game')?.end || '';
 items.sort((a, b) => String(end(a)).localeCompare(String(end(b))) || (a.mode === 'game' ? -1 : 1));
 let sent = 0;
-for (const it of items.filter((x) => x.draft)) {
+for (const it of items.filter((x) => x.draft && !x.noSend)) {
   await sendTelegram(cfg.env, itemMessage(it) || heldAlert(it));
   sent++;
   await new Promise((r) => setTimeout(r, 1500)); // stay well under Telegram's per-chat rate limit

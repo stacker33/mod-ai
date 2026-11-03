@@ -181,6 +181,8 @@ export function gameBrief(f) {
   // standard recap: 2 body paragraphs; 3 only when an Israeli played in the game
   const israeliPlayed = (f.israelis || []).some((i) => i.played);
   b.max_paragraphs = israeliPlayed ? 3 : 2;
+  // the score line above the block already shows the final score: the text does not repeat it
+  b.final_score_in = 'heading';
   b.featured = featured;
   b.states = states; // for the verifier (stripped from the prompt)
   b._check = checkData(f, names, tn, recordAngles, ctxFacts);

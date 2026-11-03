@@ -244,3 +244,19 @@ test('a dropped headline falls back to the code-written angle; repetition is not
   const rep = check(f, { headline: 'ניצחון 121:117', deck: 'אטלנטה ניצחה 121:117', paragraphs: ['אטלנטה ניצחה 121:117 באינדיאנה.'] }, b);
   assert.ok(codes(rep).includes('repetition') || codes(rep).includes('pair'));
 });
+
+// ---------- editor round 3: score once, one piece per game ----------
+test('the final score is not repeated: block text never (score line above), article only in the headline', () => {
+  const f = game('401909920'); // Toronto won 125-118
+  const d = { headline: 'טורונטו חזרה מפיגור 16 לניצחון 118:125 על הקליפרס', deck: 'ד', paragraphs: ['טורונטו חזרה מפיגור 16 בדרך לניצחון 118:125 בלוס אנג׳לס.'] };
+  const r = check(f, d);
+  assert.equal(r.issues.filter((i) => i.code === 'score-repeat').length, 2);
+  const fixed = autoFix(d, r.issues);
+  assert.equal(fixed.headline, 'טורונטו חזרה מפיגור 16 לניצחון על הקליפרס');
+  assert.equal(fixed.paragraphs[0], 'טורונטו חזרה מפיגור 16 בדרך לניצחון בלוס אנג׳לס.');
+  // an article: the headline keeps it, the body loses it
+  const art = { ...gameBrief(f), final_score_in: 'headline' };
+  const ra = check(f, d, art);
+  assert.equal(ra.issues.filter((i) => i.code === 'score-repeat').length, 1);
+  assert.equal(autoFix(d, ra.issues).headline, d.headline);
+});

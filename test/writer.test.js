@@ -146,7 +146,9 @@ test('score written from the wrong team is caught (BKN @ BOS)', () => {
   const f = oldFacts('401909877');
   assert.ok(codes(check(f, { paragraphs: ['ברוקלין כבר הובילה 124:119 כשנותרו פחות משתי דקות לסיום.'] })).includes('score-order'));
   assert.deepEqual(codes(check(f, { paragraphs: ['ברוקלין כבר הובילה 119:124 כשנותרו פחות משתי דקות לסיום.'] })), []);
-  assert.deepEqual(codes(check(f, { paragraphs: ['בדרך לניצחון 124:125 של בוסטון על ברוקלין.'] })), []);
+  // round 2: the final score belongs in the headline only (article) — that is where its order is checked
+  const art = { ...gameBrief(f), final_score_in: 'headline' };
+  assert.deepEqual(codes(check(f, { headline: 'בדרך לניצחון 124:125 של בוסטון על ברוקלין.' }, art)), []);
 });
 
 test('halftime is a partial score: subject first, and the verb must fit (DET @ NY, NY led 51-50)', () => {
@@ -192,10 +194,12 @@ test('a score in parentheses that is not a record is still checked (real output,
 
 test('the closest result word decides the final-score order ("6 ניצחונות... ונכנעה")', () => {
   const f = game('401909914'); // NO won 135-134 at Memphis
-  assert.deepEqual(codes(check(f, { paragraphs: ['ממפיס ספגה הפסד ראשון, אחרי 6 ניצחונות בפתיחת העונה, ונכנעה 135:134 לניו אורלינס.'] })), []);
-  const bad = check(f, { paragraphs: ['ממפיס ספגה הפסד ראשון, אחרי 6 ניצחונות בפתיחת העונה, ונכנעה 134:135 לניו אורלינס.'] });
+  // round 2: the final score is checked where it may appear — an article headline
+  const art = { ...gameBrief(f), final_score_in: 'headline' };
+  assert.deepEqual(codes(check(f, { headline: 'ממפיס ספגה הפסד ראשון, אחרי 6 ניצחונות בפתיחת העונה, ונכנעה 135:134 לניו אורלינס.' }, art)), []);
+  const bad = check(f, { headline: 'ממפיס ספגה הפסד ראשון, אחרי 6 ניצחונות בפתיחת העונה, ונכנעה 134:135 לניו אורלינס.' }, art);
   assert.deepEqual(codes(bad), ['result-order']);
-  assert.deepEqual(codes(check(f, { paragraphs: ['ניו אורלינס ניצחה 134:135.'] })), []);
+  assert.deepEqual(codes(check(f, { headline: 'ניו אורלינס ניצחה 134:135.' }, art)), []);
 });
 
 test('a paragraph cut in the middle is caught (real output: כ"א split the JSON string)', () => {

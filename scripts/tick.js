@@ -64,7 +64,7 @@ async function tickDate(date, cfg) {
         Object.assign(s, { status: 'done', doneAt: s.doneAt || now, hash, items: items.map((i) => ({ mode: i.mode, ok: i.check.ok })) });
         if (recheck) s.correctedAt = now;
         if (telegramReady(cfg.env)) {
-          for (const it of items) {
+          for (const it of items.filter((x) => !x.noSend)) {
             try { await sendTelegram(cfg.env, itemMessage(it) || heldAlert(it)); } catch (e) { log(`  telegram error: ${e.message.slice(0, 120)}`); }
           }
           s.notifiedAt = Date.now();

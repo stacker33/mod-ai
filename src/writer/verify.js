@@ -233,6 +233,17 @@ export function verifyDraft(input, brief, names, ctx = null) {
     if (/^\s*[,;:.\-–]/.test(p) || (!/[.!?״"'׳)]\s*$/.test(p) && i < draft.paragraphs.length - 1)) push('broken', 'block', `פסקה ${i + 1} נקטעה באמצע: "${p.slice(-30)}"`, { type: 'join', index: /^\s*[,;:.\-–]/.test(p) ? i - 1 : i });
   });
 
+  // the final score appears once: in the score line above a block, or in an article's headline
+  const fsc = finalOf(brief);
+  if (fsc && brief.final_score_in) {
+    const re = new RegExp(`(^|\\s)(ב-|ל-|-)?(${fsc[0]}:${fsc[1]}|${fsc[1]}:${fsc[0]})(?=[\\s.,!?]|$)`);
+    const after = brief.final_score_in === 'heading' ? [draft.headline, draft.deck, draft.subheadline, draft.lead, ...(draft.paragraphs || [])] : [draft.deck, draft.subheadline, draft.lead, ...(draft.paragraphs || [])];
+    for (const s of after.filter(Boolean).flatMap((t) => sentences(t))) {
+      const m = s.match(re);
+      if (m) push('score-repeat', 'block', `"${s.slice(0, 70)}": התוצאה הסופית ${m[3]} כבר ${brief.final_score_in === 'heading' ? 'בשורת התוצאה' : 'בכותרת'} — לא חוזרים עליה`, { type: 'replace', sentence: s, from: m[0], to: m[1] ? ' ' : '' });
+    }
+  }
+
   // length: a standard block has at most 2 body paragraphs (3 only for a featured game)
   if (brief.max_paragraphs && (draft.paragraphs || []).length > brief.max_paragraphs) push('length', 'block', `${draft.paragraphs.length} פסקאות — המקסימום כאן ${brief.max_paragraphs}`, { type: 'trim', keep: brief.max_paragraphs });
 
@@ -261,7 +272,8 @@ export function autoFix(draft, issues, brief = null) {
   const fields = ['headline', 'deck', 'subheadline', 'lead'];
   const edit = (fn) => {
     for (const k of fields) if (typeof d[k] === 'string') d[k] = fn(d[k]);
-    d.paragraphs = (d.paragraphs || []).map(fn).map((p) => p.replace(/\s{2,}/g, ' ').trim()).filter(Boolean);
+    d.paragraphs = (d.paragraphs || []).map(fn).map((p) => p.replace(/\s{2,}/g, ' ').replace(/\s+([.,!?])/g, '$1').trim()).filter(Boolean);
+    for (const k of fields) if (typeof d[k] === 'string') d[k] = d[k].replace(/\s{2,}/g, ' ').replace(/\s+([.,!?])/g, '$1').trim();
   };
   for (const i of issues.filter((x) => x.severity === 'block' && x.fix)) {
     if (i.fix.type === 'replace') edit((t) => (t.includes(i.fix.sentence) ? t.replace(i.fix.sentence, i.fix.sentence.replace(i.fix.from, i.fix.to)) : t));

@@ -164,26 +164,46 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   mkdirSync(join(dd, 'items'), { recursive: true });
   const items = [];
   const gb = gameBrief(f);
-  const game = await writeItem(cfg, 'game', gb, f);
-  Object.assign(game, { heading: gb.heading, end: f.endedAt || f.date, weight: f.candidates[0]?.weight || 0, angle: gb.main_angle, corrected, leads: { highlights: f.color?.highlights || [], unverified: f.research, namesMissing: f.namesMissing } });
-  items.push(game);
-  log(`  block ${game.held ? 'HELD' : game.autoFixed?.length ? 'ok (auto-fixed)' : 'ok'} (${game.rounds} rounds, ${game.model})`);
-  if (game.weight >= FEATURED) {
-    const a = await writeItem(cfg, 'article', { ...gb, max_paragraphs: 3 }, f);
-    Object.assign(a, { heading: gb.heading, corrected });
-    items.push(a);
-    log(`  big-game article ${a.held ? 'HELD' : 'ok'}`);
+  const weight = f.candidates[0]?.weight || 0;
+  const base = { heading: gb.heading, end: f.endedAt || f.date, weight, angle: gb.main_angle, corrected, leads: { highlights: f.color?.highlights || [], unverified: f.research, namesMissing: f.namesMissing } };
+  const tracks = (f.tracks || []).filter((t) => t.inGame && t.played && t.ok); // did not play -> a normal recap
+  // ONE piece per game (editor, 2026-11-03): when Avdija (full track) played, his article IS the game's
+  // piece; a big game gets its stand-alone article INSTEAD of the short block. The nightly page then shows
+  // that piece's opening. Both are written only when the main piece is held (no other choice).
+  let main = null;
+  const full = tracks.find((t) => t.player.track === 'full');
+  if (full) {
+    main = await writeItem(cfg, 'player', { ...playerBrief(f, full), max_paragraphs: 3, final_score_in: 'headline' }, f);
+    Object.assign(main, { player: full.player, corrected });
+    log(`  player ${full.player.name} ${main.held ? 'HELD' : 'ok'} (${main.rounds} rounds, ${main.model})`);
+  } else if (weight >= FEATURED) {
+    main = await writeItem(cfg, 'article', { ...gb, max_paragraphs: 3, final_score_in: 'headline' }, f);
+    Object.assign(main, { heading: gb.heading, corrected });
+    log(`  big-game article ${main.held ? 'HELD' : 'ok'} (${main.rounds} rounds, ${main.model})`);
   }
-  for (const t of f.tracks || []) {
-    if (!t.inGame || !t.played || !t.ok) continue; // did not play -> the normal block covers the game
-    const mode = t.player.track === 'full' ? 'player' : 'short';
-    const it = await writeItem(cfg, mode, { ...playerBrief(f, t), max_paragraphs: mode === 'player' ? 3 : 2 }, f);
+  if (main) items.push(main);
+  if (main && !main.held) {
+    // the nightly page's block for this game = the article's headline, sub-headline and first paragraph;
+    // not sent to Telegram on its own (the article already was)
+    const d = main.draft;
+    items.push({ ...base, mode: 'game', gameId: f.gameId, model: main.model, rounds: 0, check: main.check, held: false, noSend: true, from: main.mode,
+      draft: { headline: d.headline, deck: d.subheadline || d.deck || '', paragraphs: (d.paragraphs || []).slice(0, 1) }, writtenAt: main.writtenAt });
+    log('  block = opening of the article (not sent separately)');
+  } else {
+    const game = await writeItem(cfg, 'game', gb, f);
+    Object.assign(game, base);
+    items.push(game);
+    log(`  block ${game.held ? 'HELD' : game.autoFixed?.length ? 'ok (auto-fixed)' : 'ok'} (${game.rounds} rounds, ${game.model})`);
+  }
+  // Wolf / Saraf: a short item next to the normal recap
+  for (const t of tracks.filter((x) => x.player.track !== 'full')) {
+    const it = await writeItem(cfg, 'short', { ...playerBrief(f, t), max_paragraphs: 2, final_score_in: 'headline' }, f);
     Object.assign(it, { player: t.player, corrected });
     items.push(it);
-    log(`  ${mode} ${t.player.name} ${it.held ? 'HELD' : 'ok'} (${it.rounds} rounds)`);
+    log(`  short ${t.player.name} ${it.held ? 'HELD' : 'ok'} (${it.rounds} rounds)`);
   }
   writeFileSync(join(dd, 'items', `${f.gameId}.json`), JSON.stringify(items, null, 1));
-  for (const it of items.filter((x) => x.mode !== 'game')) {
+  for (const it of items.filter((x) => x.mode !== 'game' && x.draft)) {
     const name = it.player ? `${it.mode}-${it.player.name.replace(/\W+/g, '-')}-${it.gameId}` : `article-${it.gameId}`;
     const body = [`# ${it.draft.headline}`, it.draft.subheadline ? `\n**${it.draft.subheadline}**` : '', '', ...it.draft.paragraphs.flatMap((p) => [p, '']), checkBox(it)];
     writeFileSync(join(dd, `${name}.md`), body.join('\n') + '\n');
@@ -214,7 +234,8 @@ export function assembleClosing(date, { pending = [] } = {}) {
     const d = g.draft;
     // a held draft (known contradiction) is shown to the editor as such, never as copy
     const body = g.held ? ['⛔ הטיוטה לא פורסמה — ראו הערות לעורך'] : [...(d.headline ? [`**${d.headline}**`, ''] : []), ...(d.deck ? [d.deck, ''] : []), ...(d.lead ? [d.lead] : []), ...d.paragraphs.flatMap((p, i) => (i ? ['', p] : [p]))];
-    o.push('', '---', '', `_${when}_`, '', `**${g.heading}**`, ...body, checkBox(g));
+    const from = g.from === 'player' ? ['', '_(פתיחת הכתבה על השחקן הישראלי — הכתבה המלאה בנפרד)_'] : g.from === 'article' ? ['', '_(פתיחת הכתבה על המשחק — הכתבה המלאה בנפרד)_'] : [];
+    o.push('', '---', '', `_${when}_`, '', `**${g.heading}**`, ...body, ...from, checkBox(g));
   }
   writeFileSync(join(dd, 'closing.md'), o.join('\n') + '\n');
   return join(dd, 'closing.md');
