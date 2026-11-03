@@ -205,7 +205,7 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   writeFileSync(join(dd, 'items', `${f.gameId}.json`), JSON.stringify(items, null, 1));
   for (const it of items.filter((x) => x.mode !== 'game' && x.draft)) {
     const name = it.player ? `${it.mode}-${it.player.name.replace(/\W+/g, '-')}-${it.gameId}` : `article-${it.gameId}`;
-    const body = [`# ${it.draft.headline}`, it.draft.subheadline ? `\n**${it.draft.subheadline}**` : '', '', ...it.draft.paragraphs.flatMap((p) => [p, '']), checkBox(it)];
+    const body = [`{#g${it.gameId}}`, `# ${it.draft.headline}`, it.draft.subheadline ? `\n**${it.draft.subheadline}**` : '', '', ...it.draft.paragraphs.flatMap((p) => [p, '']), checkBox(it)];
     writeFileSync(join(dd, `${name}.md`), body.join('\n') + '\n');
   }
   return items;
@@ -235,7 +235,7 @@ export function assembleClosing(date, { pending = [] } = {}) {
     // a held draft (known contradiction) is shown to the editor as such, never as copy
     const body = g.held ? ['⛔ הטיוטה לא פורסמה — ראו הערות לעורך'] : [...(d.headline ? [`**${d.headline}**`, ''] : []), ...(d.deck ? [d.deck, ''] : []), ...(d.lead ? [d.lead] : []), ...d.paragraphs.flatMap((p, i) => (i ? ['', p] : [p]))];
     const from = g.from === 'player' ? ['', '_(פתיחת הכתבה על השחקן הישראלי — הכתבה המלאה בנפרד)_'] : g.from === 'article' ? ['', '_(פתיחת הכתבה על המשחק — הכתבה המלאה בנפרד)_'] : [];
-    o.push('', '---', '', `_${when}_`, '', `**${g.heading}**`, ...body, ...from, checkBox(g));
+    o.push('', '---', '', `{#g${g.gameId}}`, `_${when}_`, '', `**${g.heading}**`, ...body, ...from, checkBox(g));
   }
   writeFileSync(join(dd, 'closing.md'), o.join('\n') + '\n');
   return join(dd, 'closing.md');

@@ -116,6 +116,15 @@ async function tickDate(date, cfg) {
     writeFileSync(stateFile, JSON.stringify(state, null, 1));
     assembleClosing(date, { pending });
   }
+  // the night's schedule for the editor page board (which games are still to come / playing); saved only
+  // when a game changes state, so live score changes do not rebuild the page every check
+  const schedule = rows.map((x) => ({ id: x.id, state: x.state, start: x.start, home: x.home.abbr, away: x.away.abbr }));
+  if (JSON.stringify(schedule) !== JSON.stringify(state.schedule || [])) {
+    state.schedule = schedule;
+    state.updatedAt = Date.now();
+    writeFileSync(stateFile, JSON.stringify(state, null, 1));
+    changed = true;
+  }
   const done = Object.values(state.games).filter((g) => g.status === 'done').length;
   return { date, rows: rows.length, done, live: rows.filter((x) => x.state === 'in').length, upcoming: rows.filter((x) => x.state === 'pre').length, changed };
 }

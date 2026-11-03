@@ -1,11 +1,16 @@
 // Builds site/index.html: the drafts of the last nights, ENCRYPTED with PAGE_PASSWORD (AES-256-GCM,
 // key from PBKDF2). The repo and the page are public; only someone with the password can read the drafts.
 //   PAGE_PASSWORD=… node scripts/site.js
+//
+// Per night: a summary (games, recaps ready, median minutes from final buzzer to recap, contradictions
+// published, automatic fixes), a board with one card per game (score, story angle, status, speed), then
+// the stand-alone articles and the nightly page. Editor notes are folded into one line of chips.
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pbkdf2Sync, randomBytes, createCipheriv } from 'node:crypto';
+import { heTeam } from '../src/teams.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const NIGHTS = 7;
@@ -14,12 +19,76 @@ const password = process.env.PAGE_PASSWORD;
 if (!password) { console.log('site: no PAGE_PASSWORD, skipped'); process.exit(0); }
 
 const outDir = join(ROOT, 'out');
+const readJ = (p) => { try { return JSON.parse(readFileSync(p, 'utf8')); } catch { return null; } };
+
+// one card per game of the night, from the runner's state, the drafts and the facts
+function nightBoard(dir) {
+  const state = readJ(join(dir, 'state.json')) || { games: {} };
+  const itemsDir = join(dir, 'drafts', 'items');
+  const items = existsSync(itemsDir) ? readdirSync(itemsDir).filter((f) => f.endsWith('.json')).flatMap((f) => readJ(join(itemsDir, f)) || []) : [];
+  const byGame = new Map();
+  for (const it of items) byGame.set(it.gameId, [...(byGame.get(it.gameId) || []), it]);
+  const ids = [...new Set([...(state.schedule || []).map((x) => x.id), ...Object.keys(state.games || {}), ...byGame.keys()])];
+  const board = ids.map((id) => {
+    const f = readJ(join(dir, `${id}.json`));
+    const sched = (state.schedule || []).find((x) => x.id === id);
+    const g = state.games?.[id];
+    const its = byGame.get(id) || [];
+    const published = its.filter((x) => !x.noSend);
+    let status;
+    if (its.length) {
+      const held = published.filter((x) => x.held).length;
+      status = held && held === published.length ? 'held' : held ? 'partial' : its.some((x) => x.autoFixed?.length) ? 'fixed' : 'ok';
+    } else if (g?.status === 'retry' && /quota/.test(g.error || '')) status = 'quota';
+    else if (g && ['failed', 'blocked'].includes(g.status)) status = 'manual';
+    else if (g?.status === 'retry') status = 'retry';
+    else status = sched?.state === 'in' ? 'live' : 'upcoming';
+    const t = (side) => heTeam(f?.teams?.[side]?.abbr || sched?.[side]) || f?.teams?.[side]?.heShort || sched?.[side] || '';
+    const line = f ? `${t('home')} - ${t('away')} ${f.teams.away.score}:${f.teams.home.score}` : `${t('home')} - ${t('away')}`;
+    const block = its.find((x) => x.mode === 'game');
+    // speed: final buzzer (ESPN's last play) -> the first time the runner had the recap ready
+    const ended = f?.endedAt ? Date.parse(f.endedAt) : null;
+    const minutes = ended && g?.doneAt ? Math.round((g.doneAt - ended) / 60e3) : null;
+    const firstWritten = Math.min(...its.map((x) => Date.parse(x.writtenAt) || Infinity));
+    return {
+      id,
+      line,
+      angle: block?.angle?.fact_he || its.find((x) => x.angle)?.angle?.fact_he || null,
+      status,
+      // over 3 hours = written later (backfill / quota wait), not a live time
+      minutes: minutes != null && minutes >= 0 && minutes <= 180 ? minutes : null,
+      late: minutes != null && minutes > 180,
+      rewritten: !!(g?.doneAt && firstWritten - g.doneAt > 30 * 60e3),
+      israelis: (f?.israelis || []).filter((i) => i.played).map((i) => i.he || i.name),
+      published: published.filter((x) => !x.held && x.draft).length,
+      contradictions: published.filter((x) => !x.held && x.check?.blocking > 0).length,
+      fixes: its.reduce((a, x) => a + (x.autoFixed?.length || 0), 0),
+      end: f?.endedAt || sched?.start || '',
+    };
+  });
+  // finished games newest first, then the ones still to come
+  board.sort((a, b) => (['live', 'upcoming'].includes(a.status) - ['live', 'upcoming'].includes(b.status)) || String(b.end).localeCompare(String(a.end)));
+  const mins = board.map((x) => x.minutes).filter((x) => x != null).sort((a, b) => a - b);
+  const summary = {
+    games: board.length,
+    ready: board.filter((x) => ['ok', 'fixed', 'partial'].includes(x.status)).length,
+    held: board.filter((x) => ['held', 'manual'].includes(x.status)).length,
+    waiting: board.filter((x) => ['quota', 'retry'].includes(x.status)).length,
+    live: board.filter((x) => x.status === 'live').length,
+    upcoming: board.filter((x) => x.status === 'upcoming').length,
+    avgMinutes: mins.length ? mins[Math.floor((mins.length - 1) / 2)] : null, // median: one late game does not skew it
+    publishedContradictions: board.reduce((a, x) => a + x.contradictions, 0),
+    autoFixes: board.reduce((a, x) => a + x.fixes, 0),
+  };
+  return { board, summary };
+}
+
 const nights = readdirSync(outDir).filter((d) => /^\d{8}$/.test(d) && existsSync(join(outDir, d, 'drafts', 'closing.md'))).sort().reverse().slice(0, NIGHTS)
   .map((d) => {
     const dd = join(outDir, d, 'drafts');
     const pieces = readdirSync(dd).filter((f) => f.endsWith('.md') && f !== 'closing.md').sort((a, b) => (a.startsWith('player') ? -1 : 1) - (b.startsWith('player') ? -1 : 1))
       .map((f) => ({ name: f, md: readFileSync(join(dd, f), 'utf8') }));
-    return { date: d, closing: readFileSync(join(dd, 'closing.md'), 'utf8'), pieces };
+    return { date: d, closing: readFileSync(join(dd, 'closing.md'), 'utf8'), pieces, ...nightBoard(join(outDir, d)) };
   });
 
 const payload = Buffer.from(JSON.stringify({ builtAt: new Date().toISOString(), nights }), 'utf8');
@@ -28,48 +97,50 @@ const key = pbkdf2Sync(password, salt, ITER, 32, 'sha256');
 const c = createCipheriv('aes-256-gcm', key, iv);
 const enc = Buffer.concat([c.update(payload), c.final(), c.getAuthTag()]); // WebCrypto expects the tag appended
 const blob = { salt: salt.toString('base64'), iv: iv.toString('base64'), iter: ITER, data: enc.toString('base64') };
+const client = readFileSync(join(ROOT, 'scripts', 'site-client.js'), 'utf8');
+
+const css = `
+:root{--bg:#f4f5f7;--card:#fff;--ink:#16181d;--mute:#5d6370;--line:#dde1e7;--brand:#0b2a5b;--accent:#c2185b;--ok:#1b7f3b;--okbg:#e6f4ea;--warn:#8a5a00;--warnbg:#fff4dc;--bad:#b3261e;--badbg:#fde7e7;--live:#0b57d0;--livebg:#e3edfd;--isr:#0038b8;--isrbg:#e8eefc}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--ink:#e9ebef;--mute:#9aa1ad;--line:#2a2f38;--brand:#9cc0ff;--accent:#ff6fa5;--ok:#5fd28a;--okbg:#14301f;--warn:#f2c46b;--warnbg:#33290f;--bad:#ff8a80;--badbg:#3a1614;--live:#8ab4f8;--livebg:#132744;--isr:#a9c1ff;--isrbg:#18234a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,"Segoe UI",Arial,sans-serif}
+header{background:#0b2a5b;color:#fff;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:5}header b{font-size:18px}
+main{max-width:860px;margin:0 auto;padding:16px}
+.lock{max-width:360px;margin:15vh auto;background:var(--card);border:1px solid var(--line);padding:20px;border-radius:10px}
+input,button,select{font:inherit;padding:8px 10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px}
+form button{cursor:pointer;background:#c2185b;color:#fff;border:0}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:4px 0 6px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-size:24px;line-height:1.2;color:var(--brand)}.stat span{font-size:13px;color:var(--mute)}
+.extra{margin:0 0 12px;color:var(--mute);font-size:14px}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin:8px 0 22px}
+.card{display:flex;flex-direction:column;gap:6px;text-align:start;cursor:pointer;background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--line);border-radius:10px;padding:10px 12px}
+.card:hover{border-color:var(--brand)}.card.ok{border-inline-start-color:var(--ok)}.card.warn{border-inline-start-color:var(--warn)}.card.bad{border-inline-start-color:var(--bad)}.card.live{border-inline-start-color:var(--live)}
+.card .score{font-weight:700}.card .angle{font-size:14px;color:var(--mute);line-height:1.45}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--ink);white-space:nowrap}
+.chip.ok{background:var(--okbg);color:var(--ok)}.chip.warn{background:var(--warnbg);color:var(--warn)}.chip.bad{background:var(--badbg);color:var(--bad)}.chip.live{background:var(--livebg);color:var(--live)}.chip.isr{background:var(--isrbg);color:var(--isr)}.chip.mute{color:var(--mute)}
+h2.sec{font-size:15px;color:var(--mute);font-weight:600;margin:22px 0 4px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.block{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0;scroll-margin-top:70px;transition:box-shadow .3s}
+.block.flash{box-shadow:0 0 0 3px var(--accent)}
+.block h3{margin:0 0 6px;font-size:17px;color:var(--brand)}.when{color:var(--mute);font-size:13px}
+.copy{float:left;font-size:13px;padding:4px 10px;cursor:pointer;background:var(--accent);color:#fff;border:0}
+details.check{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px;font-size:14px;color:var(--mute)}
+details.check summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+details.check summary::-webkit-details-marker{display:none}
+details.check .more{font-size:12px;text-decoration:underline;margin-inline-start:auto}
+details.check p{margin:4px 0}
+@media (max-width:520px){main{padding:10px}.board{grid-template-columns:1fr}.stat b{font-size:20px}}
+`;
 
 const html = `<!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow"><title>Mod-AI · NBA</title>
-<style>
-:root{--bg:#f5f6f8;--card:#fff;--ink:#16181d;--mute:#5d6370;--line:#dde1e7;--brand:#0b2a5b;--accent:#c2185b;--ok:#1b7f3b;--bad:#b3261e}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--ink:#e9ebef;--mute:#9aa1ad;--line:#2a2f38;--brand:#9cc0ff;--accent:#ff6fa5;--ok:#5fd28a;--bad:#ff8a80}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,"Segoe UI",Arial,sans-serif}
-header{background:#0b2a5b;color:#fff;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}header b{font-size:18px}
-main{max-width:820px;margin:0 auto;padding:16px}
-.lock{max-width:360px;margin:15vh auto;background:var(--card);border:1px solid var(--line);padding:20px}
-input,button,select{font:inherit;padding:8px 10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}button{cursor:pointer;background:#c2185b;color:#fff;border:0}
-.block{background:var(--card);border:1px solid var(--line);padding:14px 16px;margin:12px 0}
-.block h3{margin:0 0 6px;font-size:17px;color:var(--brand)}.when{color:var(--mute);font-size:13px}
-.check{border-inline-start:3px solid var(--line);padding:6px 10px;color:var(--mute);font-size:14px;margin-top:10px}
-.check p{margin:2px 0}.copy{float:left;font-size:13px;padding:4px 10px}
-h1{font-size:22px}h2{font-size:19px}
-</style></head><body>
+<style>${css}</style></head><body>
 <header><b>Mod-AI · NBA</b><span id="meta"></span><select id="night" hidden></select></header>
 <main id="app"><div class="lock"><p>טיוטות פנימיות. הכנס סיסמה:</p><form id="f"><input id="pw" type="password" autocomplete="current-password" style="width:100%"><p><button>פתח</button> <span id="err"></span></p></form></div></main>
 <script>
 const BLOB=${JSON.stringify(blob)};
-const b64=(s)=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-async function open(pw){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
-const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(BLOB.salt),iterations:BLOB.iter,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['decrypt']);
-const out=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(BLOB.iv)},key,b64(BLOB.data));return JSON.parse(new TextDecoder().decode(out));}
-const esc=(s)=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-const inline=(s)=>esc(s).replace(/\\*\\*(.+?)\\*\\*/g,'<b>$1</b>').replace(/_(.+?)_/g,'<i>$1</i>');
-// one markdown file -> blocks split on ---; the "> " lines are the editor's check box (never copied)
-function render(md){return md.split(/\\n---\\n/).map(part=>{const lines=part.trim().split('\\n');const text=[],check=[];let h='',when='';
-for(const l of lines){if(l.startsWith('> '))check.push(l.slice(2));else if(/^#{1,3} /.test(l))h=l.replace(/^#+ /,'');else if(/^_.*_$/.test(l)&&!text.length)when=l.slice(1,-1);else if(/^\\*\\*.*\\*\\*$/.test(l)&&!h)h=l.slice(2,-2);else text.push(l);}
-const body=text.join('\\n').trim().split(/\\n\\s*\\n/).filter(Boolean);
-const copy=[h,...body].filter(Boolean).join('\\n\\n').replace(/\\*\\*/g,'');
-return '<div class="block">'+(body.length?'<button class="copy" data-t="'+encodeURIComponent(copy)+'">העתק</button>':'')+(when?'<div class="when">'+esc(when)+'</div>':'')+(h?'<h3>'+inline(h)+'</h3>':'')+body.map(p=>'<p>'+inline(p).replace(/\\n/g,'<br>')+'</p>').join('')+(check.length?'<div class="check">'+check.map(c=>'<p>'+inline(c)+'</p>').join('')+'</div>':'')+'</div>';}).join('');}
-function show(db,i){const n=db.nights[i];document.getElementById('app').innerHTML=n.pieces.map(p=>render(p.md)).join('')+render(n.closing);}
-document.getElementById('f').onsubmit=async(e)=>{e.preventDefault();const pw=document.getElementById('pw').value;
-if(!window.crypto||!crypto.subtle){document.getElementById('err').textContent='הדפדפן חוסם פענוח בכתובת הזו (צריך https)';return}
-try{const db=await open(pw);try{sessionStorage.setItem('mpw',pw)}catch{}start(db)}catch{document.getElementById('err').textContent='סיסמה שגויה'}};
-function start(db){const sel=document.getElementById('night');sel.hidden=false;sel.innerHTML=db.nights.map((n,i)=>'<option value="'+i+'">'+n.date.slice(6)+'.'+n.date.slice(4,6)+'</option>').join('');
-sel.onchange=()=>show(db,+sel.value);document.getElementById('meta').textContent='עודכן '+new Date(db.builtAt).toLocaleTimeString('he-IL',{timeZone:'Asia/Jerusalem',hour:'2-digit',minute:'2-digit'});if(db.nights.length)show(db,0);else document.getElementById('app').innerHTML='<p>אין עדיין טיוטות.</p>';}
-document.addEventListener('click',async(e)=>{const b=e.target.closest('.copy');if(!b)return;try{await navigator.clipboard.writeText(decodeURIComponent(b.dataset.t));b.textContent='הועתק ✓'}catch{b.textContent='לא הועתק'}});
-(async()=>{let pw=null;try{pw=sessionStorage.getItem('mpw')}catch{}if(pw){try{start(await open(pw))}catch{}}})();
+${client.replace(/<\/script/gi, '<\\/script')}
 </script></body></html>
 `;
 mkdirSync(join(ROOT, 'site'), { recursive: true });
