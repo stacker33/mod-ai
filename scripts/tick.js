@@ -109,6 +109,7 @@ async function tick(cfg) {
 
 const cfg = loadConfig();
 if (!cfg.ai.key) throw new Error('GEMINI_API_KEY missing (.env or environment)');
+if (!telegramReady(cfg.env)) console.log(`[${stamp()}] ⚠️ Telegram is off: ${!cfg.env.TELEGRAM_BOT_TOKEN ? 'TELEGRAM_BOT_TOKEN' : 'TELEGRAM_CHAT'} is missing — drafts are written but not sent`);
 await tick(cfg);
 if (process.argv.includes('--loop')) {
   for (;;) {

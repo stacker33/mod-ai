@@ -5,6 +5,11 @@ name: Mod-AI tick
 
 on:
   workflow_dispatch:
+    inputs:
+      resend:
+        description: 'Re-send a night to Telegram (US date YYYYMMDD, e.g. 20261102). Leave empty for a normal run.'
+        required: false
+        default: ''
   schedule:
     - cron: '*/10 * * * *'
 
@@ -51,6 +56,15 @@ jobs:
           TELEGRAM_CHAT: ${{ vars.TELEGRAM_CHAT }}
           PAGE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: node scripts/tick.js
+
+      - name: Re-send a night to Telegram
+        if: github.event.inputs.resend != ''
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT: ${{ vars.TELEGRAM_CHAT }}
+          PAGE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          GEMINI_API_KEY: unused
+        run: node scripts/resend.js "${{ github.event.inputs.resend }}"
 
       - name: Save state
         if: always()
