@@ -97,8 +97,9 @@ function show(i) {
   if (!d.results.length) { document.getElementById('app').innerHTML = `<p class="empty-day">אין משחקי NBA ב${esc(d.label)}.</p>`; return; }
   let h = topLine(d) + scoreboard(d);
   if (d.board) {
-    if (d.pieces.length) h += '<h2 class="sec">כתבות</h2>' + d.pieces.map((p) => render(p.md)).join('');
-    if (d.closing) h += '<h2 class="sec">סגירת הלילה</h2>' + render(d.closing);
+    // the nightly page is always the first article; stand-alone articles follow it
+    if (d.closing) h += '<h2 class="sec">סגירת הלילה ב-NBA</h2>' + render(d.closing);
+    if (d.pieces.length) h += '<h2 class="sec">כתבות נוספות</h2>' + d.pieces.map((p) => render(p.md)).join('');
   } else if (!d.future) h += '<p class="empty-day">המערכת לא כתבה סיכומים לתאריך הזה.</p>';
   document.getElementById('app').innerHTML = h;
   // Israeli recaps / articles: highlighted wherever they appear
