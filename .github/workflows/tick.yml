@@ -10,6 +10,11 @@ on:
         description: 'Re-send a night to Telegram (US date YYYYMMDD, e.g. 20261102). Leave empty for a normal run.'
         required: false
         default: ''
+      rewrite:
+        description: 'Before re-sending: rewrite that night with the current code (re-fetches ESPN, uses Gemini quota)'
+        type: boolean
+        required: false
+        default: false
   schedule:
     - cron: '*/10 * * * *'
 
@@ -56,6 +61,16 @@ jobs:
           TELEGRAM_CHAT: ${{ vars.TELEGRAM_CHAT }}
           PAGE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: node scripts/tick.js
+
+      - name: Rewrite a night with the current code
+        if: github.event.inputs.resend != '' && github.event.inputs.rewrite == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          AI_MODEL: ${{ vars.AI_MODEL || 'gemini-3.8-flash' }}
+          AI_MODEL_FALLBACK: ${{ vars.AI_MODEL_FALLBACK || 'gemini-3.7-flash,gemini-3.5-flash,gemini-flash-latest,gemini-3.5-flash-lite' }}
+        run: |
+          node scripts/write.js "${{ github.event.inputs.resend }}" --refetch
+          echo yes > out/changed
 
       - name: Re-send a night to Telegram
         if: github.event.inputs.resend != ''
