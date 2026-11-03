@@ -27,6 +27,30 @@ function watchedDates(now = new Date()) {
 
 const stamp = () => new Date().toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
 
+// Gemini's free daily quota resets at midnight Pacific time. While it is used up, finished games wait
+// (not counted as failures) and are written right after the reset. One notice to the channel per wait.
+const QUOTA_FILE = join(ROOT, 'out', 'quota.json');
+const readQuota = () => { try { return JSON.parse(readFileSync(QUOTA_FILE, 'utf8')); } catch { return {}; } };
+function nextPacificMidnight(now) {
+  const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' });
+  let t = Math.ceil(now / 300e3) * 300e3;
+  for (let i = 0; i < 300; i++, t += 300e3) {
+    const [h, m] = fmt.format(t).split(':').map(Number);
+    if (h === 0 && m < 5) return t;
+  }
+  return now + 6 * 3600e3;
+}
+async function quotaOut(cfg, now) {
+  const q = readQuota();
+  if (q.until && q.until > now) return q.until;
+  const until = nextPacificMidnight(now) + 10 * 60e3;
+  mkdirSync(join(ROOT, 'out'), { recursive: true });
+  writeFileSync(QUOTA_FILE, JSON.stringify({ until, since: now }));
+  const il = new Date(until).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
+  if (telegramReady(cfg.env)) await sendTelegram(cfg.env, `⏳ המכסה היומית של מודל הכתיבה נגמרה. משחקים שמסתיימים עכשיו ייכתבו וישלחו אוטומטית אחרי ${il} (שעון ישראל).`).catch(() => {});
+  return until;
+}
+
 async function tickDate(date, cfg) {
   const dir = dayDir(date);
   const stateFile = join(dir, 'state.json');
@@ -46,6 +70,8 @@ async function tickDate(date, cfg) {
     const due = !s.status || (s.status === 'retry' && now >= s.nextTry);
     const recheck = s.status === 'done' && !s.rechecked && now - s.doneAt >= RECHECK_AFTER;
     if (!due && !recheck) continue;
+    const quotaUntil = readQuota().until || 0;
+    if (quotaUntil > now) continue; // waiting for the daily writing quota; nothing is lost
     try {
       const f = await factsForGame(date, r.id, cfg);
       const hash = boxHash(f);
@@ -71,9 +97,17 @@ async function tickDate(date, cfg) {
         }
       }
     } catch (e) {
-      s.attempts++;
-      Object.assign(s, { status: s.attempts >= MAX_ATTEMPTS ? 'failed' : 'retry', nextTry: now + RETRY_AFTER, error: e.message.slice(0, 300) });
-      log(`${label}: error (${s.status}): ${e.message.slice(0, 160)}`);
+      if (e.quota) {
+        // not a failure: wait for the quota reset, then write it (a re-check simply runs again later)
+        const until = await quotaOut(cfg, now);
+        if (recheck) s.rechecked = false;
+        else Object.assign(s, { status: 'retry', nextTry: until, error: 'daily writing quota used up' });
+        log(`${label}: writing quota used up — waiting until ${new Date(until).toISOString()}`);
+      } else {
+        s.attempts++;
+        Object.assign(s, { status: s.attempts >= MAX_ATTEMPTS ? 'failed' : 'retry', nextTry: now + RETRY_AFTER, error: e.message.slice(0, 300) });
+        log(`${label}: error (${s.status}): ${e.message.slice(0, 160)}`);
+      }
     }
     state.games[r.id] = s;
     changed = true;

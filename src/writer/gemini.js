@@ -5,6 +5,7 @@ const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 export async function generateJSON({ key, model, fallback, system, messages, schema, temperature = 0.5 }) {
   const models = [model, ...String(fallback || '').split(',')].map((x) => x && x.trim()).filter(Boolean);
   let lastErr;
+  let dailyOut = 0; // models whose daily quota is used up
   for (const m of models) {
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
@@ -21,7 +22,7 @@ export async function generateJSON({ key, model, fallback, system, messages, sch
         if (r.status === 429 || r.status >= 500) {
           const body = await r.text();
           lastErr = new Error(`Gemini ${m} ${r.status}: ${body.slice(0, 200)}`);
-          if (r.status === 429 && /PerDay|per day|daily/i.test(body)) break; // daily quota (free tier: 20 a day per model): next model
+          if (r.status === 429 && /PerDay|per day|daily/i.test(body)) { dailyOut++; break; } // daily quota (free tier: 20 a day per model): next model
           if (r.status === 503 && attempt >= 2) break; // overloaded: try the next model
           await new Promise((res) => setTimeout(res, 6000 * attempt));
           continue;
@@ -37,5 +38,7 @@ export async function generateJSON({ key, model, fallback, system, messages, sch
       }
     }
   }
+  // every model is out for the day: the caller waits for the reset instead of counting a failure
+  if (dailyOut === models.length) lastErr.quota = true;
   throw lastErr;
 }
