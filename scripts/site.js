@@ -211,7 +211,7 @@ nav.dates button.empty{opacity:.55}
 .block.israeli{border:2px solid var(--isr);background:linear-gradient(180deg,var(--isrbg),var(--card) 90px)}
 .block.israeli.full{border-width:3px}
 .empty-day{color:var(--mute);text-align:center;padding:30px 0}
-@media (max-width:520px){main{padding:10px}.board{grid-template-columns:1fr}.stat b{font-size:20px}nav.dates{justify-content:flex-start;padding:8px 10px}}
+@media (max-width:520px){main{padding:10px}.board{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.card{padding:6px 8px;border-inline-start-width:3px}.card .score{font-size:13px;line-height:1.35}.card .st{font-size:12px}.card .angle{font-size:11.5px}.isrtag{font-size:11px;padding:1px 6px}.stat b{font-size:20px}nav.dates{justify-content:flex-start;padding:8px 10px}}
 `;
 
 const html = `<!doctype html>
