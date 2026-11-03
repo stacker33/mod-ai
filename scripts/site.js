@@ -6,7 +6,7 @@
 // published, automatic fixes), a board with one card per game (score, story angle, status, speed), then
 // the stand-alone articles and the nightly page. Editor notes are folded into one line of chips.
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, copyFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pbkdf2Sync, randomBytes, createCipheriv } from 'node:crypto';
@@ -123,7 +123,9 @@ const css = `
 :root{--bg:#f4f5f7;--card:#fff;--ink:#16181d;--mute:#5d6370;--line:#dde1e7;--brand:#0b2a5b;--accent:#c2185b;--ok:#1b7f3b;--okbg:#e6f4ea;--warn:#8a5a00;--warnbg:#fff4dc;--bad:#b3261e;--badbg:#fde7e7;--live:#0b57d0;--livebg:#e3edfd;--isr:#0038b8;--isrbg:#e8eefc}
 @media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#181b21;--ink:#e9ebef;--mute:#9aa1ad;--line:#2a2f38;--brand:#9cc0ff;--accent:#ff6fa5;--ok:#5fd28a;--okbg:#14301f;--warn:#f2c46b;--warnbg:#33290f;--bad:#ff8a80;--badbg:#3a1614;--live:#8ab4f8;--livebg:#132744;--isr:#a9c1ff;--isrbg:#18234a}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,"Segoe UI",Arial,sans-serif}
-header{background:#0b2a5b;color:#fff;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:5}header b{font-size:18px}
+header{background:#0b2a5b;color:#fff;padding:8px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:5}header b{font-size:18px}
+header .logo{width:40px;height:40px;border-radius:50%;display:block}
+.lock .biglogo{display:block;width:120px;height:120px;margin:0 auto 12px;border-radius:50%}
 main{max-width:860px;margin:0 auto;padding:16px}
 .lock{max-width:360px;margin:15vh auto;background:var(--card);border:1px solid var(--line);padding:20px;border-radius:10px}
 input,button,select{font:inherit;padding:8px 10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px}
@@ -155,9 +157,10 @@ details.check p{margin:4px 0}
 const html = `<!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow"><title>Mod-AI · NBA</title>
+<link rel="icon" type="image/png" href="favicon.png"><link rel="apple-touch-icon" href="logo.png">
 <style>${css}</style></head><body>
-<header><b>Mod-AI · NBA</b><span id="meta"></span><select id="night" hidden></select></header>
-<main id="app"><div class="lock"><p>טיוטות פנימיות. הכנס סיסמה:</p><form id="f"><input id="pw" type="password" autocomplete="current-password" style="width:100%"><p><button>פתח</button> <span id="err"></span></p></form></div></main>
+<header><img class="logo" src="logo.png" alt=""><b>Mod-AI · NBA</b><span id="meta"></span><select id="night" hidden></select></header>
+<main id="app"><div class="lock"><img class="biglogo" src="logo.png" alt="Mod-AI"><p>טיוטות פנימיות. הכנס סיסמה:</p><form id="f"><input id="pw" type="password" autocomplete="current-password" style="width:100%"><p><button>פתח</button> <span id="err"></span></p></form></div></main>
 <script>
 const BLOB=${JSON.stringify(blob)};
 ${client.replace(/<\/script/gi, '<\\/script')}
@@ -166,4 +169,5 @@ ${client.replace(/<\/script/gi, '<\\/script')}
 mkdirSync(join(ROOT, 'site'), { recursive: true });
 writeFileSync(join(ROOT, 'site', 'index.html'), html);
 writeFileSync(join(ROOT, 'site', '.nojekyll'), '');
+for (const f of ['logo.png', 'favicon.png']) copyFileSync(join(ROOT, 'assets', f), join(ROOT, 'site', f));
 console.log(`site: ${nights.length} nights, ${Math.round(html.length / 1024)} KB -> site/index.html`);

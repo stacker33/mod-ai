@@ -91,7 +91,7 @@ jobs:
       - name: Page code changed?
         run: |
           mkdir -p out
-          h=$(cat scripts/site.js scripts/site-client.js src/teams.js | sha1sum | cut -c1-12)
+          h=$(cat scripts/site.js scripts/site-client.js src/teams.js assets/* | sha1sum | cut -c1-12)
           if [ "$h" != "$(cat out/site-hash 2>/dev/null)" ]; then echo "$h" > out/site-hash; echo yes > out/changed; echo "page code changed ($h)"; fi
 
       - name: Save state
