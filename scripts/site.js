@@ -53,6 +53,7 @@ function nightBoard(dir) {
     return {
       id,
       line,
+      teams: [t('home'), t('away')],
       angle: block?.angle?.fact_he || its.find((x) => x.angle)?.angle?.fact_he || null,
       status,
       // over 3 hours = written later (backfill / quota wait), not a live time

@@ -75,7 +75,7 @@ function summary(n) {
 function board(n) {
   return `<div class="board">${n.board.map((g) => {
     const [cls, label] = STATUS[g.status] || ['mute', g.status];
-    return `<button class="card ${cls}" data-go="g${g.id}">
+    return `<button class="card ${cls}" data-go="g${g.id}" data-teams="${esc((g.teams || []).join('|'))}">
       <span class="score">${esc(g.line)}</span>
       ${g.angle ? `<span class="angle">${esc(g.angle)}</span>` : ''}
       <span class="meta"><span class="chip ${cls}">${esc(label)}</span>${g.minutes != null ? `<span class="chip mute">⚡ ${g.minutes} ד׳ מהבאזר</span>` : ''}${g.israelis.length ? `<span class="chip isr">ישראלי: ${esc(g.israelis.join(', '))}</span>` : ''}${g.late ? '<span class="chip mute">נכתב מאוחר</span>' : g.rewritten ? '<span class="chip mute">נכתב מחדש</span>' : ''}</span>
@@ -106,7 +106,11 @@ document.addEventListener('click', async (e) => {
   if (b) { try { await navigator.clipboard.writeText(decodeURIComponent(b.dataset.t)); b.textContent = 'הועתק ✓'; } catch { b.textContent = 'לא הועתק'; } return; }
   const c = e.target.closest('[data-go]');
   if (c) {
-    const t = document.querySelector(`[data-g="${c.dataset.go}"]`);
+    // the recap's jump point; fallback: the first recap whose heading names both teams
+    const teams = (c.dataset.teams || '').split('|').filter(Boolean);
+    const t = document.querySelector(`[data-g="${c.dataset.go}"]`)
+      || [...document.querySelectorAll('.block')].find((b) => teams.length === 2 && teams.every((x) => (b.querySelector('h3')?.textContent || '').includes(x)))
+      || [...document.querySelectorAll('.block')].find((b) => teams.length === 2 && teams.every((x) => b.textContent.includes(x)));
     if (t) { t.scrollIntoView({ block: 'start' }); t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1600); }
   }
 });
