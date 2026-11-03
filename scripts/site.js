@@ -83,12 +83,31 @@ function nightBoard(dir) {
   return { board, summary };
 }
 
+// jump targets for the board. Drafts written before anchors existed get them here: a block by its score
+// heading (matched to the game's items), an article by the game id at the end of its file name.
+function withAnchors(md, headingToId, fileId = null) {
+  return md.split('\n---\n').map((part, i) => {
+    if (/^\{#g\d+\}$/m.test(part)) return part;
+    const h = part.match(/^\*\*(.+)\*\*$/m);
+    const id = (i === 0 && fileId) || (h && headingToId.get(h[1].trim()));
+    return id ? `{#g${id}}\n${part.replace(/^\n+/, '')}` : part;
+  }).join('\n---\n');
+}
+function headingsOf(dir) {
+  const itemsDir = join(dir, 'drafts', 'items');
+  const m = new Map();
+  if (!existsSync(itemsDir)) return m;
+  for (const f of readdirSync(itemsDir).filter((x) => x.endsWith('.json'))) for (const it of readJ(join(itemsDir, f)) || []) if (it.heading) m.set(it.heading.trim(), it.gameId);
+  return m;
+}
+
 const nights = readdirSync(outDir).filter((d) => /^\d{8}$/.test(d) && existsSync(join(outDir, d, 'drafts', 'closing.md'))).sort().reverse().slice(0, NIGHTS)
   .map((d) => {
     const dd = join(outDir, d, 'drafts');
     const pieces = readdirSync(dd).filter((f) => f.endsWith('.md') && f !== 'closing.md').sort((a, b) => (a.startsWith('player') ? -1 : 1) - (b.startsWith('player') ? -1 : 1))
-      .map((f) => ({ name: f, md: readFileSync(join(dd, f), 'utf8') }));
-    return { date: d, closing: readFileSync(join(dd, 'closing.md'), 'utf8'), pieces, ...nightBoard(join(outDir, d)) };
+      .map((f) => ({ name: f, md: withAnchors(readFileSync(join(dd, f), 'utf8'), new Map(), f.match(/-(\d+)\.md$/)?.[1]) }));
+    const heads = headingsOf(join(outDir, d));
+    return { date: d, closing: withAnchors(readFileSync(join(dd, 'closing.md'), 'utf8'), heads), pieces, ...nightBoard(join(outDir, d)) };
   });
 
 const payload = Buffer.from(JSON.stringify({ builtAt: new Date().toISOString(), nights }), 'utf8');

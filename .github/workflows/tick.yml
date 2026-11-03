@@ -15,6 +15,11 @@ on:
         type: boolean
         required: false
         default: false
+      rebuild:
+        description: 'Rebuild and publish the drafts page now (after a page change)'
+        type: boolean
+        required: false
+        default: false
   schedule:
     - cron: '*/10 * * * *'
 
@@ -92,7 +97,9 @@ jobs:
 
       - name: Did anything change?
         id: changed
-        run: echo "yes=$(cat out/changed 2>/dev/null || echo no)" >> "$GITHUB_OUTPUT"
+        run: |
+          if [ "${{ github.event.inputs.rebuild }}" = "true" ]; then echo "yes=yes" >> "$GITHUB_OUTPUT"
+          else echo "yes=$(cat out/changed 2>/dev/null || echo no)" >> "$GITHUB_OUTPUT"; fi
 
       - name: Build encrypted page
         if: steps.changed.outputs.yes == 'yes'
