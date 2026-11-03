@@ -1,12 +1,5 @@
-// Browser side of the encrypted editor page (inlined by scripts/site.js). Plain JS, no libraries.
-/* global BLOB */
-const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
-async function open(pw) {
-  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
-  const key = await crypto.subtle.deriveKey({ name: 'PBKDF2', salt: b64(BLOB.salt), iterations: BLOB.iter, hash: 'SHA-256' }, k, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
-  const out = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(BLOB.iv) }, key, b64(BLOB.data));
-  return JSON.parse(new TextDecoder().decode(out));
-}
+// Browser side of the editor page (inlined by scripts/site.js). Plain JS, no libraries.
+/* global DB */
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const inline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/_(.+?)_/g, '<i>$1</i>');
 
@@ -59,6 +52,20 @@ const STATUS = {
   live: ['live', '🏀 משוחק עכשיו'], upcoming: ['mute', '🕐 טרם התחיל'], final: ['mute', '⏱️ הסתיים — נכתב'],
 };
 
+const isrTags = (list) => (list || []).map((i) => `<span class="isrtag${i.full ? ' full' : ''}">${i.full ? '★ ' : ''}${esc(i.name)}</span>`).join(' ');
+
+// "כל התוצאות" — always first; copy gives Sport5's plain list
+function resultsBox(d) {
+  if (!d.results.length) return `<div class="results"><h2>${esc(d.label)}</h2><p class="empty-day">אין משחקי NBA בתאריך הזה.</p></div>`;
+  const live = d.results.filter((r) => r.state === 'in').length;
+  const copy = ['כל התוצאות:', ...d.results.filter((r) => r.state === 'post').map((r) => r.line)].join('\n');
+  const title = d.future ? 'לוח המשחקים' : 'כל התוצאות';
+  return `<div class="results">${d.future ? '' : `<button class="copy" data-t="${encodeURIComponent(copy)}">העתק</button>`}<h2>${title}<span class="night">${esc(d.night)}${live ? ` · ${live} משוחקים עכשיו` : ''}</span></h2><ul>${d.results.map((r) => {
+    const st = r.state === 'post' ? '' : r.state === 'in' ? '<span class="chip live">משוחק עכשיו</span>' : `<span class="t">${esc(r.time)}</span>`;
+    return `<li class="${r.state}${r.israelis.length ? ' isr' : ''}" data-go="g${r.id}">${st}<span class="ln">${esc(r.line)}</span>${isrTags(r.israelis)}</li>`;
+  }).join('')}</ul></div>`;
+}
+
 function summary(n) {
   const s = n.summary;
   const cells = [
@@ -75,32 +82,48 @@ function summary(n) {
 function board(n) {
   return `<div class="board">${n.board.map((g) => {
     const [cls, label] = STATUS[g.status] || ['mute', g.status];
-    return `<button class="card ${cls}" data-go="g${g.id}" data-teams="${esc((g.teams || []).join('|'))}">
+    return `<button class="card ${cls}${g.isr?.length ? ' israeli' : ''}" data-go="g${g.id}" data-teams="${esc((g.teams || []).join('|'))}">
       <span class="score">${esc(g.line)}</span>
       ${g.angle ? `<span class="angle">${esc(g.angle)}</span>` : ''}
-      <span class="meta"><span class="chip ${cls}">${esc(label)}</span>${g.minutes != null ? `<span class="chip mute">⚡ ${g.minutes} ד׳ מהבאזר</span>` : ''}${g.israelis.length ? `<span class="chip isr">ישראלי: ${esc(g.israelis.join(', '))}</span>` : ''}${g.late ? '<span class="chip mute">נכתב מאוחר</span>' : g.rewritten ? '<span class="chip mute">נכתב מחדש</span>' : ''}</span>
+      <span class="meta"><span class="chip ${cls}">${esc(label)}</span>${g.minutes != null ? `<span class="chip mute">⚡ ${g.minutes} ד׳ מהבאזר</span>` : ''}${isrTags(g.isr)}${g.late ? '<span class="chip mute">נכתב מאוחר</span>' : g.rewritten ? '<span class="chip mute">נכתב מחדש</span>' : ''}</span>
     </button>`;
   }).join('')}</div>`;
 }
 
-function show(db, i) {
-  const n = db.nights[i];
-  document.getElementById('app').innerHTML = summary(n) + board(n) + '<h2 class="sec">כתבות</h2>' + n.pieces.map((p) => render(p.md)).join('') + '<h2 class="sec">סגירת הלילה</h2>' + render(n.closing);
+function show(i) {
+  const d = DB.days[i];
+  document.querySelectorAll('nav.dates button').forEach((b, k) => b.classList.toggle('on', k === i));
+  let h = resultsBox(d);
+  if (d.board) {
+    // Israelis on the board: names from the board, "full" from the results list
+    const full = new Map(d.results.flatMap((r) => r.israelis.map((x) => [x.name, x.full])));
+    for (const g of d.board) g.isr = g.israelis.map((name) => ({ name, full: !!full.get(name) }));
+    h += summary(d) + board(d);
+    if (d.pieces.length) h += '<h2 class="sec">כתבות</h2>' + d.pieces.map((p) => render(p.md)).join('');
+    if (d.closing) h += '<h2 class="sec">סגירת הלילה</h2>' + render(d.closing);
+  } else if (!d.future && d.results.length) h += '<p class="empty-day">המערכת לא כתבה סיכומים לתאריך הזה.</p>';
+  document.getElementById('app').innerHTML = h;
+  // Israeli recaps / articles: highlighted wherever they appear
+  const isrGames = new Map(d.results.filter((r) => r.israelis.length).map((r) => [`g${r.id}`, r.israelis.some((x) => x.full)]));
+  document.querySelectorAll('.block[data-g]').forEach((b) => {
+    if (!isrGames.has(b.dataset.g)) return;
+    b.classList.add('israeli');
+    if (isrGames.get(b.dataset.g)) b.classList.add('full');
+    const r = d.results.find((x) => `g${x.id}` === b.dataset.g);
+    const h3 = b.querySelector('h3');
+    if (h3 && r) h3.insertAdjacentHTML('beforebegin', `<div style="margin-bottom:6px">${isrTags(r.israelis)}</div>`);
+  });
+  try { sessionStorage.setItem('mday', d.date); } catch { /* private mode */ }
 }
-function start(db) {
-  const sel = document.getElementById('night');
-  sel.hidden = false;
-  sel.innerHTML = db.nights.map((n, i) => `<option value="${i}">${n.date.slice(6)}.${n.date.slice(4, 6)}</option>`).join('');
-  sel.onchange = () => show(db, +sel.value);
-  document.getElementById('meta').textContent = 'עודכן ' + new Date(db.builtAt).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
-  if (db.nights.length) show(db, 0); else document.getElementById('app').innerHTML = '<p>אין עדיין טיוטות.</p>';
+function start() {
+  const nav = document.getElementById('dates');
+  nav.innerHTML = DB.days.map((d, i) => `<button data-day="${i}" class="${d.results.length ? '' : 'empty'}">${esc(d.today ? 'היום' : d.label.split(' ')[0])}<small>${esc(d.label.split(' ')[1])}</small></button>`).join('');
+  nav.onclick = (e) => { const b = e.target.closest('[data-day]'); if (b) show(+b.dataset.day); };
+  document.getElementById('meta').textContent = 'עודכן ' + new Date(DB.builtAt).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
+  let i = DB.open;
+  try { const m = sessionStorage.getItem('mday'); const k = DB.days.findIndex((d) => d.date === m); if (k >= 0) i = k; } catch { /* none */ }
+  show(i >= 0 ? i : 0);
 }
-document.getElementById('f').onsubmit = async (e) => {
-  e.preventDefault();
-  const pw = document.getElementById('pw').value;
-  if (!window.crypto || !crypto.subtle) { document.getElementById('err').textContent = 'הדפדפן חוסם פענוח בכתובת הזו (צריך https)'; return; }
-  try { const db = await open(pw); try { sessionStorage.setItem('mpw', pw); } catch { /* private mode */ } start(db); } catch { document.getElementById('err').textContent = 'סיסמה שגויה'; }
-};
 document.addEventListener('click', async (e) => {
   const b = e.target.closest('.copy');
   if (b) { try { await navigator.clipboard.writeText(decodeURIComponent(b.dataset.t)); b.textContent = 'הועתק ✓'; } catch { b.textContent = 'לא הועתק'; } return; }
@@ -114,4 +137,4 @@ document.addEventListener('click', async (e) => {
     if (t) { t.scrollIntoView({ block: 'start' }); t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1600); }
   }
 });
-(async () => { let pw = null; try { pw = sessionStorage.getItem('mpw'); } catch { /* none */ } if (pw) { try { start(await open(pw)); } catch { /* ask again */ } } })();
+start();

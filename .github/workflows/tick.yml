@@ -109,10 +109,8 @@ jobs:
           if [ "${{ github.event.inputs.rebuild }}" = "true" ]; then echo "yes=yes" >> "$GITHUB_OUTPUT"
           else echo "yes=$(cat out/changed 2>/dev/null || echo no)" >> "$GITHUB_OUTPUT"; fi
 
-      - name: Build encrypted page
+      - name: Build the editor page
         if: steps.changed.outputs.yes == 'yes'
-        env:
-          PAGE_PASSWORD: ${{ secrets.PAGE_PASSWORD }}
         run: node scripts/site.js
 
       - uses: actions/upload-pages-artifact@v3

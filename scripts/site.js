@@ -1,22 +1,23 @@
-// Builds site/index.html: the drafts of the last nights, ENCRYPTED with PAGE_PASSWORD (AES-256-GCM,
-// key from PBKDF2). The repo and the page are public; only someone with the password can read the drafts.
-//   PAGE_PASSWORD=… node scripts/site.js
+// Builds site/index.html: the editor page (open, no password; hidden from search engines).
+//   node scripts/site.js
 //
-// Per night: a summary (games, recaps ready, median minutes from final buzzer to recap, contradictions
-// published, automatic fixes), a board with one card per game (score, story angle, status, speed), then
-// the stand-alone articles and the nightly page. Editor notes are folded into one line of chips.
+// A strip of dates, 3 days back and 3 forward (US dates, as ESPN schedules them). For each date:
+//   - "כל התוצאות" on top: every game — final score / playing now / start time in Israel — ready to copy
+//   - past nights the system wrote: a summary (games, recaps ready, median minutes from final buzzer to
+//     recap, contradictions published, automatic fixes), a board with one card per game, the stand-alone
+//     articles and the nightly page; editor notes folded into one line of chips
+//   - future dates: the schedule, Israelis' games marked
+// Israeli players are highlighted everywhere; full-track players (own article) the most.
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, copyFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { pbkdf2Sync, randomBytes, createCipheriv } from 'node:crypto';
 import { heTeam } from '../src/teams.js';
+import { listGames } from '../src/espn.js';
+import { nightHe } from '../src/writer/he.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const NIGHTS = 7;
-const ITER = 200000;
-const password = process.env.PAGE_PASSWORD;
-if (!password) { console.log('site: no PAGE_PASSWORD, skipped'); process.exit(0); }
+const BACK = 3, FORWARD = 3;
 
 const outDir = join(ROOT, 'out');
 const readJ = (p) => { try { return JSON.parse(readFileSync(p, 'utf8')); } catch { return null; } };
@@ -102,21 +103,57 @@ function headingsOf(dir) {
   return m;
 }
 
-const nights = readdirSync(outDir).filter((d) => /^\d{8}$/.test(d) && existsSync(join(outDir, d, 'drafts', 'closing.md'))).sort().reverse().slice(0, NIGHTS)
-  .map((d) => {
-    const dd = join(outDir, d, 'drafts');
+const ISRAELIS = readJ(join(ROOT, 'config', 'israelis.json'))?.players || [];
+const etDate = (t) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(t).replaceAll('-', '');
+const ilTime = (iso) => new Date(iso).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
+const DAY_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+
+// "כל התוצאות": one line per game, Sport5 form (home - away away:home); Israelis by team (box score for past games)
+function results(rows, dir) {
+  return rows.map((r) => {
+    const f = dir ? readJ(join(dir, `${r.id}.json`)) : null;
+    const t = (x) => heTeam(x.abbr) || x.name;
+    const played = (f?.israelis || []).filter((i) => i.played).map((i) => ({ name: i.he || i.name, full: i.track === 'full' }));
+    const onTeams = ISRAELIS.filter((p) => [r.home.abbr, r.away.abbr].includes(p.team)).map((p) => ({ name: p.he, full: p.track === 'full' }));
+    const israelis = r.state === 'post' && f ? played : onTeams;
+    return {
+      id: r.id,
+      state: r.state,
+      line: r.state === 'post' ? `${t(r.home)} - ${t(r.away)} ${r.away.score}:${r.home.score}` : `${t(r.home)} - ${t(r.away)}`,
+      time: ilTime(r.start),
+      israelis,
+    };
+  });
+}
+
+const today = etDate(new Date());
+const dates = [];
+for (let k = -BACK; k <= FORWARD; k++) dates.push(etDate(new Date(Date.now() + k * 86400e3)));
+
+const days = [];
+for (const d of dates) {
+  const dir = join(outDir, d);
+  let rows = [];
+  try { rows = await listGames(d); } catch {
+    // ESPN unreachable: fall back to what the runner saved
+    rows = (readJ(join(dir, 'state.json'))?.schedule || []).map((x) => ({ id: x.id, state: x.state, start: x.start, home: { abbr: x.home }, away: { abbr: x.away } }));
+  }
+  const night = rows[0] ? nightHe(rows[0].start) : '';
+  const dt = new Date(`${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}T12:00:00-05:00`);
+  const day = { date: d, label: `${DAY_HE[dt.getUTCDay()]} ${d.slice(6)}.${d.slice(4, 6)}`, night, today: d === today, future: d > today, results: results(rows, existsSync(dir) ? dir : null) };
+  const dd = join(dir, 'drafts');
+  if (existsSync(dd)) {
     const pieces = readdirSync(dd).filter((f) => f.endsWith('.md') && f !== 'closing.md').sort((a, b) => (a.startsWith('player') ? -1 : 1) - (b.startsWith('player') ? -1 : 1))
       .map((f) => ({ name: f, md: withAnchors(readFileSync(join(dd, f), 'utf8'), new Map(), f.match(/-(\d+)\.md$/)?.[1]) }));
-    const heads = headingsOf(join(outDir, d));
-    return { date: d, closing: withAnchors(readFileSync(join(dd, 'closing.md'), 'utf8'), heads), pieces, ...nightBoard(join(outDir, d)) };
-  });
+    const closing = existsSync(join(dd, 'closing.md')) ? withAnchors(readFileSync(join(dd, 'closing.md'), 'utf8'), headingsOf(dir)) : '';
+    Object.assign(day, { pieces, closing, ...nightBoard(dir) });
+  } else if (existsSync(join(dir, 'state.json'))) Object.assign(day, { pieces: [], closing: '', ...nightBoard(dir) });
+  days.push(day);
+}
+// open on the latest date that has finished games (or today)
+const openOn = [...days].reverse().findIndex((x) => !x.future && x.results.some((r) => r.state === 'post'));
+const db = { builtAt: new Date().toISOString(), days, open: openOn >= 0 ? days.length - 1 - openOn : days.findIndex((x) => x.today) };
 
-const payload = Buffer.from(JSON.stringify({ builtAt: new Date().toISOString(), nights }), 'utf8');
-const salt = randomBytes(16), iv = randomBytes(12);
-const key = pbkdf2Sync(password, salt, ITER, 32, 'sha256');
-const c = createCipheriv('aes-256-gcm', key, iv);
-const enc = Buffer.concat([c.update(payload), c.final(), c.getAuthTag()]); // WebCrypto expects the tag appended
-const blob = { salt: salt.toString('base64'), iv: iv.toString('base64'), iter: ITER, data: enc.toString('base64') };
 const client = readFileSync(join(ROOT, 'scripts', 'site-client.js'), 'utf8');
 
 const css = `
@@ -151,7 +188,23 @@ details.check summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap
 details.check summary::-webkit-details-marker{display:none}
 details.check .more{font-size:12px;text-decoration:underline;margin-inline-start:auto}
 details.check p{margin:4px 0}
-@media (max-width:520px){main{padding:10px}.board{grid-template-columns:1fr}.stat b{font-size:20px}}
+nav.dates{position:sticky;top:56px;z-index:4;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:8px 16px;justify-content:center}
+nav.dates button{flex:0 0 auto;cursor:pointer;border-radius:999px;padding:5px 12px;font-size:14px;line-height:1.3;text-align:center}
+nav.dates button small{display:block;font-size:11px;color:var(--mute)}
+nav.dates button.on{background:var(--brand);color:#fff;border-color:var(--brand)}nav.dates button.on small{color:#dfe7f7}
+nav.dates button.empty{opacity:.55}
+.results{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:4px 0 14px}
+.results h2{margin:0 0 6px;font-size:17px;color:var(--brand)}.results .night{color:var(--mute);font-size:13px;font-weight:400;margin-inline-start:6px}
+.results ul{list-style:none;margin:0;padding:0}.results li{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:4px 0;border-bottom:1px dashed var(--line)}.results li:last-child{border:0}
+.results li .t{color:var(--mute);font-size:13px;min-width:44px}.results li.post .ln{font-weight:600}
+.results li.isr{background:var(--isrbg);margin:0 -8px;padding:4px 8px;border-radius:6px}
+.isrtag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--isr);color:#fff;white-space:nowrap}
+.isrtag.full{background:linear-gradient(90deg,#0038b8,#1d5fe0)}
+.card.israeli{border-color:var(--isr);border-width:2px;background:var(--isrbg)}
+.block.israeli{border:2px solid var(--isr);background:linear-gradient(180deg,var(--isrbg),var(--card) 90px)}
+.block.israeli.full{border-width:3px}
+.empty-day{color:var(--mute);text-align:center;padding:30px 0}
+@media (max-width:520px){main{padding:10px}.board{grid-template-columns:1fr}.stat b{font-size:20px}nav.dates{justify-content:flex-start;padding:8px 10px}}
 `;
 
 const html = `<!doctype html>
@@ -159,10 +212,11 @@ const html = `<!doctype html>
 <meta name="robots" content="noindex, nofollow"><title>Mod-AI · NBA</title>
 <link rel="icon" type="image/png" href="favicon.png"><link rel="apple-touch-icon" href="logo.png">
 <style>${css}</style></head><body>
-<header><img class="logo" src="logo.png" alt=""><b>Mod-AI · NBA</b><span id="meta"></span><select id="night" hidden></select></header>
-<main id="app"><div class="lock"><img class="biglogo" src="logo.png" alt="Mod-AI"><p>טיוטות פנימיות. הכנס סיסמה:</p><form id="f"><input id="pw" type="password" autocomplete="current-password" style="width:100%"><p><button>פתח</button> <span id="err"></span></p></form></div></main>
+<header><img class="logo" src="logo.png" alt=""><b>Mod-AI · NBA</b><span id="meta"></span></header>
+<nav id="dates" class="dates"></nav>
+<main id="app"></main>
 <script>
-const BLOB=${JSON.stringify(blob)};
+const DB=${JSON.stringify(db).replace(/</g, '\\u003c')};
 ${client.replace(/<\/script/gi, '<\\/script')}
 </script></body></html>
 `;
@@ -170,4 +224,4 @@ mkdirSync(join(ROOT, 'site'), { recursive: true });
 writeFileSync(join(ROOT, 'site', 'index.html'), html);
 writeFileSync(join(ROOT, 'site', '.nojekyll'), '');
 for (const f of ['logo.png', 'favicon.png']) copyFileSync(join(ROOT, 'assets', f), join(ROOT, 'site', f));
-console.log(`site: ${nights.length} nights, ${Math.round(html.length / 1024)} KB -> site/index.html`);
+console.log(`site: ${days.length} dates (${days.filter((x) => x.board).length} with drafts), ${Math.round(html.length / 1024)} KB -> site/index.html`);
