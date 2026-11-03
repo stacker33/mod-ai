@@ -60,7 +60,7 @@ const inline=(s)=>esc(s).replace(/\\*\\*(.+?)\\*\\*/g,'<b>$1</b>').replace(/_(.+
 function render(md){return md.split(/\\n---\\n/).map(part=>{const lines=part.trim().split('\\n');const text=[],check=[];let h='',when='';
 for(const l of lines){if(l.startsWith('> '))check.push(l.slice(2));else if(/^#{1,3} /.test(l))h=l.replace(/^#+ /,'');else if(/^_.*_$/.test(l)&&!text.length)when=l.slice(1,-1);else if(/^\\*\\*.*\\*\\*$/.test(l)&&!h)h=l.slice(2,-2);else text.push(l);}
 const body=text.join('\\n').trim().split(/\\n\\s*\\n/).filter(Boolean);
-const copy=[h,...body].filter(Boolean).join('\\n\\n');
+const copy=[h,...body].filter(Boolean).join('\\n\\n').replace(/\\*\\*/g,'');
 return '<div class="block">'+(body.length?'<button class="copy" data-t="'+encodeURIComponent(copy)+'">העתק</button>':'')+(when?'<div class="when">'+esc(when)+'</div>':'')+(h?'<h3>'+inline(h)+'</h3>':'')+body.map(p=>'<p>'+inline(p).replace(/\\n/g,'<br>')+'</p>').join('')+(check.length?'<div class="check">'+check.map(c=>'<p>'+inline(c)+'</p>').join('')+'</div>':'')+'</div>';}).join('');}
 function show(db,i){const n=db.nights[i];document.getElementById('app').innerHTML=n.pieces.map(p=>render(p.md)).join('')+render(n.closing);}
 document.getElementById('f').onsubmit=async(e)=>{e.preventDefault();const pw=document.getElementById('pw').value;

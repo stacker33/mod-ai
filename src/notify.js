@@ -24,19 +24,18 @@ export async function sendTelegram(env, text) {
   }
 }
 
-function status(it) {
-  const s = [it.check.ok ? '✅ נבדק מול הנתונים' : `❌ לבדוק: ${it.check.errors.slice(0, 3).join('; ')}`];
-  if (it.check.toApprove.length) s.push(`✏️ שמות לאישור: ${it.check.toApprove.length}`);
-  return s.join(' · ');
+// the publishable text only: no check marks, editor notes or links (those live on the editor page)
+export function itemMessage(it) {
+  if (it.held || !it.draft) return null;
+  const d = it.draft;
+  const head = it.corrected ? 'עדכון: ' : '';
+  const body = [d.headline, d.deck || d.subheadline, d.lead, ...(d.paragraphs || [])].filter(Boolean).join('\n\n');
+  if (it.mode === 'game') return `${head}${it.heading}\n\n${body}`;
+  return `${head}${body}`;
 }
 
-export function itemMessage(it, pageUrl) {
-  const d = it.draft;
-  const tag = it.corrected ? '🔁 עודכן אחרי תיקון של ESPN\n' : '';
-  const link = pageUrl ? `\n\n${pageUrl}` : '';
-  if (it.mode === 'game') {
-    return `${tag}🏀 ${it.heading}\n\n${[`${d.lead} ${d.paragraphs[0] || ''}`.trim(), ...d.paragraphs.slice(1)].join('\n\n')}\n\n— ${status(it)}${link}`;
-  }
-  const kind = it.mode === 'player' ? '🇮🇱 כתבה' : it.mode === 'short' ? '🇮🇱 ידיעה' : '⭐ כתבת משחק';
-  return `${tag}${kind}\n\n${d.headline}\n${d.subheadline ? `\n${d.subheadline}\n` : ''}\n${d.paragraphs.join('\n\n')}\n\n— ${status(it)}${link}`;
+// a draft that still contradicts the data is not sent; the editor gets this alert instead
+export function heldAlert(it) {
+  const what = it.mode === 'game' ? it.heading : it.player ? `כתבה על ${it.player.he || it.player.name}` : 'כתבת משחק';
+  return `⛔ ${what}: הטיוטה לא פורסמה כי לא עברה את הבדיקה מול הנתונים. צריך לכתוב ידנית.`;
 }

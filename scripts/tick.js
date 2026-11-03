@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { listGames } from '../src/espn.js';
 import { loadConfig, dayDir, factsForGame, draftsForGame, assembleClosing, boxHash } from '../src/pipeline.js';
 import { heTeam } from '../src/teams.js';
-import { telegramReady, sendTelegram, itemMessage } from '../src/notify.js';
+import { telegramReady, sendTelegram, itemMessage, heldAlert } from '../src/notify.js';
 import { ROOT } from '../src/pipeline.js';
 
 const RECHECK_AFTER = 45 * 60e3; // ESPN stat corrections usually land within the hour
@@ -65,7 +65,7 @@ async function tickDate(date, cfg) {
         if (recheck) s.correctedAt = now;
         if (telegramReady(cfg.env)) {
           for (const it of items) {
-            try { await sendTelegram(cfg.env, itemMessage(it, cfg.pageUrl)); } catch (e) { log(`  telegram error: ${e.message.slice(0, 120)}`); }
+            try { await sendTelegram(cfg.env, itemMessage(it) || heldAlert(it)); } catch (e) { log(`  telegram error: ${e.message.slice(0, 120)}`); }
           }
           s.notifiedAt = Date.now();
         }

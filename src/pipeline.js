@@ -7,16 +7,15 @@ import { fileURLToPath } from 'node:url';
 import { getSummary, getTeamSchedule } from './espn.js';
 import { playerHistory } from './gamelog.js';
 import { analyzeGame } from './game.js';
-import { gameBrief, playerBrief } from './writer/brief.js';
+import { gameBrief, playerBrief, FEATURED } from './writer/brief.js';
 import { buildPrompt, schemaFor } from './writer/prompt.js';
 import { generateJSON } from './writer/gemini.js';
-import { verifyDraft } from './writer/verify.js';
+import { verifyDraft, autoFix } from './writer/verify.js';
 import { nightHe } from './writer/he.js';
 import { NICK_HE } from './teams.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));
-const BIG_GAME = 90; // story weight that earns a stand-alone article
 
 export function loadConfig() {
   const envFile = join(ROOT, '.env');
@@ -75,29 +74,44 @@ function ctxFor(f) {
 async function writeItem(cfg, mode, brief, f) {
   const inGame = new Set(['home', 'away'].flatMap((s) => f.players[s].map((p) => p.id)));
   const names = cfg.dict.map((d) => ({ ...d, inGame: inGame.has(d.id), status: d.approved ? 'approved' : d.status }));
+  const ctx = ctxFor(f);
   const { system, user } = buildPrompt(ROOT, mode, brief);
   const messages = [{ role: 'user', text: user }];
   let last;
   for (let round = 1; round <= 3; round++) {
     const res = await generateJSON({ ...cfg.ai, system, messages, schema: schemaFor(mode) });
-    const d = res.data;
-    const text = [d.headline, d.subheadline, d.lead, ...(d.paragraphs || [])].filter(Boolean).join('\n');
-    const check = verifyDraft(text, brief, names, ctxFor(f));
-    last = { mode, gameId: f.gameId, model: res.model, rounds: round, draft: d, check, writtenAt: new Date().toISOString() };
-    if (check.ok) break;
-    messages.push({ role: 'model', text: res.text }, { role: 'user', text: `הטיוטה נכשלה בבדיקה האוטומטית. תקן רק את הבעיות האלה והחזר את כל ה-JSON מחדש:\n- ${check.errors.join('\n- ')}` });
+    const check = verifyDraft(res.data, brief, names, ctx);
+    last = { mode, gameId: f.gameId, model: res.model, rounds: round, draft: res.data, check, writtenAt: new Date().toISOString() };
+    if (!check.issues.length) break;
+    if (round < 3) messages.push({ role: 'model', text: res.text }, { role: 'user', text: `הטיוטה לא עברה את הבדיקה. תקן רק את אלה והחזר את כל ה-JSON מחדש:\n- ${check.errors.join('\n- ')}` });
   }
+  // still contradicting the data after the model's rounds: fix in code (swap / drop the sentence / trim)
+  if (!last.check.ok) {
+    const fixed = autoFix(last.draft, last.check.issues);
+    const again = verifyDraft(fixed, brief, names, ctx);
+    last.autoFixed = last.check.issues.filter((i) => i.severity === 'block').map((i) => i.msg);
+    last.draft = fixed;
+    last.check = again;
+  }
+  // a known contradiction is never published
+  last.held = !last.check.ok;
   return last;
 }
 
+// editor-only notes (the page shows them beside the draft; they are never part of the copyable text)
 const checkBox = (it) => {
-  const o = ['', '> **לבדיקת העורך (לא להעתקה):**'];
-  if (!it.check.ok) o.push(`> ❌ נכשל בבדיקה גם אחרי ${it.rounds} סבבים: ${it.check.errors.join('; ')}`);
-  else o.push(`> ✅ כל המספרים, התוצאות והשמות נבדקו מול הנתונים (${it.rounds === 1 ? 'בסבב הראשון' : `אחרי ${it.rounds} סבבים`})`);
+  const o = ['', '> **לעורך (לא להעתקה):**'];
+  const issues = it.check.issues || []; // drafts written before the validation layer have no issue list
+  if (it.held) o.push(`> ⛔ לא פורסם — סתירה לנתונים שלא תוקנה: ${issues.filter((i) => i.severity === 'block').map((i) => i.msg).join('; ')}`);
+  else if (it.check.issues) o.push('> נבדקו מול ESPN: תוצאה, רבעים, מאזנים, מספרים, סדר תוצאות, שמות, שיאים/רצפים (רק אם אומתו), אורך');
+  if (it.autoFixed?.length) o.push(`> 🔧 תוקן אוטומטית: ${it.autoFixed.join('; ')}`);
+  const style = issues.filter((i) => i.severity === 'style');
+  if (style.length) o.push(`> ✍️ ניסוח לבדיקה: ${style.map((i) => i.msg).join('; ')}`);
+  if (it.angle) o.push(`> 🎯 זווית: ${it.angle.fact_he}`);
   if (it.corrected) o.push('> 🔁 נכתב מחדש אחרי תיקון סטטיסטיקה של ESPN');
   if (it.check.toApprove.length) o.push(`> ✏️ שמות שעוד לא אושרו: ${it.check.toApprove.join(', ')}`);
   if (it.leads?.namesMissing?.length) o.push(`> ❓ שחקנים בלי שם בעברית: ${it.leads.namesMissing.join(', ')}`);
-  if (it.leads?.unverified?.length) o.push(`> 🔎 לא אומת (לא נכתב): ${it.leads.unverified.join(' · ')}`);
+  if (it.leads?.unverified?.length) o.push(`> 🔎 לא אומת ולכן לא נכתב: ${it.leads.unverified.join(' · ')}`);
   if (it.leads?.highlights?.length) o.push(`> 🎬 קטעי וידאו של ESPN (כיוון לצבע): ${it.leads.highlights.join(' · ')}`);
   return o.join('\n');
 };
@@ -109,14 +123,14 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   const items = [];
   const gb = gameBrief(f);
   const game = await writeItem(cfg, 'game', gb, f);
-  Object.assign(game, { heading: gb.heading, end: f.endedAt || f.date, weight: f.candidates[0]?.weight || 0, corrected, leads: { highlights: f.color?.highlights || [], unverified: gb.do_not_state, namesMissing: f.namesMissing } });
+  Object.assign(game, { heading: gb.heading, end: f.endedAt || f.date, weight: f.candidates[0]?.weight || 0, angle: gb.main_angle, corrected, leads: { highlights: f.color?.highlights || [], unverified: f.research, namesMissing: f.namesMissing } });
   items.push(game);
-  log(`  block ${game.check.ok ? 'ok' : 'CHECK'} (${game.rounds} rounds, ${game.model})`);
-  if (game.weight >= BIG_GAME) {
-    const a = await writeItem(cfg, 'article', gb, f);
+  log(`  block ${game.held ? 'HELD' : game.autoFixed ? 'ok (auto-fixed)' : 'ok'} (${game.rounds} rounds, ${game.model})`);
+  if (game.weight >= FEATURED) {
+    const a = await writeItem(cfg, 'article', { ...gb, max_paragraphs: 6 }, f);
     Object.assign(a, { heading: gb.heading, corrected });
     items.push(a);
-    log(`  big-game article ${a.check.ok ? 'ok' : 'CHECK'}`);
+    log(`  big-game article ${a.held ? 'HELD' : 'ok'}`);
   }
   for (const t of f.tracks || []) {
     if (!t.inGame || !t.played || !t.ok) continue; // did not play -> the normal block covers the game
@@ -124,7 +138,7 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
     const it = await writeItem(cfg, mode, playerBrief(f, t), f);
     Object.assign(it, { player: t.player, corrected });
     items.push(it);
-    log(`  ${mode} ${t.player.name} ${it.check.ok ? 'ok' : 'CHECK'} (${it.rounds} rounds)`);
+    log(`  ${mode} ${t.player.name} ${it.held ? 'HELD' : 'ok'} (${it.rounds} rounds)`);
   }
   writeFileSync(join(dd, 'items', `${f.gameId}.json`), JSON.stringify(items, null, 1));
   for (const it of items.filter((x) => x.mode !== 'game')) {
@@ -155,7 +169,10 @@ export function assembleClosing(date, { pending = [] } = {}) {
   for (const f of [...facts].sort((a, b) => String(b.endedAt).localeCompare(String(a.endedAt)))) o.push(`${f.teams.home.heShort} - ${f.teams.away.heShort} ${f.teams.away.score}:${f.teams.home.score}`);
   for (const g of blocks) {
     const when = new Date(g.end).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
-    o.push('', '---', '', `_${when}_`, '', `**${g.heading}**`, `${g.draft.lead} ${g.draft.paragraphs[0] || ''}`.trim(), ...g.draft.paragraphs.slice(1).map((p) => `\n${p}`), checkBox(g));
+    const d = g.draft;
+    // a held draft (known contradiction) is shown to the editor as such, never as copy
+    const body = g.held ? ['⛔ הטיוטה לא פורסמה — ראו הערות לעורך'] : [...(d.headline ? [`**${d.headline}**`, ''] : []), ...(d.deck ? [d.deck, ''] : []), ...(d.lead ? [d.lead] : []), ...d.paragraphs.flatMap((p, i) => (i ? ['', p] : [p]))];
+    o.push('', '---', '', `_${when}_`, '', `**${g.heading}**`, ...body, checkBox(g));
   }
   writeFileSync(join(dd, 'closing.md'), o.join('\n') + '\n');
   return join(dd, 'closing.md');

@@ -1,8 +1,11 @@
-// facts -> the brief the model writes from. Hebrew names only, numbers already in Sport5 form.
-// Everything the model may say is in here; the verifier checks the draft against it.
+// facts -> the brief the model writes from. Hebrew names only, and every number already rendered in the
+// order its context needs (see he.js). The model copies strings; it never orders numbers, picks the angle
+// or decides whether a milestone is true. A claim the data does not verify is not in the brief at all.
 
 import { heTeam } from '../teams.js';
-import { pair, recordHe, whenHe, periodNumber, nightHe, fullLineHe, shortLineHe, KIND_HE, PERIOD_HE } from './he.js';
+import { pair, partialPair, recordForms, whenHe, periodNumber, nightHe, fullLineHe, shortLineHe, KIND_HE, PERIOD_HE } from './he.js';
+
+export const FEATURED = 90; // story weight from which a game block may run to 3 paragraphs
 
 const heOf = (f) => {
   const m = new Map();
@@ -12,62 +15,102 @@ const heOf = (f) => {
 // swap English player names inside ESPN play text for Hebrew ones
 const heText = (names, text) => [...names.entries()].sort((a, b) => b[0].length - a[0].length).reduce((t, [en, he]) => t.split(en).join(he), text || '');
 
-function teamBrief(f, side) {
-  const t = f.teams[side];
-  return { he: t.he, short: t.heShort, score: t.score, record_he: recordHe(t.record) };
+function starBrief(p, full = false) {
+  return { name_he: p.he || p.name, starter: p.starter, line_he: full ? fullLineHe(p) : shortLineHe(p), pts: p.pts, reb: p.reb, ast: p.ast, bench: !p.starter };
 }
 
-function starBrief(p, full = false) {
-  return { name_he: p.he || p.name, starter: p.starter, line_he: full ? fullLineHe(p) : shortLineHe(p), pts: p.pts, reb: p.reb, ast: p.ast, notes: p.flags };
+// the main angle, written as a Hebrew fact the lead must carry (only types the data proves)
+function angleHe(k, f, tn) {
+  const t = (s) => tn(s);
+  switch (k.type) {
+    case 'FIRST_LOSS': return `${t(k.side)} ספגה הפסד ראשון העונה, אחרי ${k.n} ניצחונות בפתיחת העונה`;
+    case 'FIRST_WIN': return `${t(k.side)} רשמה ניצחון ראשון העונה, אחרי ${k.n} הפסדים בפתיחת העונה`;
+    case 'UNBEATEN': return `${t(k.side)} נשארה בלי הפסד: ${k.n} ניצחונות ב-${k.n} משחקים`;
+    case 'WINLESS': return `${t(k.side)} עדיין בלי ניצחון: ${k.n} הפסדים ב-${k.n} משחקים`;
+    case 'DOMINANT_QUARTER': return `${t(k.side)} הכריעה ב${PERIOD_HE(k.period, f.clutch.finalPeriod)}: ${partialPair(k.score[k.side], k.score[k.side === 'home' ? 'away' : 'home'])}`;
+    default: return null;
+  }
 }
 
 export function gameBrief(f) {
   const names = heOf(f);
   const W = f.result.winner, L = f.result.loser, fp = f.clutch.finalPeriod;
+  const other = (s) => (s === 'home' ? 'away' : 'home');
   const tn = (side) => f.teams[side].heShort || f.teams[side].he;
   const at = (a) => (a ? whenHe(a.period ?? periodNumber(a.periodName), a.clock, fp) : null);
-  // every score state, written once per team: pick the version of the team the sentence is about
+  // every score state, once per team. kind 'partial' = subject first, 'last' = subject last (he.js)
   const states = [];
-  const by = (h, a) => {
-    states.push({ home: h, away: a });
-    return h === a ? `${h}:${a}` : { [tn('home')]: pair(h, a), [tn('away')]: pair(a, h) };
+  const by = (h, a, kind, label = null) => {
+    states.push({ home: h, away: a, kind, label });
+    const fmt = kind === 'partial' ? partialPair : pair;
+    return h === a ? `${h}:${a}` : { [tn('home')]: fmt(h, a), [tn('away')]: fmt(a, h) };
   };
-  const byS = (s) => by(s.home, s.away);
+  const byS = (s, kind = 'last') => by(s.home, s.away, kind);
+  const recs = { home: recordForms(f.teams.home.record, W === 'home'), away: recordForms(f.teams.away.record, W === 'away') };
+  const top = f.candidates[0];
+  const featured = (top?.weight || 0) >= FEATURED;
+
   const b = {
     kind: 'game',
     night_he: `הלילה (${nightHe(f.date)})`,
-    heading: `${f.teams.home.he} ${recordHe(f.teams.home.record)} - ${f.teams.away.he} ${recordHe(f.teams.away.record)} ${f.teams.away.score}:${f.teams.home.score}`,
-    home: teamBrief(f, 'home'),
-    away: teamBrief(f, 'away'),
+    heading: `${f.teams.home.he} ${recs.home?.in_parentheses || ''} - ${f.teams.away.he} ${recs.away?.in_parentheses || ''} ${f.teams.away.score}:${f.teams.home.score}`.replace(/\s+/g, ' '),
     home_is: tn('home'),
     away_is: tn('away'),
     winner_he: tn(W),
     loser_he: tn(L),
     margin: f.result.margin,
     overtimes: f.clutch.overtimes,
-    final_score_by_subject: byS({ home: f.teams.home.score, away: f.teams.away.score }),
     result_for_winner: `ניצחון ${pair(f.teams[W].score, f.teams[L].score)}`,
     result_for_loser: `הפסד ${pair(f.teams[L].score, f.teams[W].score)}`,
-    quarters: f.teams.home.periods.map((_, i) => ({ period_he: PERIOD_HE(i + 1, fp), [tn('home')]: f.teams.home.periods[i], [tn('away')]: f.teams.away.periods[i], quarter_score_by_subject: by(f.teams.home.periods[i], f.teams.away.periods[i]) })),
-    halftime_by_subject: byS(f.result.halftime),
-    after_three_by_subject: byS(f.result.after3),
+    // records: copy the form that fits the sentence — never reorder
+    records: Object.fromEntries(['home', 'away'].filter((s) => recs[s]).map((s) => [tn(s), { after_team_name: recs[s].in_parentheses, after_verb: recs[s].phrase }])),
+    quarters: f.teams.home.periods.map((h, i) => {
+      const a = f.teams.away.periods[i];
+      const win = h === a ? null : h > a ? 'home' : 'away';
+      return {
+        period_he: PERIOD_HE(i + 1, fp),
+        clause: win ? `${tn(win)} ניצחה את ${PERIOD_HE(i + 1, fp)} ${partialPair(f.teams[win].periods[i], f.teams[other(win)].periods[i])}` : `${PERIOD_HE(i + 1, fp)} הסתיים בשוויון ${h}:${a}`,
+        score_by_subject: by(h, a, 'partial', 'quarter'),
+      };
+    }),
   };
+  const lead = (s, word, label) => {
+    const lv = s.home === s.away ? null : s.home > s.away ? 'home' : 'away';
+    by(s.home, s.away, 'partial', label);
+    return lv ? `${tn(lv)} הובילה ${word} ${partialPair(s[lv], s[other(lv)])}` : `שוויון ${word} ${s.home}:${s.away}`;
+  };
+  b.halftime_clause = lead(f.result.halftime, 'במחצית', 'half');
+  b.after_three_clause = lead(f.result.after3, 'אחרי שלושה רבעים', 'after3');
+
+  // the angle is chosen here, in code; the lead must open with it
+  b.main_angle = top ? { type: top.type, fact_he: angleHe(top, f, tn) || heText(names, top.why) } : null;
+  b.secondary_angles = f.candidates.slice(1, 3).map((k) => ({ type: k.type, fact_he: angleHe(k, f, tn) || heText(names, k.why) }));
+
   if (f.flow.available) {
     b.largest_lead = ['home', 'away'].filter((s) => f.flow.largestLead[s].pts > 0).map((s) => ({ team_he: tn(s), pts: f.flow.largestLead[s].pts, when_he: at(f.flow.largestLead[s].at), score_by_subject: byS(f.flow.largestLead[s].score) }));
     b.lead_changes = f.flow.leadChanges;
-    b.runs = f.flow.spurts.slice(0, 3).map((s) => {
-      states.push(s.side === 'home' ? { home: s.for, away: s.against } : { home: s.against, away: s.for });
+    b.runs = f.flow.spurts.slice(0, 2).map((s) => {
+      states.push(s.side === 'home' ? { home: s.for, away: s.against, kind: 'last' } : { home: s.against, away: s.for, kind: 'last' });
       return { team_he: tn(s.side), run_he: `ריצת ${pair(s.for, s.against)}`, from_he: at(s.from), to_he: at(s.to), score_after_by_subject: byS(s.scoreAfter) };
     });
   }
+
+  // decisive plays: each one separately, with who, assist, time and the score after it
   const c = f.clutch;
+  const play = (x, side) => {
+    if (!x) return null;
+    const scorer = names.get(x.player) || x.player;
+    const assist = (x.text.match(/\(([^)]+) assists\)/) || [])[1];
+    return { player_he: scorer, assist_he: assist ? names.get(assist) || assist : null, team_he: tn(side), points: x.points ?? x.value, when_he: at(x), score_after_by_subject: byS(x.scoreAfter || x.score) };
+  };
   b.final_minutes = {
     five_minutes_left_by_subject: c.marginAt5min ? byS(c.marginAt5min) : null,
     two_minutes_left_by_subject: c.marginAt2min ? byS(c.marginAt2min) : null,
-    winning_basket: c.winningBasket ? { player_he: names.get(c.winningBasket.player) || c.winningBasket.player, team_he: tn(c.winningBasket.side), when_he: at(c.winningBasket), decisive_late: c.winningBasket.late, score_after_by_subject: byS(c.winningBasket.scoreAfter), play: heText(names, c.winningBasket.text) } : null,
-    tying_shot_to_overtime: c.tyingShotToOT ? { player_he: names.get(c.tyingShotToOT.player) || c.tyingShotToOT.player, team_he: tn(c.tyingShotToOT.side), when_he: at(c.tyingShotToOT), score: byS(c.tyingShotToOT.score), play: heText(names, c.tyingShotToOT.text) } : null,
+    winning_basket: c.winningBasket ? { ...play(c.winningBasket, c.winningBasket.side), decisive_late: c.winningBasket.late } : null,
+    tying_shot_to_overtime: c.tyingShotToOT ? play(c.tyingShotToOT, c.tyingShotToOT.side) : null,
     loser_led_in_last_three_minutes: c.loserLedInLast3min,
-    last_two_minutes: c.finalSequence.filter((p) => p.scoring || /miss|block|steal|turnover|foul/i.test(p.text)).slice(-14).map((p) => ({ when_he: whenHe(fp, p.clock, fp), team_he: p.side ? tn(p.side) : null, score_by_subject: byS(p.score), play: heText(names, p.text) })),
+    // separate plays, in order — never merge two of them into one sentence about one player
+    last_two_minutes: c.finalSequence.filter((p) => p.scoring).slice(-8).map((p) => ({ when_he: whenHe(fp, p.clock, fp), team_he: p.side ? tn(p.side) : null, score_after_by_subject: byS(p.score), play: heText(names, p.text) })),
   };
   b.stars = {
     [tn(W)]: f.players[W].filter((p) => p.played).sort((x, y) => y.pts - x.pts).slice(0, 4).map((p) => starBrief(p)),
@@ -75,11 +118,19 @@ export function gameBrief(f) {
   };
   const outInjured = ['home', 'away'].flatMap((s) => f.players[s].filter((p) => !p.played && p.dnpReason && !/coach/i.test(p.dnpReason)).map((p) => `${p.he || p.name} (${tn(s)}) לא שיחק — ${p.dnpReason}`));
   if (outInjured.length) b.did_not_play = outInjured;
-  b.color = (f.color?.events || []).filter((e) => !/challenge/.test(e.kind)).map((e) => ({ what_he: KIND_HE[e.kind] || e.kind, player_he: names.get(e.player) || e.player, team_he: e.team ? tn(e.team === f.teams.home.abbr ? 'home' : 'away') : null, when_he: e.kind === 'end-of-period buzzer basket' ? `בסיום ${PERIOD_HE(e.period, fp)}` : at(e), in_crunch_time: e.clutch }));
-  const w = f.candidates[0]?.weight || 0;
-  b.paragraphs_target = w >= 70 ? '2-3' : w >= 50 ? '2' : '1-2';
-  b.story_candidates = f.candidates.slice(0, 4).map((k) => ({ type: k.type, why: heText(names, k.why) }));
-  b.do_not_state = f.research.map((r) => heText(names, r));
+  // only events that change how the game is told (color.js decides relevance)
+  b.color = (f.color?.events || []).filter((e) => e.relevant).map((e) => ({ what_he: KIND_HE[e.kind] || e.kind, players_he: (e.players || []).map((n) => names.get(n) || n), team_he: e.team ? tn(e.team === f.teams.home.abbr ? 'home' : 'away') : null, when_he: at(e) }));
+
+  // what the data verifies — milestone language is allowed only where true
+  const streakTypes = ['FIRST_LOSS', 'FIRST_WIN', 'UNBEATEN', 'WINLESS'];
+  b.verified = {
+    season_high: false,
+    career_high: false,
+    streak: f.candidates.some((k) => streakTypes.includes(k.type)),
+    standings: false,
+  };
+  b.max_paragraphs = featured ? 3 : 2;
+  b.featured = featured;
   b.states = states; // for the verifier (stripped from the prompt)
   return b;
 }
@@ -87,9 +138,11 @@ export function gameBrief(f) {
 export function playerBrief(f, t) {
   const g = gameBrief(f);
   const names = heOf(f);
-  const sideW = t.won;
   const tnp = (side) => f.teams[side].heShort || f.teams[side].he;
-  const subject = (s) => { g.states.push({ home: s.home, away: s.away }); return s.home === s.away ? `${s.home}:${s.away}` : { [tnp('home')]: pair(s.home, s.away), [tnp('away')]: pair(s.away, s.home) }; };
+  const subject = (s) => { g.states.push({ home: s.home, away: s.away, kind: 'last' }); return s.home === s.away ? `${s.home}:${s.away}` : { [tnp('home')]: pair(s.home, s.away), [tnp('away')]: pair(s.away, s.home) }; };
+  const rec = recordForms(t.team.record, t.won);
+  const ms = t.milestones.map((m) => m.type);
+  const streak = t.team.context.streak;
   const b = {
     kind: 'player',
     player_he: t.player.he,
@@ -97,9 +150,10 @@ export function playerBrief(f, t) {
     opp_he: t.opp.he,
     home: t.home,
     won: t.won,
-    result_he: `${sideW ? 'ניצחון' : 'הפסד'} ${pair(t.team.score, t.opp.score)}`,
-    team_record_he: recordHe(t.team.record),
-    team_streak: t.team.context.streak ? `${t.team.context.streak.length} ${t.team.context.streak.kind === 'W' ? 'ניצחונות' : 'הפסדים'} רצופים` : null,
+    result_he: `${t.won ? 'ניצחון' : 'הפסד'} ${pair(t.team.score, t.opp.score)}`,
+    team_record: rec ? { after_team_name: rec.in_parentheses, after_verb: rec.phrase } : null,
+    // written in full so the model never builds "N wins in a row in a row"
+    team_streak_he: streak && streak.length >= 2 ? (streak.kind === 'W' ? `ניצחון ${ordinal(streak.length)} ברציפות` : `הפסד ${ordinal(streak.length)} ברציפות`) : null,
     night_he: g.night_he,
     line_full_he: fullLineHe(t.line),
     line_short_he: `(${t.line.pts} נק' ו-${t.line.ast >= t.line.reb ? `${t.line.ast} אס'` : `${t.line.reb} ריב'`})`,
@@ -120,6 +174,17 @@ export function playerBrief(f, t) {
     opponents: t.opponents.map((m) => ({ name_he: names.get(m.name) || m.name, pts: m.pts, reb: m.reb, ast: m.ast })),
     game: g,
   };
+  b.verified = {
+    season_high: ms.includes('SEASON_HIGH'),
+    career_high: ms.includes('CAREER_HIGH') || ms.includes('TIES_CAREER_HIGH'),
+    streak: !!b.team_streak_he || ms.includes('STREAK') || g.verified.streak,
+    standings: false,
+  };
   b.states = g.states;
   return b;
+}
+
+const ORD = ['', 'ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שביעי', 'שמיני', 'תשיעי', 'עשירי'];
+function ordinal(n) {
+  return ORD[n] || `${n}`;
 }

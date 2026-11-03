@@ -1,14 +1,41 @@
-// Sport5 Hebrew formatting, done in code so the model never has to order numbers itself.
+// Sport5 Hebrew formatting, done in code so the model never decides an order itself.
+// The orders below are the editor's rules (2026-11-03); each context has exactly one function.
 //
-// Right-to-left score rule (see style/STYLE.md): in prose the subject's score is written LAST in the
-// string, so it displays first — "ניצחון 129:136" (subject 136), "הפסד 124:103" (subject 103).
-// Heading lines: "home (rec) - away (rec) away:home". Records: "(losses:wins)".
+//   final result ("ניצחון 129:136", "הפסד 124:103")   subject's score LAST   -> pair()
+//   partial scores: quarter, halftime, after three     subject's score FIRST  -> partialPair()
+//     ("טורונטו ניצחה את הרבע הרביעי 47:27")
+//   in-game moments and runs ("שלשה שקבעה 129:135", "ריצת 0:17")  subject LAST, as in Sport5 copy -> pair()
+//   record in parentheses after a team name           WINS:LOSSES   ("ממפיס (6:1)")      -> formatRecord(..., 'standalone')
+//   record after "עלה/עלתה/ירד/ירדה למאזן"            LOSSES:WINS   ("עלתה למאזן 1:6")   -> formatRecord(..., 'relative')
 
 export const pair = (subject, other) => `${other}:${subject}`;
+export const partialPair = (subject, other) => `${subject}:${other}`;
 
-export function recordHe(rec) {
+// "6-1" (ESPN) -> {wins: 6, losses: 1}
+export function parseRecord(rec) {
   const m = String(rec || '').match(/^(\d+)-(\d+)$/);
-  return m ? `(${m[2]}:${m[1]})` : '';
+  return m ? { wins: Number(m[1]), losses: Number(m[2]) } : null;
+}
+
+export function formatRecord(wins, losses, context) {
+  if (context === 'standalone') return `${wins}:${losses}`;
+  if (context === 'relative') return `${losses}:${wins}`;
+  throw new Error(`formatRecord: context must be 'standalone' or 'relative', got ${context}`);
+}
+
+// everything the writer may say about a team's record, already in the right order for each context
+export function recordForms(rec, won, female = true) {
+  const r = parseRecord(rec);
+  if (!r) return null;
+  const verb = won ? (female ? 'עלתה' : 'עלו') : (female ? 'ירדה' : 'ירדו');
+  return {
+    wins: r.wins,
+    losses: r.losses,
+    standalone: formatRecord(r.wins, r.losses, 'standalone'),
+    relative: formatRecord(r.wins, r.losses, 'relative'),
+    in_parentheses: `(${formatRecord(r.wins, r.losses, 'standalone')})`,
+    phrase: `${verb} למאזן ${formatRecord(r.wins, r.losses, 'relative')}`,
+  };
 }
 
 export const PERIOD_HE = (p, final) => {

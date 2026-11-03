@@ -3,6 +3,7 @@
 
 import { normPlays, periodName } from './facts.js';
 import { heTeam } from './teams.js';
+import { foulRole } from './pbp.js';
 
 const STATS = ['pts', 'reb', 'ast', 'stl', 'blk'];
 const HE_DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
@@ -36,7 +37,13 @@ function playerEvents(plays, id, names, side) {
     else if (p.shooting) { kind = r0 ? (/blocks/i.test(p.text) ? 'blocked' : 'miss') : 'block'; partner = names.get(p.ids[r0 ? 1 : 0]) || null; }
     else if (/turnover/i.test(type)) { kind = r0 ? 'turnover' : 'steal'; partner = names.get(p.ids[r0 ? 1 : 0]) || null; }
     else if (/rebound/i.test(type)) kind = r0 ? (/offensive/i.test(type) ? 'oreb' : 'dreb') : null;
-    else if (/technical/i.test(type)) kind = r0 ? 'technical' : null;
+    else if (foulRole(type, p.text)) {
+      // (free throws, technical ones included, were already handled above as score / miss)
+      const role = foulRole(type, p.text);
+      if (role.charged.some((i) => p.ids[i] === id)) {
+        kind = role.kind === 'ejection' ? 'ejection' : /^flagrant/.test(role.kind) ? 'flagrant' : /technical/.test(role.kind) && role.kind !== 'minor-technical' ? 'technical' : 'foul';
+      }
+    }
     else if (/foul/i.test(type)) kind = r0 ? 'foul' : null;
     if (!kind) continue;
     const marginBefore = before[side] - before[other];

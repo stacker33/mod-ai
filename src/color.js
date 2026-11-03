@@ -5,34 +5,43 @@
 // in `leads` for the editor and are never written as fact without a source.
 
 import { normPlays, periodName } from './facts.js';
+import { foulRole } from './pbp.js';
 
-const MINOR_TECH = /defensive 3-seconds|delay of game|illegal defense/i;
+const KIND = {
+  technical: 'technical', 'flopping-technical': 'flopping technical', 'double-technical': 'double technical',
+  'flagrant-1': 'flagrant 1', 'flagrant-2': 'flagrant 2', ejection: 'ejection',
+};
 
 export function gameColor(summary, f) {
   const names = new Map();
   for (const side of ['home', 'away']) for (const p of f.players[side]) names.set(p.id, p.name);
   const teamOf = new Map();
   for (const side of ['home', 'away']) for (const p of f.players[side]) teamOf.set(p.id, f.teams[side].abbr);
+  const line = new Map();
+  for (const side of ['home', 'away']) for (const p of f.players[side]) line.set(p.id, p);
   const plays = normPlays(summary.plays, names, f.teams.home.id);
   const finalPeriod = f.clutch.finalPeriod;
   const isClutch = (p) => p.period >= Math.min(4, finalPeriod) && p.period === finalPeriod && p.cs <= 300;
-  const who = (p) => (p.ids[0] ? { player: names.get(p.ids[0]) || null, team: teamOf.get(p.ids[0]) || null } : { player: null, team: null });
   const when = (p) => ({ period: p.period, periodName: periodName(p.period), clock: p.clockText, clutch: isClutch(p), score: { home: p.home, away: p.away } });
 
   const events = [];
   for (const p of plays) {
-    const type = p.type.toLowerCase();
-    const text = p.text.toLowerCase();
-    if (/technical/.test(type) && !MINOR_TECH.test(p.type)) {
-      events.push({ kind: /flop/.test(type) ? 'flopping technical' : /double/.test(type) || /double technical/.test(text) ? 'double technical' : 'technical', ...who(p), ...when(p), text: p.text });
-    } else if (/flagrant foul/.test(type)) {
-      events.push({ kind: /type 2/.test(type) ? 'flagrant 2' : 'flagrant 1', ...who(p), ...when(p), text: p.text });
-    } else if (/ejection|ejected/.test(type) || /ejected/.test(text)) {
-      events.push({ kind: 'ejection', ...who(p), ...when(p), text: p.text });
-    } else if (/coach's challenge \(/.test(type)) {
-      events.push({ kind: /overturned/.test(type) ? 'challenge won' : 'challenge lost', team: (p.text.match(/\[([^\]]+)\]/) || [])[1] || null, player: null, ...when(p), text: p.text });
+    const role = foulRole(p.type, p.text);
+    if (role && KIND[role.kind]) {
+      // only the players the play CHARGES — never the free-throw shooter or the fouled player
+      const charged = role.charged.map((i) => p.ids[i]).filter(Boolean);
+      const players = charged.map((id) => names.get(id)).filter(Boolean);
+      const margin = Math.abs(p.home - p.away);
+      const big = charged.some((id) => (line.get(id)?.starter || (line.get(id)?.min || 0) >= 12));
+      // relevance: does this change how the game is told? ordinary technicals and flagrants do not
+      const relevant = role.kind === 'ejection' ? big
+        : role.kind === 'flagrant-2' ? true
+        : isClutch(p) && margin <= 8;
+      events.push({ kind: KIND[role.kind], player: players[0] || null, players, team: charged[0] ? teamOf.get(charged[0]) || null : null, ...when(p), text: p.text, relevant });
+    } else if (/coach's challenge \(/i.test(p.type)) {
+      events.push({ kind: /overturned/i.test(p.type) ? 'challenge won' : 'challenge lost', team: (p.text.match(/\[([^\]]+)\]/) || [])[1] || null, player: null, players: [], ...when(p), text: p.text, relevant: false });
     } else if (p.scoring && p.period < finalPeriod && p.cs <= 1) {
-      events.push({ kind: 'end-of-period buzzer basket', ...who(p), ...when(p), text: p.text });
+      events.push({ kind: 'end-of-period buzzer basket', player: names.get(p.ids[0]) || null, players: [names.get(p.ids[0])].filter(Boolean), team: teamOf.get(p.ids[0]) || null, ...when(p), text: p.text, relevant: false });
     }
   }
   // a late scoring play at the final horn that did not decide the game is still color
@@ -53,9 +62,9 @@ export function colorCandidates(color) {
   for (const e of color.events) {
     if (e.kind === 'ejection') c.push({ type: 'EJECTION', weight: 55, why: `${e.player || '?'} (${e.team || '?'}) ejected, ${e.periodName} ${e.clock}`, evidence: 'pbp' });
     if (e.kind === 'flagrant 2') c.push({ type: 'FLAGRANT', weight: 45, why: `flagrant 2 on ${e.player || '?'}, ${e.periodName} ${e.clock}`, evidence: 'pbp' });
-    if (e.kind === 'double technical') c.push({ type: 'SCUFFLE', weight: 45, why: `double technical (${e.player || '?'}), ${e.periodName} ${e.clock} — check for a confrontation`, evidence: 'pbp' });
+    if (e.kind === 'double technical' && e.relevant) c.push({ type: 'SCUFFLE', weight: 45, why: `double technical (${e.players.join(' and ')}), ${e.periodName} ${e.clock}`, evidence: 'pbp' });
   }
-  const clutchTechs = color.events.filter((e) => e.clutch && /technical/.test(e.kind));
-  if (clutchTechs.length >= 2) c.push({ type: 'HEATED_FINISH', weight: 40, why: `${clutchTechs.length} technicals in the last five minutes (${clutchTechs.map((e) => e.player).join(', ')})`, evidence: 'pbp' });
+  const clutchTechs = color.events.filter((e) => e.relevant && /technical/.test(e.kind));
+  if (clutchTechs.length >= 2) c.push({ type: 'HEATED_FINISH', weight: 40, why: `${clutchTechs.length} technicals in the last five minutes (${clutchTechs.flatMap((e) => e.players).join(', ')})`, evidence: 'pbp' });
   return c;
 }

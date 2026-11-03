@@ -4,7 +4,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadConfig, dayDir } from '../src/pipeline.js';
-import { telegramReady, sendTelegram, itemMessage } from '../src/notify.js';
+import { telegramReady, sendTelegram, itemMessage, heldAlert } from '../src/notify.js';
 
 const date = process.argv[2];
 if (!/^\d{8}$/.test(date || '')) throw new Error('usage: node scripts/resend.js YYYYMMDD');
@@ -17,7 +17,7 @@ const end = (it) => items.find((x) => x.gameId === it.gameId && x.mode === 'game
 items.sort((a, b) => String(end(a)).localeCompare(String(end(b))) || (a.mode === 'game' ? -1 : 1));
 let sent = 0;
 for (const it of items.filter((x) => x.draft)) {
-  await sendTelegram(cfg.env, itemMessage(it, cfg.pageUrl));
+  await sendTelegram(cfg.env, itemMessage(it) || heldAlert(it));
   sent++;
   await new Promise((r) => setTimeout(r, 1500)); // stay well under Telegram's per-chat rate limit
 }

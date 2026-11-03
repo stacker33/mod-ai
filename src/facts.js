@@ -287,6 +287,26 @@ function candidates(f) {
   else if (deficit.pts >= 10 && late) add('COMEBACK', 55, `${W.abbr} came back from ${deficit.pts} down (${deficit.at?.periodName})`, 'pbp');
   if (f.clutch.loserLedInLast3min && !wb?.late) add('LATE_COLLAPSE', 60, `${L.abbr} led inside the last three minutes and lost`, 'pbp');
   if (m <= 3 && !wb?.late) add('CLOSE_FINISH', 55, `decided by ${m}`, 'box');
+
+  // season-context angles that the records themselves prove (records are after this game)
+  const rec = (side) => {
+    const r = String(f.teams[side].record || '').match(/^(\d+)-(\d+)$/);
+    return r ? { w: Number(r[1]), l: Number(r[2]) } : null;
+  };
+  const wr = rec(f.result.winner), lr = rec(f.result.loser);
+  // an unbeaten team's first loss outranks an ordinary game-winner or overtime: it is the night's news
+  if (lr && lr.l === 1 && lr.w >= 3) c.push({ type: 'FIRST_LOSS', weight: 95, side: f.result.loser, n: lr.w, why: `${L.abbr} lost for the first time after a ${lr.w}-0 start`, evidence: 'box' });
+  if (wr && wr.w === 1 && wr.l >= 3) c.push({ type: 'FIRST_WIN', weight: 80, side: f.result.winner, n: wr.l, why: `${W.abbr} won for the first time after an 0-${wr.l} start`, evidence: 'box' });
+  if (wr && wr.l === 0 && wr.w >= 4) c.push({ type: 'UNBEATEN', weight: 62, side: f.result.winner, n: wr.w, why: `${W.abbr} stayed unbeaten at ${wr.w}-0`, evidence: 'box' });
+  if (lr && lr.w === 0 && lr.l >= 4) c.push({ type: 'WINLESS', weight: 55, side: f.result.loser, n: lr.l, why: `${L.abbr} still winless at 0-${lr.l}`, evidence: 'box' });
+  // one quarter that decided it
+  f.teams.home.periods.forEach((h, i) => {
+    const a = f.teams.away.periods[i];
+    if (Math.abs(h - a) >= 18) {
+      const side = h > a ? 'home' : 'away';
+      c.push({ type: 'DOMINANT_QUARTER', weight: side === f.result.winner ? 58 : 40, side, period: i + 1, score: { home: h, away: a }, why: `${f.teams[side].abbr} won period ${i + 1} by ${Math.abs(h - a)}`, evidence: 'box' });
+    }
+  });
   if (m >= 25) add('BLOWOUT', 45, `won by ${m}`, 'box');
 
   for (const side of ['home', 'away']) {
