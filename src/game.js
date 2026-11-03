@@ -3,9 +3,12 @@
 import { buildFacts } from './facts.js';
 import { gameColor, colorCandidates } from './color.js';
 import { buildPlayerFacts } from './player.js';
+import { buildContext } from './context.js';
+import { rankStory } from './story.js';
 
 // names: Map espnId -> {he, status, approved} from config/names.he.json
-export function analyzeGame(summary, { israelis = [], histories = new Map(), schedules = new Map(), names = new Map() } = {}) {
+// context: what context.fetchContext returned (schedules, head-to-head, game logs); empty = no context facts
+export function analyzeGame(summary, { israelis = [], histories = new Map(), schedules = new Map(), names = new Map(), context = {} } = {}) {
   const f = buildFacts(summary, { israelis });
   const missing = [];
   for (const side of ['home', 'away']) {
@@ -18,7 +21,10 @@ export function analyzeGame(summary, { israelis = [], histories = new Map(), sch
   }
   f.namesMissing = missing;
   f.color = gameColor(summary, f);
-  f.candidates = [...f.candidates, ...colorCandidates(f.color)].sort((a, b) => b.weight - a.weight);
+  // GAME FACTS (facts.js, color.js) and CONTEXT FACTS (context.js) stay separate until story selection
+  f.contextFacts = buildContext(f, context);
+  f.story = rankStory([...f.candidates, ...colorCandidates(f.color)], f.contextFacts);
+  f.candidates = f.story.ranked;
   const teams = [f.teams.home.abbr, f.teams.away.abbr];
   f.tracks = israelis
     .filter((p) => teams.includes(p.team) || f.israelis.some((i) => i.id === p.id))

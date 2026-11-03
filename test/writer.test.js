@@ -118,7 +118,8 @@ test('F. a standard recap has at most 2 body paragraphs', () => {
   const r = check(f, draft, b);
   assert.ok(codes(r).includes('length'));
   assert.equal(autoFix(draft, r.issues).paragraphs.length, 2);
-  assert.equal(gameBrief(game('401909914')).max_paragraphs, 3); // first loss of an unbeaten team = featured
+  // round 2: every standard recap is 2 paragraphs, featured or not (3 only when an Israeli played — test J)
+  assert.equal(gameBrief(game('401909914')).max_paragraphs, 2);
 });
 
 // ---------- G. story hierarchy ----------
@@ -150,7 +151,7 @@ test('score written from the wrong team is caught (BKN @ BOS)', () => {
 
 test('halftime is a partial score: subject first, and the verb must fit (DET @ NY, NY led 51-50)', () => {
   const f = oldFacts('401909878');
-  assert.equal(gameBrief(f).halftime_clause, 'ניקס הובילה במחצית 51:50');
+  assert.equal(gameBrief(f).halftime_clause, 'הניקס הובילו במחצית 51:50'); // plural nickname, plural verb
   assert.deepEqual(codes(check(f, { paragraphs: ['ניו יורק הובילה במחצית 51:50.'] })), []);
   assert.ok(codes(check(f, { paragraphs: ['ניו יורק פיגרה במחצית 51:50.'] })).includes('verb-score'));
   assert.ok(codes(check(f, { paragraphs: ['ניו יורק הובילה במחצית 50:51.'] })).includes('score-order'));

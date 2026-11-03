@@ -5,7 +5,7 @@
 // Things the data cannot tell us (career/season highs, injury severity, quotes, standings meaning)
 // are listed in `research` — never asserted.
 
-import { heTeam } from './teams.js';
+import { heTeam, isPlural } from './teams.js';
 
 export const SCHEMA = 1;
 
@@ -186,18 +186,73 @@ function spurts(plays, minDiff = 10, maxWindow = 360) {
       if (taken.length === 3) break;
     }
     for (const c of taken) {
+      const scoreBefore = { home: c.before.home, away: c.before.away };
+      const scoreAfter = { home: sc[c.b].home, away: sc[c.b].away };
       found.push({
         side: c.side,
         for: c.for,
         against: c.against,
         from: at(sc[c.a]),
         to: at(sc[c.b]),
-        scoreBefore: { home: c.before.home, away: c.before.away },
-        scoreAfter: { home: sc[c.b].home, away: sc[c.b].away },
+        scoreBefore,
+        scoreAfter,
+        // the structured run: everything needed to reproduce it from the play-by-play (validateRun)
+        points_for: c.for,
+        points_against: c.against,
+        start_period: sc[c.a].period,
+        start_clock: sc[c.a].clockText,
+        end_period: sc[c.b].period,
+        end_clock: sc[c.b].clockText,
+        end_seconds_left: sc[c.b].cs,
+        start_index: sc[c.a].i,
+        end_index: sc[c.b].i,
+        score_before: scoreBefore,
+        score_after: scoreAfter,
+        // nobody scored again in that period after the run / the run was the period's first points
+        closes_period: !sc.slice(c.b + 1).some((p) => p.period === sc[c.b].period),
+        opens_period: sc[c.a].period === sc[c.b].period && (c.a === 0 || sc[c.a - 1].period !== sc[c.a].period),
       });
     }
   }
   return found.sort((x, y) => y.for - y.against - (x.for - x.against));
+}
+
+// A run is only used when the play-by-play reproduces it: same start/end plays, same points both ways.
+export function validateRun(plays, run) {
+  const sc = plays.filter((p) => p.scoring && p.side);
+  const a = sc.findIndex((p) => p.i === run.start_index);
+  const b = sc.findIndex((p) => p.i === run.end_index);
+  if (a < 0 || b < a || sc[a].side !== run.side || sc[b].side !== run.side) return false;
+  const before = a > 0 ? sc[a - 1] : { home: 0, away: 0 };
+  const other = run.side === 'home' ? 'away' : 'home';
+  return sc[b][run.side] - before[run.side] === run.points_for && sc[b][other] - before[other] === run.points_against
+    && before.home === run.score_before.home && before.away === run.score_before.away
+    && sc[b].home === run.score_after.home && sc[b].away === run.score_after.away;
+}
+
+// Game-state checkpoints for narrative checks: did each side lead at any moment of each period, and
+// every scoring play with the score before and after it (for tie / go-ahead / lead-cut claims).
+function gameStates(plays) {
+  const sc = plays.filter((p) => p.scoring && p.side);
+  const periods = Math.max(0, ...plays.map((p) => p.period));
+  const periodLead = [];
+  let cur = { home: 0, away: 0 };
+  for (let p = 1; p <= periods; p++) {
+    const st = { period: p, homeLed: cur.home > cur.away && p > 1, awayLed: cur.away > cur.home && p > 1 };
+    for (const x of sc.filter((y) => y.period === p)) {
+      if (x.home > x.away) st.homeLed = true;
+      if (x.away > x.home) st.awayLed = true;
+      cur = { home: x.home, away: x.away };
+    }
+    periodLead.push(st);
+  }
+  let prev = { home: 0, away: 0 };
+  const moments = sc.map((x) => {
+    const m = { period: x.period, secondsLeft: x.cs, clock: x.clockText, side: x.side, points: x.value, before: prev, after: { home: x.home, away: x.away } };
+    prev = m.after;
+    return m;
+  });
+  return { periodLead, moments };
 }
 
 // score after the last play that happened with more than `secondsLeft` on the clock in `period`
@@ -273,20 +328,22 @@ function clutch(plays, winner, finalPeriod) {
 function candidates(f) {
   const c = [];
   const W = f.teams[f.result.winner], L = f.teams[f.result.loser];
-  const add = (type, weight, why, evidence) => c.push({ type, weight, why, evidence });
+  // extra: the structured fields the Hebrew angle is rendered from (brief.js angleHe)
+  const add = (type, weight, why, evidence, extra = {}) => c.push({ type, weight, why, evidence, ...extra });
   const m = f.result.margin;
   const wb = f.clutch.winningBasket;
 
-  if (wb?.late) add(wb.buzzer ? 'BUZZER_BEATER' : 'GAME_WINNER', wb.buzzer ? 100 : 92, `${wb.player || W.name} put ${W.abbr} ahead for good with ${wb.secondsLeftInPeriod}s left`, 'pbp');
-  if (f.clutch.tyingShotToOT && f.clutch.tyingShotToOT.secondsLeftInPeriod <= 30) add('FORCED_OT', 75, `${f.clutch.tyingShotToOT.player || 'tying basket'} tied it with ${f.clutch.tyingShotToOT.secondsLeftInPeriod}s left in regulation`, 'pbp');
-  if (f.clutch.overtimes) add('OVERTIME', 60 + 10 * f.clutch.overtimes, `${f.clutch.overtimes} overtime period(s)`, 'box');
+  if (wb?.late) add(wb.buzzer ? 'BUZZER_BEATER' : 'GAME_WINNER', wb.buzzer ? 100 : 92, `${wb.player || W.name} put ${W.abbr} ahead for good with ${wb.secondsLeftInPeriod}s left`, 'pbp', { side: f.result.winner, player: wb?.player || null });
+  if (f.clutch.tyingShotToOT && f.clutch.tyingShotToOT.secondsLeftInPeriod <= 30) add('FORCED_OT', 75, `${f.clutch.tyingShotToOT.player || 'tying basket'} tied it with ${f.clutch.tyingShotToOT.secondsLeftInPeriod}s left in regulation`, 'pbp', { side: f.clutch.tyingShotToOT.side, player: f.clutch.tyingShotToOT.player || null });
+  if (f.clutch.overtimes) add('OVERTIME', 60 + 10 * f.clutch.overtimes, `${f.clutch.overtimes} overtime period(s)`, 'box', { side: f.result.winner, n: f.clutch.overtimes });
   // a deficit is a story when it was big, or when it came after the first quarter
   const deficit = f.flow.largestLead[f.result.loser];
   const late = (deficit.at?.period || 1) >= 2;
-  if (deficit.pts >= 15) add('COMEBACK', 70 + Math.min(20, deficit.pts - 15) + (late ? 5 : 0), `${W.abbr} came back from ${deficit.pts} down (${deficit.at?.periodName})`, 'pbp');
-  else if (deficit.pts >= 10 && late) add('COMEBACK', 55, `${W.abbr} came back from ${deficit.pts} down (${deficit.at?.periodName})`, 'pbp');
-  if (f.clutch.loserLedInLast3min && !wb?.late) add('LATE_COLLAPSE', 60, `${L.abbr} led inside the last three minutes and lost`, 'pbp');
-  if (m <= 3 && !wb?.late) add('CLOSE_FINISH', 55, `decided by ${m}`, 'box');
+  const cb = { side: f.result.winner, pts: deficit.pts };
+  if (deficit.pts >= 15) add('COMEBACK', 70 + Math.min(20, deficit.pts - 15) + (late ? 5 : 0), `${W.abbr} came back from ${deficit.pts} down (${deficit.at?.periodName})`, 'pbp', cb);
+  else if (deficit.pts >= 10 && late) add('COMEBACK', 55, `${W.abbr} came back from ${deficit.pts} down (${deficit.at?.periodName})`, 'pbp', cb);
+  if (f.clutch.loserLedInLast3min && !wb?.late) add('LATE_COLLAPSE', 60, `${L.abbr} led inside the last three minutes and lost`, 'pbp', { side: f.result.loser });
+  if (m <= 3 && !wb?.late) add('CLOSE_FINISH', 55, `decided by ${m}`, 'box', { side: f.result.winner, n: m });
 
   // season-context angles that the records themselves prove (records are after this game)
   const rec = (side) => {
@@ -307,7 +364,7 @@ function candidates(f) {
       c.push({ type: 'DOMINANT_QUARTER', weight: side === f.result.winner ? 58 : 40, side, period: i + 1, score: { home: h, away: a }, why: `${f.teams[side].abbr} won period ${i + 1} by ${Math.abs(h - a)}`, evidence: 'box' });
     }
   });
-  if (m >= 25) add('BLOWOUT', 45, `won by ${m}`, 'box');
+  if (m >= 25) add('BLOWOUT', 45, `won by ${m}`, 'box', { side: f.result.winner, n: m });
 
   for (const side of ['home', 'away']) {
     for (const p of f.players[side]) {
@@ -315,15 +372,28 @@ function candidates(f) {
       const fl = p.flags;
       const won = side === f.result.winner;
       const base = won ? 0 : -5;
-      if (fl.includes('triple-double')) add('TRIPLE_DOUBLE', 70 + base, `${p.name}: ${p.pts}/${p.reb}/${p.ast}`, 'box');
-      if (fl.includes('50+ points')) add('BIG_SCORING', 95 + base, `${p.name}: ${p.pts} points`, 'box');
-      else if (fl.includes('40+ points')) add('BIG_SCORING', 75 + base, `${p.name}: ${p.pts} points`, 'box');
-      if (p.pts >= 20 && p.reb >= 20) add('UNUSUAL_STAT_LINE', 65 + base, `${p.name}: ${p.pts} points, ${p.reb} rebounds`, 'box');
-      if (fl.includes('ejected')) add('EJECTION', 50, `${p.name} was ejected`, 'box');
+      const px = { side, player: p.name, pts: p.pts, reb: p.reb, ast: p.ast };
+      if (fl.includes('triple-double')) add('TRIPLE_DOUBLE', 70 + base, `${p.name}: ${p.pts}/${p.reb}/${p.ast}`, 'box', px);
+      if (fl.includes('50+ points')) add('BIG_SCORING', 95 + base, `${p.name}: ${p.pts} points`, 'box', px);
+      else if (fl.includes('40+ points')) add('BIG_SCORING', 75 + base, `${p.name}: ${p.pts} points`, 'box', px);
+      if (p.pts >= 20 && p.reb >= 20) add('UNUSUAL_STAT_LINE', 65 + base, `${p.name}: ${p.pts} points, ${p.reb} rebounds`, 'box', px);
+      if (fl.includes('ejected')) add('EJECTION', 50, `${p.name} was ejected`, 'box', px);
     }
   }
+  // a team that had only a handful of players on the floor is news on its own (box score: who played)
+  for (const side of ['home', 'away']) {
+    const n = f.players[side].filter((p) => p.played).length;
+    if (n > 0 && n <= 7) {
+      const close = side === f.result.winner || m <= 6;
+      c.push({ type: 'SHORT_ROSTER', weight: close ? 88 : 72, side, n, why: `${f.teams[side].abbr} played with only ${n} players`, evidence: 'box' });
+    }
+  }
+  // the winner's run that decided the last five minutes
+  // (only when the game was still close as it began — not padding in a blowout)
+  const lateRun = f.flow.spurts.find((s) => s.side === f.result.winner && s.end_period === f.clutch.finalPeriod && s.end_seconds_left <= 300 && s.for - s.against >= 8 && Math.abs(s.score_before.home - s.score_before.away) <= 8);
+  if (lateRun) c.push({ type: 'DECISIVE_RUN', weight: 62, side: lateRun.side, run: lateRun, why: `${W.abbr} ${lateRun.for}-${lateRun.against} run late in the game`, evidence: 'pbp' });
   for (const s of f.flow.spurts.slice(0, 1)) {
-    if (s.for - s.against >= 15) add('MAJOR_RUN', 45, `${f.teams[s.side].abbr} ${s.for}-${s.against} run (${s.from.periodName} ${s.from.clock} to ${s.to.periodName} ${s.to.clock})`, 'pbp');
+    if (s.for - s.against >= 15) add('MAJOR_RUN', 45, `${f.teams[s.side].abbr} ${s.for}-${s.against} run (${s.from.periodName} ${s.from.clock} to ${s.to.periodName} ${s.to.clock})`, 'pbp', { side: s.side, run: s });
   }
   for (const i of f.israelis) {
     if (i.played) add('ISRAELI_ANGLE', 85, `${i.name} (${i.team}): ${i.pts} pts, ${i.reb} reb, ${i.ast} ast in ${i.min} min`, 'box');
@@ -331,7 +401,7 @@ function candidates(f) {
   }
   // fallback so every game has a top performer candidate
   const top = [...f.players.home, ...f.players.away].filter((p) => p.played).sort((a, b) => b.pts - a.pts)[0];
-  if (top) add('TOP_PERFORMER', 40, `${top.name}: ${top.pts} points`, 'box');
+  if (top) add('TOP_PERFORMER', 40, `${top.name}: ${top.pts} points`, 'box', { side: f.players.home.includes(top) ? 'home' : 'away', player: top.name, pts: top.pts });
   return c.sort((a, b) => b.weight - a.weight);
 }
 
@@ -400,6 +470,7 @@ export function buildFacts(summary, { israelis = [], fetchedAt = new Date().toIS
     name: c.team.displayName,
     he: heTeam(c.team.abbreviation, true),
     heShort: heTeam(c.team.abbreviation),
+    plural: isPlural(c.team.abbreviation),
     score: Number(c.score),
     periods: (c.linescores || []).map((l) => Number(l.displayValue)),
     record: (c.record || []).find((r) => r.type === 'total')?.summary || '',
@@ -438,8 +509,11 @@ export function buildFacts(summary, { israelis = [], fetchedAt = new Date().toIS
   const plays = normPlays(summary.plays, names, H.team.id);
   const finalPeriod = Math.max(f.teams.home.periods.length, plays.at(-1)?.period || REG_PERIODS);
   f.flow = plays.length
-    ? { available: true, quality: plays.quality, ...leadFlow(plays), spurts: spurts(plays), finalScore: { home: plays.at(-1).home, away: plays.at(-1).away } }
+    ? { available: true, quality: plays.quality, ...leadFlow(plays), ...gameStates(plays), finalScore: { home: plays.at(-1).home, away: plays.at(-1).away } }
     : { available: false, largestLead: { home: { pts: f.teamStats.home.largestLead ?? 0 }, away: { pts: f.teamStats.away.largestLead ?? 0 } }, leadChanges: null, ties: null, spurts: [] };
+  // runs: only the ones the play-by-play reproduces
+  if (plays.length) f.flow.spurts = spurts(plays).filter((r) => validateRun(plays, r));
+  f.result.q1 = { home: f.teams.home.periods[0] ?? 0, away: f.teams.away.periods[0] ?? 0 };
   f.clutch = plays.length ? clutch(plays, winner, finalPeriod) : { finalPeriod, overtimes: Math.max(0, finalPeriod - REG_PERIODS), winningBasket: null, tyingShotToOT: null, finalSequence: [] };
 
   // context from ESPN structured data (not box score) — labelled as such

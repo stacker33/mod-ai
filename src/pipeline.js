@@ -1,5 +1,15 @@
 // One game at a time: ESPN summary -> facts -> Hebrew drafts -> files, and the night's closing page
 // rebuilt from whatever games are done so far. Used by scripts/tick.js (live) and scripts/write.js (backfill).
+//
+// FACTS FIRST -> STORY SELECTION -> NATURAL HEBREW -> VALIDATION -> PUBLICATION
+//   1-4  parse, names, game facts, play-by-play facts (runs, checkpoints)   facts.js, color.js, game.js
+//   5    verified external context (streaks, head-to-head, highs)          context.js
+//   6-7  candidate angles, ranked                                          story.js
+//   8    Hebrew from structured facts only                                 writer/brief.js, prompt.js
+//   9    deterministic factual validation, code fixes                      writer/verify.js, narrative.js
+//   10   language-only proofreading                                        proofread() below
+//   11   facts re-checked after the language edit                          factPrint() + verifyDraft
+//   12   publish (held only if a contradiction or nothing usable is left)  notify.js, scripts/tick.js
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -8,9 +18,10 @@ import { getSummary, getTeamSchedule } from './espn.js';
 import { playerHistory } from './gamelog.js';
 import { analyzeGame } from './game.js';
 import { gameBrief, playerBrief, FEATURED } from './writer/brief.js';
-import { buildPrompt, schemaFor } from './writer/prompt.js';
+import { buildPrompt, proofPrompt, schemaFor } from './writer/prompt.js';
 import { generateJSON } from './writer/gemini.js';
-import { verifyDraft, autoFix } from './writer/verify.js';
+import { verifyDraft, autoFix, draftText } from './writer/verify.js';
+import { fetchContext } from './context.js';
 import { nightHe } from './writer/he.js';
 import { NICK_HE } from './teams.js';
 
@@ -27,6 +38,7 @@ export function loadConfig() {
     env,
     pageUrl: env.PAGE_URL || null,
     ai: { key: env.GEMINI_API_KEY, model: env.AI_MODEL || 'gemini-flash-latest', fallback: env.AI_MODEL_FALLBACK },
+    proofread: env.AI_PROOFREAD !== '0', // the language-only pass (one more model call per item)
     israelis: readJson(join(ROOT, 'config', 'israelis.json')).players,
     dict: readJson(join(ROOT, 'config', 'names.he.json')).players,
   };
@@ -48,7 +60,11 @@ export async function factsForGame(date, gameId, cfg) {
     if (!schedules.has(p.team)) try { schedules.set(p.team, await getTeamSchedule(p.team)); } catch { /* no next game */ }
   }
   const names = new Map(cfg.dict.map((p) => [p.id, p]));
-  const f = analyzeGame(s, { israelis: cfg.israelis, histories, schedules, names });
+  // CONTEXT FACTS (streaks, head-to-head, highs) from schedules and game logs; a failed fetch = no such fact
+  let context = {};
+  try { context = await fetchContext(s, { cacheDir: join(ROOT, 'cache') }); } catch (e) { context = { errors: [e.message] }; }
+  const f = analyzeGame(s, { israelis: cfg.israelis, histories, schedules, names, context });
+  f.contextErrors = context.errors || [];
   f.endedAt = s.plays?.at(-1)?.wallclock || null;
   writeFileSync(join(dir, `${gameId}.json`), JSON.stringify(f, null, 2));
   return f;
@@ -85,17 +101,42 @@ async function writeItem(cfg, mode, brief, f) {
     if (!check.issues.length) break;
     if (round < 3) messages.push({ role: 'model', text: res.text }, { role: 'user', text: `הטיוטה לא עברה את הבדיקה. תקן רק את אלה והחזר את כל ה-JSON מחדש:\n- ${check.errors.join('\n- ')}` });
   }
-  // still contradicting the data after the model's rounds: fix in code (swap / drop the sentence / trim)
-  if (!last.check.ok) {
-    const fixed = autoFix(last.draft, last.check.issues);
-    const again = verifyDraft(fixed, brief, names, ctx);
-    last.autoFixed = last.check.issues.filter((i) => i.severity === 'block').map((i) => i.msg);
-    last.draft = fixed;
-    last.check = again;
+  // still contradicting the data after the model's rounds: fix in code — only the failing claim goes
+  // (swap a pair, drop that sentence, rejoin a split paragraph, trim), then check again
+  last.autoFixed = [];
+  for (let pass = 0; pass < 3 && !last.check.ok; pass++) {
+    last.autoFixed.push(...last.check.issues.filter((i) => i.severity === 'block').map((i) => i.msg));
+    last.draft = autoFix(last.draft, last.check.issues, brief);
+    last.check = verifyDraft(last.draft, brief, names, ctx);
   }
-  // a known contradiction is never published
-  last.held = !last.check.ok;
+  // held only when a contradiction is left, or nothing usable is left after removing the bad claims
+  last.held = !last.check.ok || !last.draft.headline || !(last.draft.paragraphs || []).length;
+  // language-only proofreading; thrown away if it touches any fact
+  if (!last.held && cfg.proofread) {
+    try {
+      const p = await proofread(cfg, mode, last.draft, brief, names, ctx);
+      last.proofread = p.note;
+      if (p.applied) { last.draft = p.draft; last.check = p.check; }
+    } catch (e) { last.proofread = `לא רץ: ${e.message.slice(0, 80)}`; }
+  }
   return last;
+}
+
+// the facts of a draft, for comparing before / after language editing: every number and score, every name
+function factPrint(draft, names) {
+  const t = draftText(draft);
+  return JSON.stringify([(t.match(/\d+(?::\d+)?/g) || []).sort(), names.filter((n) => n.he && t.includes(n.he)).map((n) => n.he).sort()]);
+}
+
+async function proofread(cfg, mode, draft, brief, names, ctx) {
+  const { system, user } = proofPrompt(mode, draft);
+  const res = await generateJSON({ ...cfg.ai, system, messages: [{ role: 'user', text: user }], schema: schemaFor(mode), temperature: 0.2 });
+  const d = res.data;
+  if (factPrint(d, names) !== factPrint(draft, names)) return { applied: false, note: 'ההגהה שינתה מספר / תוצאה / שם — נזרקה' };
+  if ((d.paragraphs || []).length > (draft.paragraphs || []).length) return { applied: false, note: 'ההגהה הוסיפה פסקה — נזרקה' };
+  const check = verifyDraft(d, brief, names, ctx);
+  if (!check.ok) return { applied: false, note: 'ההגהה יצרה סתירה — נזרקה' };
+  return { applied: true, draft: d, check, note: `הוגה (${res.model})` };
 }
 
 // editor-only notes (the page shows them beside the draft; they are never part of the copyable text)
@@ -103,8 +144,9 @@ const checkBox = (it) => {
   const o = ['', '> **לעורך (לא להעתקה):**'];
   const issues = it.check.issues || []; // drafts written before the validation layer have no issue list
   if (it.held) o.push(`> ⛔ לא פורסם — סתירה לנתונים שלא תוקנה: ${issues.filter((i) => i.severity === 'block').map((i) => i.msg).join('; ')}`);
-  else if (it.check.issues) o.push('> נבדקו מול ESPN: תוצאה, רבעים, מאזנים, מספרים, סדר תוצאות, שמות, שיאים/רצפים (רק אם אומתו), אורך');
+  else if (it.check.issues) o.push('> נבדקו מול ESPN: תוצאה, רבעים, מאזנים, מספרים, סדר תוצאות, שמות, מי עשה מה (שחקן/קבוצה), מהלך המשחק מול התוצאה במחצית ובסיום הרבעים, שוויון/יתרון/סל ניצחון/באזר, ריצות, שיאים/רצפים (רק אם אומתו), עברית שבורה, אורך');
   if (it.autoFixed?.length) o.push(`> 🔧 תוקן אוטומטית: ${it.autoFixed.join('; ')}`);
+  if (it.proofread) o.push(`> 🔤 הגהה: ${it.proofread}`);
   const style = issues.filter((i) => i.severity === 'style');
   if (style.length) o.push(`> ✍️ ניסוח לבדיקה: ${style.map((i) => i.msg).join('; ')}`);
   if (it.angle) o.push(`> 🎯 זווית: ${it.angle.fact_he}`);
@@ -125,9 +167,9 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   const game = await writeItem(cfg, 'game', gb, f);
   Object.assign(game, { heading: gb.heading, end: f.endedAt || f.date, weight: f.candidates[0]?.weight || 0, angle: gb.main_angle, corrected, leads: { highlights: f.color?.highlights || [], unverified: f.research, namesMissing: f.namesMissing } });
   items.push(game);
-  log(`  block ${game.held ? 'HELD' : game.autoFixed ? 'ok (auto-fixed)' : 'ok'} (${game.rounds} rounds, ${game.model})`);
+  log(`  block ${game.held ? 'HELD' : game.autoFixed?.length ? 'ok (auto-fixed)' : 'ok'} (${game.rounds} rounds, ${game.model})`);
   if (game.weight >= FEATURED) {
-    const a = await writeItem(cfg, 'article', { ...gb, max_paragraphs: 6 }, f);
+    const a = await writeItem(cfg, 'article', { ...gb, max_paragraphs: 3 }, f);
     Object.assign(a, { heading: gb.heading, corrected });
     items.push(a);
     log(`  big-game article ${a.held ? 'HELD' : 'ok'}`);
@@ -135,7 +177,7 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   for (const t of f.tracks || []) {
     if (!t.inGame || !t.played || !t.ok) continue; // did not play -> the normal block covers the game
     const mode = t.player.track === 'full' ? 'player' : 'short';
-    const it = await writeItem(cfg, mode, playerBrief(f, t), f);
+    const it = await writeItem(cfg, mode, { ...playerBrief(f, t), max_paragraphs: mode === 'player' ? 3 : 2 }, f);
     Object.assign(it, { player: t.player, corrected });
     items.push(it);
     log(`  ${mode} ${t.player.name} ${it.held ? 'HELD' : 'ok'} (${it.rounds} rounds)`);

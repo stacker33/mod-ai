@@ -3,15 +3,23 @@ const TEAMS = {
   ATL: ['אטלנטה', 'אטלנטה'], BOS: ['בוסטון', 'בוסטון'], BKN: ['ברוקלין', 'ברוקלין'], CHA: ['שארלוט', 'שארלוט'],
   CHI: ['שיקגו', 'שיקגו'], CLE: ['קליבלנד', 'קליבלנד'], DAL: ['דאלאס', 'דאלאס'], DEN: ['דנבר', 'דנבר'],
   DET: ['דטרויט', 'דטרויט'], GS: ['גולדן סטייט', 'גולדן סטייט'], GSW: ['גולדן סטייט', 'גולדן סטייט'], HOU: ['יוסטון', 'יוסטון'],
-  IND: ['אינדיאנה', 'אינדיאנה'], LAC: ["לוס אנג'לס קליפרס", 'קליפרס'], LAL: ["לוס אנג'לס לייקרס", 'לייקרס'],
+  IND: ['אינדיאנה', 'אינדיאנה'], LAC: ["לוס אנג'לס קליפרס", 'הקליפרס'], LAL: ["לוס אנג'לס לייקרס", 'הלייקרס'],
   MEM: ['ממפיס', 'ממפיס'], MIA: ['מיאמי', 'מיאמי'], MIL: ['מילווקי', 'מילווקי'], MIN: ['מינסוטה', 'מינסוטה'],
-  NO: ['ניו אורלינס', 'ניו אורלינס'], NOP: ['ניו אורלינס', 'ניו אורלינס'], NY: ['ניו יורק', 'ניקס'], NYK: ['ניו יורק', 'ניקס'],
+  NO: ['ניו אורלינס', 'ניו אורלינס'], NOP: ['ניו אורלינס', 'ניו אורלינס'], NY: ['ניו יורק', 'הניקס'], NYK: ['ניו יורק', 'הניקס'],
   OKC: ['אוקלהומה סיטי', 'אוקלהומה סיטי'], ORL: ['אורלנדו', 'אורלנדו'], PHI: ['פילדלפיה', 'פילדלפיה'], PHX: ['פיניקס', 'פיניקס'],
   POR: ['פורטלנד', 'פורטלנד'], SAC: ['סקרמנטו', 'סקרמנטו'], SA: ['סן אנטוניו', 'סן אנטוניו'], SAS: ['סן אנטוניו', 'סן אנטוניו'],
   TOR: ['טורונטו', 'טורונטו'], UTAH: ['יוטה', 'יוטה'], UTA: ['יוטה', 'יוטה'], WSH: ['וושינגטון', 'וושינגטון'], WAS: ['וושינגטון', 'וושינגטון'],
 };
 
 export const heTeam = (abbr, full = false) => (TEAMS[abbr] ? TEAMS[abbr][full ? 0 : 1] : null);
+
+// teams whose short name is a plural nickname ("הקליפרס ניצחו"); every other short name is a city (feminine)
+const PLURAL = new Set(['LAC', 'LAL', 'NY', 'NYK']);
+export const isPlural = (abbr) => PLURAL.has(abbr);
+// the verb form that agrees with the team's short name: v(abbr, 'ניצחה', 'ניצחו')
+export const v = (abbr, fem, plural) => (isPlural(abbr) ? plural : fem);
+// "ל" + name ("לבוסטון", "לקליפרס")
+export const withLamed = (name) => `ל${name.startsWith('ה') ? name.slice(1) : name}`;
 
 // how Sport5 refers to a team besides its name (plural nicknames take plural verbs)
 export const NICK_HE = {

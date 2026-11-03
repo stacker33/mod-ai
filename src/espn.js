@@ -43,7 +43,9 @@ export async function getSummary(gameId) {
   return getJson(`${BASE}/summary?event=${gameId}`);
 }
 
-// team schedule for the current season (results so far + upcoming games)
-export async function getTeamSchedule(abbr) {
-  return getJson(`${BASE}/teams/${abbr.toLowerCase()}/schedule`);
+// team schedule for the current season (results so far + upcoming games); a past season by its end year
+// (2026 = 2025-26) and season type (2 regular, 3 playoffs)
+export async function getTeamSchedule(abbr, { season = null, seasonType = null } = {}) {
+  const q = [season && `season=${season}`, seasonType && `seasontype=${seasonType}`].filter(Boolean).join('&');
+  return getJson(`${BASE}/teams/${abbr.toLowerCase()}/schedule${q ? `?${q}` : ''}`);
 }

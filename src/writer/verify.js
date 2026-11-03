@@ -8,13 +8,15 @@
 // The checks look for the pre-rendered strings the brief hands the model (records, quarter clauses,
 // per-team scores), so they compare strings instead of trying to parse Hebrew grammar.
 
+import { narrativeChecks } from './narrative.js';
+
 const NUM = /\d+(?:\.\d+)?/g;
 const PAIR = /\d+:\d+/g;
 const LATIN_OK = new Set(['NBA', 'LA', 'MVP', 'TD', 'W']);
 const SENT = /[^.!?\n]+[.!?]?/g;
 
 export function allowedFrom(brief) {
-  const s = JSON.stringify(brief, (k, v) => (k === 'states' ? undefined : v));
+  const s = JSON.stringify(brief, (k, v) => (k === 'states' || k.startsWith('_') ? undefined : v));
   return { numbers: new Set(s.match(NUM) || []), pairs: new Set(s.match(PAIR) || []) };
 }
 
@@ -22,7 +24,8 @@ export function allowedFrom(brief) {
 const GATES = [
   { flag: 'season_high', re: /שיא (ה)?עונה|שיא עונתי|השיא העונתי|השיא שלו העונה/ },
   { flag: 'career_high', re: /שיא (ה)?קריירה|שיא אישי|השיא האישי/ },
-  { flag: 'streak', re: /(ניצחונות|הפסדים|ניצחון|הפסד)\s+(\S+\s+)?(רצו[ףפ]\S*|ברציפות)|רצף (של\s+)?(ה)?(ניצחונות|הפסדים)/ }, // ף/פ: "רצוף" ends in a final letter
+  // any streak language at all ("ברציפות", "רצוף"/"רצופים", "רצף"); ף/פ: "רצוף" ends in a final letter
+  { flag: 'streak', re: /ברציפות|רצו[ףפ]|רצופ(ים|ות)|(^|\s)ה?רצף/ },
   { flag: 'standings', re: /בטבלה|במקום ה|ראש (ה)?(מזרח|מערב|טבלה|ליגה)|מוליכת|הפלייאוף|פליי-אין|פלייאין/ },
 ];
 // the same thing said twice ("2 consecutive wins in a row")
@@ -36,6 +39,13 @@ export const BANNED = [
   [/תפקד|תיפקד/, 'הוסיף 19 נקודות מהספסל'],
   [/סיפק (הופעה|תצוגה)|הציג (יכולת|הופעה)/, 'קלע / רשם / הוביל עם'],
   [/עבודה גדולה|רצו בפיץ'|הפכו את הקערה על עורם/, 'משפט קצר וקונקרטי'],
+  // English sports idioms translated word for word
+  [/לא הסתכל(ה|ו)? אחורה/, '"ומשם X השתלטה על המשחק" / "ומשם לא איבדו את היתרון"'],
+  [/הביא(ה|ו)? את (זה|המשחק|הניצחון) הביתה/, '"סגרה את המשחק" / "שמרה על היתרון"'],
+  [/סגר(ה|ו)? את העסקה/, '"סגרה את המשחק"'],
+  [/על הלוח/, '"פתחה את החשבון" / "קלעה ראשונה"'],
+  [/בדרך הקשה/, 'משפט קונקרטי: מה היה קשה'],
+  [/(על|באש)\s+בוערת|עלה באש/, '"היה חם" / "קלע שלשה אחרי שלשה"'],
 ];
 const LEAK = /נבדק|נבדקו|אומת|מאומת|לבדיקת|לעורך|הערת עורך|BRIEF|JSON|https?:|www\.|✅|❌|✏️|🔎|\bQA\b|TODO|\[|\]/;
 
@@ -192,6 +202,8 @@ export function verifyDraft(input, brief, names, ctx = null) {
 
   if (ctx) issues.push(...scoreIssues(text, brief, ctx));
   issues.push(...recordIssues(text, brief, ctx));
+  // entity, narrative vs scoreboard, impossible basketball, runs, broken Hebrew, context, repetition
+  issues.push(...narrativeChecks(draft, text, brief, ctx));
 
   const { numbers, pairs } = allowedFrom(brief);
   const finalScores = (brief.result_for_winner || brief.result_he || brief.game?.result_for_winner || '').match(/(\d+):(\d+)/)?.slice(1).map(Number) || null;
@@ -218,7 +230,7 @@ export function verifyDraft(input, brief, names, ctx = null) {
 
   // a paragraph cut in the middle (an ASCII " inside כ"א splits the model's JSON string)
   (draft.paragraphs || []).forEach((p, i) => {
-    if (/^\s*[,;:.\-–]/.test(p) || (!/[.!?״"'׳)]\s*$/.test(p) && i < draft.paragraphs.length - 1)) push('broken', 'block', `פסקה ${i + 1} נקטעה באמצע: "${p.slice(-30)}"`);
+    if (/^\s*[,;:.\-–]/.test(p) || (!/[.!?״"'׳)]\s*$/.test(p) && i < draft.paragraphs.length - 1)) push('broken', 'block', `פסקה ${i + 1} נקטעה באמצע: "${p.slice(-30)}"`, { type: 'join', index: /^\s*[,;:.\-–]/.test(p) ? i - 1 : i });
   });
 
   // length: a standard block has at most 2 body paragraphs (3 only for a featured game)
@@ -236,9 +248,16 @@ export function verifyDraft(input, brief, names, ctx = null) {
   return { ok: blocking.length === 0, errors: issues.map((i) => i.msg), issues, blocking: blocking.length, toApprove };
 }
 
-// last resort after the model's rounds: apply code fixes, never invent text
-export function autoFix(draft, issues) {
+// last resort after the model's rounds: apply code fixes, never invent text. Only the claim that failed
+// goes (a swapped pair, a dropped sentence); the rest of the recap stays. A dropped headline is replaced
+// by the code-written main angle, never by new prose.
+export function autoFix(draft, issues, brief = null) {
   const d = JSON.parse(JSON.stringify(draft));
+  const join = issues.find((x) => x.severity === 'block' && x.fix?.type === 'join' && x.fix.index >= 0);
+  if (join && d.paragraphs?.[join.fix.index + 1] !== undefined) {
+    const i = join.fix.index;
+    d.paragraphs.splice(i, 2, `${d.paragraphs[i].replace(/["״]\s*$/, '״')}${/^\s*[,;:.]/.test(d.paragraphs[i + 1]) ? '' : ' '}${d.paragraphs[i + 1].trim()}`);
+  }
   const fields = ['headline', 'deck', 'subheadline', 'lead'];
   const edit = (fn) => {
     for (const k of fields) if (typeof d[k] === 'string') d[k] = fn(d[k]);
@@ -250,5 +269,8 @@ export function autoFix(draft, issues) {
   }
   const trim = issues.find((x) => x.fix?.type === 'trim');
   if (trim) d.paragraphs = d.paragraphs.slice(0, trim.fix.keep);
+  for (const k of fields) if (typeof d[k] === 'string') d[k] = d[k].replace(/^[\s,;]+/, '').trim();
+  d.paragraphs = (d.paragraphs || []).map((p) => p.replace(/^[\s,;]+/, '').trim()).filter((p) => /[א-ת]/.test(p));
+  if (!d.headline && brief?.main_angle?.fact_he) d.headline = brief.main_angle.fact_he;
   return d;
 }
