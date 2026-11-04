@@ -18,6 +18,8 @@ const RECHECK_AFTER = 45 * 60e3; // ESPN stat corrections usually land within th
 const RETRY_AFTER = 10 * 60e3;
 const MAX_ATTEMPTS = 6;
 const EVERY = 5 * 60e3;
+// nights whose Telegram messages also show game end -> recap sent (a one-off timing check)
+const TIMING_NIGHTS = new Set(['20261104']);
 
 // the US-Eastern dates that can still have games ending: yesterday and today
 function watchedDates(now = new Date()) {
@@ -91,7 +93,16 @@ async function tickDate(date, cfg) {
         if (recheck) s.correctedAt = now;
         if (telegramReady(cfg.env)) {
           for (const it of items.filter((x) => !x.noSend)) {
-            try { await sendTelegram(cfg.env, itemMessage(it) || heldAlert(it)); } catch (e) { log(`  telegram error: ${e.message.slice(0, 120)}`); }
+            let msg = itemMessage(it) || heldAlert(it);
+            // one trial night only: when the game ended and when the recap went out (editor's request)
+            if (TIMING_NIGHTS.has(date) && f.endedAt) {
+              const il = (t) => new Date(t).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
+              const mins = Math.round((Date.now() - Date.parse(f.endedAt)) / 60e3);
+              msg += `
+
+⏱️ המשחק הסתיים ${il(f.endedAt)} · הסיכום נשלח ${il(Date.now())} (${mins} דקות)`;
+            }
+            try { await sendTelegram(cfg.env, msg); } catch (e) { log(`  telegram error: ${e.message.slice(0, 120)}`); }
           }
           s.notifiedAt = Date.now();
         }
