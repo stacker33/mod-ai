@@ -166,8 +166,9 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   const gb = gameBrief(f);
   const weight = f.candidates[0]?.weight || 0;
   const base = { heading: gb.heading, end: f.endedAt || f.date, weight, angle: gb.main_angle, corrected, leads: { highlights: f.color?.highlights || [], unverified: f.research, namesMissing: f.namesMissing } };
-  const tracks = (f.tracks || []).filter((t) => t.inGame && t.played && t.ok); // did not play -> a normal recap
-  // ONE piece per game (editor, 2026-11-03): when a full-track Israeli (Avdija, Sharp) played, his article IS the game's
+  // Israelis who actually played (box score minutes); one who did not play changes nothing: normal recap
+  const tracks = (f.tracks || []).filter((t) => t.inGame && t.played && t.ok);
+  // ONE piece per game (editor, 2026-11-03/04): when a full-track Israeli (Avdija, Sharp) played, his article IS the game's
   // piece; a big game gets its stand-alone article INSTEAD of the short block. The nightly page then shows
   // that piece's opening. Both are written only when the main piece is held (no other choice).
   let main = null;
@@ -195,20 +196,8 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
     items.push(game);
     log(`  block ${game.held ? 'HELD' : game.autoFixed?.length ? 'ok (auto-fixed)' : 'ok'} (${game.rounds} rounds, ${game.model})`);
   }
-  // a second full-track Israeli in the same game (Avdija vs Sharp) gets his own article too
-  for (const t of tracks.filter((x) => x.player.track === 'full' && x !== full)) {
-    const it = await writeItem(cfg, 'player', { ...playerBrief(f, t), max_paragraphs: 3, final_score_in: 'headline' }, f);
-    Object.assign(it, { player: t.player, corrected });
-    items.push(it);
-    log(`  player ${t.player.name} ${it.held ? 'HELD' : 'ok'} (${it.rounds} rounds, ${it.model})`);
-  }
-  // Wolf / Saraf: a short item next to the normal recap
-  for (const t of tracks.filter((x) => x.player.track !== 'full')) {
-    const it = await writeItem(cfg, 'short', { ...playerBrief(f, t), max_paragraphs: 2, final_score_in: 'headline' }, f);
-    Object.assign(it, { player: t.player, corrected });
-    items.push(it);
-    log(`  short ${t.player.name} ${it.held ? 'HELD' : 'ok'} (${it.rounds} rounds)`);
-  }
+  // Wolf / Saraf (short track) have no piece of their own: the game's one piece includes them
+  // (brief.israelis_featured / other_israelis; the validator adds a missing one's line)
   writeFileSync(join(dd, 'items', `${f.gameId}.json`), JSON.stringify(items, null, 1));
   for (const it of items.filter((x) => x.mode !== 'game' && x.draft)) {
     const name = it.player ? `${it.mode}-${it.player.name.replace(/\W+/g, '-')}-${it.gameId}` : `article-${it.gameId}`;

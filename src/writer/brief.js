@@ -6,7 +6,18 @@ import { heTeam, v } from '../teams.js';
 import { classifyPlay } from '../pbp.js';
 import { pair, partialPair, formatScore, shotActionHe, PLAY_LABEL_HE, recordForms, whenHe, periodNumber, nightHe, fullLineHe, shortLineHe, KIND_HE, PERIOD_HE } from './he.js';
 
-export const FEATURED = 90; // story weight from which a game block may run to 3 paragraphs
+export const FEATURED = 90; // story weight from which a game gets a stand-alone article
+
+// every Israeli who played in this game, as a ready sentence — the game's ONE piece must include each of
+// them (editor, 2026-11-04: Wolf / Saraf / Avdija / Sharp in the same game = one piece, never two)
+export function israeliLines(f, exceptId = null) {
+  return (f.tracks || []).filter((t) => t.inGame && t.played && t.line && t.player.id !== exceptId).map((t) => {
+    const he = t.player.he || t.player.name;
+    const team = heTeam(t.team.abbr) || t.team.he;
+    const line = `${shortLineHe(t.line)} ב-${t.line.min} דקות`;
+    return { player_he: he, team_he: team, line_he: line, sentence_he: `${he} (${team}) סיים עם ${line}` };
+  });
+}
 
 const heOf = (f) => {
   const m = new Map();
@@ -192,6 +203,8 @@ export function gameBrief(f) {
   // standard recap: 2 body paragraphs; 3 only when an Israeli played in the game
   const israeliPlayed = (f.israelis || []).some((i) => i.played);
   b.max_paragraphs = israeliPlayed ? 3 : 2;
+  const isr = israeliLines(f);
+  if (isr.length) b.israelis_featured = isr;
   // the score line above the block already shows the final score: the text does not repeat it
   b.final_score_in = 'heading';
   b.featured = featured;
@@ -263,6 +276,10 @@ export function playerBrief(f, t) {
     opponents: t.opponents.map((m) => ({ name_he: names.get(m.name) || m.name, pts: m.pts, reb: m.reb, ast: m.ast })),
     game: g,
   };
+  // another Israeli in the same game (Wolf next to Avdija, Sharp against Avdija) belongs in this article
+  const others = israeliLines(f, t.player.id);
+  if (others.length) b.other_israelis = others;
+  delete g.israelis_featured;
   b.verified = {
     season_high: ms.includes('SEASON_HIGH'),
     career_high: ms.includes('CAREER_HIGH') || ms.includes('TIES_CAREER_HIGH'),

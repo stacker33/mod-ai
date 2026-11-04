@@ -233,6 +233,12 @@ export function verifyDraft(input, brief, names, ctx = null) {
     if (/^\s*[,;:.\-–]/.test(p) || (!/[.!?״"'׳)]\s*$/.test(p) && i < draft.paragraphs.length - 1)) push('broken', 'block', `פסקה ${i + 1} נקטעה באמצע: "${p.slice(-30)}"`, { type: 'join', index: /^\s*[,;:.\-–]/.test(p) ? i - 1 : i });
   });
 
+  // every Israeli who played must be in the piece (one piece per game); missing -> his line is added
+  for (const x of [...(brief.israelis_featured || []), ...(brief.other_israelis || [])]) {
+    const sur = x.player_he.split(' ').slice(1).join(' ');
+    if (!text.includes(x.player_he) && !(sur.length >= 3 && text.includes(sur))) push('israeli-missing', 'block', `${x.player_he} שיחק ולא מופיע בטקסט — ${x.sentence_he}`, { type: 'append', text: `${x.sentence_he}.` });
+  }
+
   // the final score appears once: in the score line above a block, or in an article's headline
   const fsc = finalOf(brief);
   if (fsc && brief.final_score_in) {
@@ -279,6 +285,10 @@ export function autoFix(draft, issues, brief = null) {
   for (const i of issues.filter((x) => x.severity === 'block' && x.fix)) {
     if (i.fix.type === 'replace') edit((t) => (t.includes(i.fix.sentence) ? t.replace(i.fix.sentence, i.fix.sentence.replace(i.fix.from, i.fix.to)) : t));
     else if (i.fix.type === 'drop') edit((t) => t.replace(i.fix.sentence, ''));
+  }
+  for (const a of issues.filter((x) => x.severity === 'block' && x.fix?.type === 'append')) {
+    if (!d.paragraphs?.length) d.paragraphs = [a.fix.text];
+    else d.paragraphs[0] = `${d.paragraphs[0].trim()} ${a.fix.text}`;
   }
   const head = issues.find((x) => x.severity === 'block' && x.fix?.type === 'headline');
   if (head) d.headline = head.fix.to;

@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { analyzeGame } from '../src/game.js';
-import { gameBrief } from '../src/writer/brief.js';
+import { gameBrief, playerBrief } from '../src/writer/brief.js';
 import { verifyDraft, autoFix } from '../src/writer/verify.js';
 import { formatScore, formatRecord } from '../src/writer/he.js';
 import { classifyPlay, shotType } from '../src/pbp.js';
@@ -165,4 +165,27 @@ test('records unchanged: (W:L) after a team name, L:W after "ירדה למאזן
   const b = gameBrief(game('401909914'));
   assert.ok(b.heading.includes('ממפיס (6:1)'));
   assert.equal(b.records['ממפיס'].after_verb, 'ירדה למאזן 1:6');
+});
+
+// ---------- one piece per game, every Israeli who played inside it (editor, 2026-11-04) ----------
+test('Israelis: one piece per game; every one who played is in it; one who did not play changes nothing', () => {
+  const avdija = { id: '4683021', name: 'Deni Avdija', he: 'דני אבדיה', team: 'POR', track: 'full' };
+  const stand = { id: '6606', name: 'Damian Lillard', he: 'דמיאן לילארד', team: 'POR', track: 'short' }; // stand-in for Wolf
+  const dnp = { id: '4066399', name: 'Micah Potter', he: 'מייקה פוטר', team: 'POR', track: 'short' }; // did not play
+  // short-track only: the normal recap must carry him (and the code adds his line if the writer forgets)
+  const f1 = game('401909918', { israelis: [stand, dnp] });
+  const b1 = gameBrief(f1);
+  assert.deepEqual(b1.israelis_featured.map((x) => x.player_he), ['דמיאן לילארד']);
+  const d = { headline: 'פורטלנד חזרה מפיגור 14', paragraphs: ['פורטלנד ניצחה בדנבר.'] };
+  const r = check(f1, d, b1);
+  assert.ok(codes(r).includes('israeli-missing'));
+  assert.ok(autoFix(d, r.issues, b1).paragraphs[0].includes(b1.israelis_featured[0].sentence_he));
+  // full track + another Israeli in the same game: one article, the other one inside it
+  const f2 = game('401909918', { israelis: [avdija, stand] });
+  const t = f2.tracks.find((x) => x.player.id === avdija.id);
+  const pb = playerBrief(f2, t);
+  assert.deepEqual(pb.other_israelis.map((x) => x.player_he), ['דמיאן לילארד']);
+  assert.equal(pb.game.israelis_featured, undefined);
+  // nobody played: nothing featured
+  assert.equal(gameBrief(game('401909918', { israelis: [dnp] })).israelis_featured, undefined);
 });
