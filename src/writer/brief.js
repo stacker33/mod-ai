@@ -55,6 +55,30 @@ export function runClause(run, f) {
   return `${t} ${vb('רשמה', 'רשמו')} ריצת ${pr} בין ${P(r.start_period)} ${pre('ל', P(r.end_period))}`;
 }
 
+// a notable moment (facts.js notableMoments) as a Hebrew fact
+function momentHe(m, f, names, tn) {
+  const byId = (id) => { for (const s of ['home', 'away']) { const p = f.players[s].find((x) => x.id === id); if (p) return names.get(p.name) || p.he || p.name; } return null; };
+  const vb = (s, fem, pl) => v(f.teams[s].abbr, fem, pl);
+  const other = (s) => (s === 'home' ? 'away' : 'home');
+  switch (m.type) {
+    case 'MISSED_WINNER': {
+      const who = byId(m.player);
+      if (!who) return null;
+      const what = m.shot === 'three' ? 'שלשה' : 'זריקה';
+      const could = m.kind === 'winning' ? 'שהייתה יכולה להכריע את המשחק' : 'שהייתה יכולה לשלוח להארכה';
+      const when = m.regulation ? 'בסיום הזמן החוקי' : m.period > 4 ? 'בסיום ההארכה' : 'בהתקפה האחרונה';
+      return `${who} החטיא ${what} ${m.regulation && m.kind === 'winning' ? 'שהייתה יכולה להכריע את המשחק' : could} ${when}`;
+    }
+    case 'BIG_HALF': { const who = byId(m.playerId); return who ? `${who} קלע ${m.pts} נקודות כבר במחצית הראשונה` : null; }
+    case 'POOR_SHOOTING_TD': { const who = byId(m.playerId); return who ? `${who} רשם טריפל-דאבל, אבל קלע רק ${m.fg[0]} מ-${m.fg[1]} מהשדה` : null; }
+    case 'Q4_COLLAPSE': {
+      const s = m.side;
+      return `${tn(s)} ${vb(s, 'הובילה', 'הובילו')} אחרי שלושה רבעים ${pair(m.after3[s], m.after3[other(s)])}, אבל ${vb(s, 'הפסידה', 'הפסידו')} ${pair(m.q4[s], m.q4[other(s)])} את הרבע האחרון`;
+    }
+    default: return null;
+  }
+}
+
 // the same run as a noun phrase, to sit inside a sentence: "ריצת 3:19 של סן אנטוניו בסיום הרבע השני"
 export function runNoun(run, f) {
   const fp = f.clutch.finalPeriod;
@@ -179,6 +203,9 @@ export function gameBrief(f) {
   b.context_facts = ctxFacts.map((x) => x.fact_he);
   // background from ESPN data, ready in Hebrew: next games, the previous meeting, who was out
   if (f.gameContext) b.context_game = f.gameContext;
+  // the one or two telling details (notable moments, chosen in code by their wow score)
+  const det = (f.notable || []).map((m) => momentHe(m, f, names, tn)).filter(Boolean);
+  if (det.length) b.details = det.slice(0, 2);
 
   if (f.flow.available) {
     b.largest_lead = ['home', 'away'].filter((s) => f.flow.largestLead[s].pts > 0).map((s) => ({ team_he: tn(s), pts: f.flow.largestLead[s].pts, period_he: f.flow.largestLead[s].at ? PERIOD_HE(f.flow.largestLead[s].at.period, fp) : null, score_by_subject: byS(f.flow.largestLead[s].score) }));

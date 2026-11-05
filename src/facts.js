@@ -259,6 +259,42 @@ function gameStates(plays) {
   return { periodLead, moments };
 }
 
+// NOTABLE MOMENTS: the telling details an editor picks — all from data we already have, each with a "wow"
+// score so the brief can hand the writer only the best one or two.
+function notableMoments(plays, f) {
+  const out = [];
+  const fp = Math.max(...plays.map((p) => p.period));
+  const other = (s) => (s === 'home' ? 'away' : 'home');
+  // a missed shot that would have tied or won it, in the last 24 seconds of regulation or of an overtime
+  for (const p of plays) {
+    if (!p.shooting || p.scoring || !p.side || p.period < 4 || p.cs > 24) continue;
+    if (/free throw/i.test(p.type)) continue;
+    const deficit = p[other(p.side)] - p[p.side];
+    const value = /three point/i.test(p.text) || p.shot === 'three' ? 3 : 2;
+    if (deficit < 0 || deficit > value) continue;
+    const kind = deficit === value ? 'tying' : 'winning';
+    const lastPeriod = p.period === fp;
+    // it matters when that team lost, or when it would have ended regulation / an overtime
+    const lost = f.result.loser === p.side;
+    if (!lost && lastPeriod) continue;
+    out.push({ type: 'MISSED_WINNER', side: p.side, player: p.ids[0] || null, period: p.period, secondsLeft: p.cs, shot: value === 3 ? 'three' : 'two', kind, regulation: p.period === 4 && fp > 4, wow: lastPeriod ? 70 : 55 });
+  }
+  // a big first half for one player
+  const firstHalf = new Map();
+  for (const p of plays) if (p.scoring && p.period <= 2 && p.ids[0]) firstHalf.set(p.ids[0], (firstHalf.get(p.ids[0]) || 0) + p.value);
+  for (const [id, pts] of firstHalf) if (pts >= 25) out.push({ type: 'BIG_HALF', playerId: id, pts, wow: 50 + Math.min(20, pts - 25) });
+  // a triple-double on poor shooting
+  for (const side of ['home', 'away']) for (const p of f.players[side]) {
+    if (!p.played || !p.flags?.includes('triple-double') || !p.fg || p.fg[1] < 10) continue;
+    if (p.fg[0] / p.fg[1] < 0.4) out.push({ type: 'POOR_SHOOTING_TD', side, playerId: p.id, fg: p.fg, wow: 45 });
+  }
+  // led after three quarters, then lost the last one big and the game
+  const a3 = f.result.after3, L = f.result.loser;
+  const q4 = { home: f.teams.home.periods[3], away: f.teams.away.periods[3] };
+  if (a3[L] > a3[other(L)] && q4[other(L)] - q4[L] >= 10) out.push({ type: 'Q4_COLLAPSE', side: L, after3: a3, q4, wow: 60 });
+  return out.sort((x, y) => y.wow - x.wow);
+}
+
 // score after the last play that happened with more than `secondsLeft` on the clock in `period`
 function scoreAt(plays, period, secondsLeft) {
   let s = { home: 0, away: 0 };
@@ -383,7 +419,8 @@ function candidates(f) {
       const won = side === f.result.winner;
       const base = won ? 0 : -5;
       const px = { side, player: p.name, pts: p.pts, reb: p.reb, ast: p.ast };
-      if (fl.includes('triple-double')) add('TRIPLE_DOUBLE', 70 + base, `${p.name}: ${p.pts}/${p.reb}/${p.ast}`, 'box', px);
+      const poor = p.fg && p.fg[1] >= 10 && p.fg[0] / p.fg[1] < 0.4;
+      if (fl.includes('triple-double')) add('TRIPLE_DOUBLE', 70 + base - (poor ? 15 : 0), `${p.name}: ${p.pts}/${p.reb}/${p.ast}`, 'box', px);
       if (fl.includes('50+ points')) add('BIG_SCORING', 95 + base, `${p.name}: ${p.pts} points`, 'box', px);
       else if (fl.includes('40+ points')) add('BIG_SCORING', 75 + base, `${p.name}: ${p.pts} points`, 'box', px);
       if (p.pts >= 20 && p.reb >= 20) add('UNUSUAL_STAT_LINE', 65 + base, `${p.name}: ${p.pts} points, ${p.reb} rebounds`, 'box', px);
@@ -525,6 +562,7 @@ export function buildFacts(summary, { israelis = [], fetchedAt = new Date().toIS
   f.flow = plays.length
     ? { available: true, quality: plays.quality, ...leadFlow(plays), ...gameStates(plays), finalScore: { home: plays.at(-1).home, away: plays.at(-1).away } }
     : { available: false, largestLead: { home: { pts: f.teamStats.home.largestLead ?? 0 }, away: { pts: f.teamStats.away.largestLead ?? 0 } }, leadChanges: null, ties: null, spurts: [] };
+  f.notable = plays.length ? notableMoments(plays, f) : [];
   // runs: only the ones the play-by-play reproduces
   if (plays.length) f.flow.spurts = spurts(plays).filter((r) => validateRun(plays, r));
   f.result.q1 = { home: f.teams.home.periods[0] ?? 0, away: f.teams.away.periods[0] ?? 0 };

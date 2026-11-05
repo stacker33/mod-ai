@@ -254,7 +254,20 @@ export function standingsFacts(f, ext = {}) {
     const fem = !f.teams[side].plural;
     const fact = e.seed === 1 ? (tied ? `${tn(side)} ${fem ? 'שותפה' : 'שותפים'} למקום הראשון ב${conf.slice(1)}` : `${tn(side)} ${fem ? 'מוליכת' : 'מוליכים את'} ${conf}`)
       : `${tn(side)} ${fem ? 'נמצאת' : 'נמצאים'} במקום ה-${e.seed} ב${conf.slice(1)}`;
-    out.push({ type: e.seed === 1 ? 'CONFERENCE_LEADER' : 'STANDINGS', side, value: e.seed, verified: true, source: 'ESPN standings (after this game)', fact_he: fact, tokens: ['מוליכת', 'מוליכים', 'במקום', 'שותפה', 'שותפים', 'ראשות', 'פסגת'], weight: e.seed === 1 && !tied ? 58 : 25, flag: 'standings' });
+    const tokens = ['מוליכת', 'מוליכים', 'במקום', 'שותפה', 'שותפים', 'ראשות', 'פסגת', 'המקום הראשון'];
+    // compared with the table before tonight's first tip-off: first place taken or lost is the story
+    const b = (ext.standingsBefore || []).find((x) => x.teamId === e.teamId || x.abbr === e.abbr);
+    if (b && b.seed === 1 && e.seed !== 1) {
+      const leader = (ext.standings || []).find((x) => x.conf === e.conf && x.seed === 1);
+      const lh = leader ? heTeam(leader.abbr) : null;
+      out.push({ type: 'LOST_FIRST_PLACE', side, verified: true, source: 'ESPN standings before tonight vs after this game', fact_he: `${tn(side)} ${fem ? 'איבדה' : 'איבדו'} את המקום הראשון ב${conf.slice(1)}${lh ? ` ${lh.startsWith('ה') ? 'ל' + lh.slice(1) : 'ל' + lh}` : ''}`, tokens, weight: 82, flag: 'standings' });
+      continue;
+    }
+    if (b && b.seed !== 1 && e.seed === 1 && !tied) {
+      out.push({ type: 'TOOK_FIRST_PLACE', side, verified: true, source: 'ESPN standings before tonight vs after this game', fact_he: `${tn(side)} ${fem ? 'עלתה' : 'עלו'} למקום הראשון ב${conf.slice(1)}`, tokens, weight: 80, flag: 'standings' });
+      continue;
+    }
+    out.push({ type: e.seed === 1 ? 'CONFERENCE_LEADER' : 'STANDINGS', side, value: e.seed, verified: true, source: 'ESPN standings (after this game)', fact_he: fact, tokens, weight: e.seed === 1 && !tied ? 58 : 25, flag: 'standings' });
   }
   return out;
 }

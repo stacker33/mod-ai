@@ -48,7 +48,7 @@ function render(md) {
 
 // status: [class, icon, words] — the icon is on the card, the words in its tooltip
 const STATUS = {
-  ok: ['ok', '✅', 'מוכן'], fixed: ['ok', '🔧', 'מוכן (תוקן אוטומטית)'], held: ['bad', '⛔', 'לא פורסם — לכתוב ידנית'], partial: ['warn', '⚠️', 'חלק מהפריטים לא פורסמו'],
+  ok: ['ok', '✅', 'מוכן לאישור'], fixed: ['ok', '🔧', 'מוכן לאישור (תוקן אוטומטית)'], review: ['warn', '⚠️', 'לבדיקה'], held: ['bad', '⛔', 'לא פורסם — לכתוב ידנית'], partial: ['warn', '⚠️', 'חלק מהפריטים לא פורסמו'],
   quota: ['warn', '⏳', 'ממתין למכסת כתיבה'], retry: ['warn', '🔁', 'ניסיון חוזר'], manual: ['bad', '⛔', 'נכשל — לכתוב ידנית'],
   live: ['live', '🏀', 'משוחק עכשיו'], upcoming: ['mute', '', 'טרם התחיל'], final: ['mute', '', 'הסתיים'],
 };
@@ -62,7 +62,8 @@ function topLine(d) {
   const s = d.summary;
   const bits = [`<b>${d.results.length}</b> משחקים`];
   if (s) {
-    bits.push(`<b>${s.ready}</b> סיכומים מוכנים`);
+    bits.push(`<b>${s.ready}</b> מוכנים לאישור`);
+    if (s.review) bits.push(`<span class="warn">${s.review} לבדיקה</span>`);
     if (s.avgMinutes != null) bits.push(`⚡ <b>${s.avgMinutes}</b> ד׳ מהבאזר לסיכום (חציון)`);
     bits.push(`<b>${s.publishedContradictions}</b> סתירות שפורסמו`);
     if (s.autoFixes) bits.push(`<b>${s.autoFixes}</b> תיקונים אוטומטיים`);
@@ -82,7 +83,7 @@ function scoreboard(d) {
     const st = g ? g.status : r.state === 'in' ? 'live' : r.state === 'pre' ? 'upcoming' : 'final';
     const [cls, icon, words] = STATUS[st] || ['mute', '', st];
     const when = r.state === 'pre' ? `<span class="t">${esc(r.time)}</span>` : '';
-    const tip = [words, g?.minutes != null ? `${g.minutes} דקות מהבאזר לסיכום` : '', g?.late ? 'נכתב מאוחר' : g?.rewritten ? 'נכתב מחדש' : ''].filter(Boolean).join(' · ');
+    const tip = [words, ...(g?.review || []), g?.minutes != null ? `${g.minutes} דקות מהבאזר לסיכום` : '', g?.late ? 'נכתב מאוחר' : g?.rewritten ? 'נכתב מחדש' : ''].filter(Boolean).join(' · ');
     return `<button class="card ${cls}${r.israelis.length ? ' israeli' : ''}" data-go="g${r.id}" data-teams="${esc((g?.teams || []).join('|'))}" title="${esc(tip)}">
       <span class="row">${when}<span class="score">${esc(r.line)}</span><span class="st">${icon}</span></span>
       ${g?.angle ? `<span class="angle">${esc(g.angle)}</span>` : ''}

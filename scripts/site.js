@@ -39,7 +39,7 @@ function nightBoard(dir) {
     let status;
     if (its.length) {
       const held = published.filter((x) => x.held).length;
-      status = held && held === published.length ? 'held' : held ? 'partial' : its.some((x) => x.autoFixed?.length) ? 'fixed' : 'ok';
+      status = held && held === published.length ? 'held' : held ? 'partial' : published.some((x) => x.review?.length) ? 'review' : its.some((x) => x.autoFixed?.length) ? 'fixed' : 'ok';
     } else if (g?.status === 'retry' && /quota/.test(g.error || '')) status = 'quota';
     else if (g && ['failed', 'blocked'].includes(g.status)) status = 'manual';
     else if (g?.status === 'retry') status = 'retry';
@@ -64,6 +64,7 @@ function nightBoard(dir) {
       israelis: (f?.israelis || []).filter((i) => i.played).map((i) => i.he || i.name),
       published: published.filter((x) => !x.held && x.draft).length,
       contradictions: published.filter((x) => !x.held && x.check?.blocking > 0).length,
+      review: published.flatMap((x) => x.review || []),
       fixes: its.reduce((a, x) => a + (x.autoFixed?.length || 0), 0),
       end: f?.endedAt || sched?.start || '',
     };
@@ -73,7 +74,8 @@ function nightBoard(dir) {
   const mins = board.map((x) => x.minutes).filter((x) => x != null).sort((a, b) => a - b);
   const summary = {
     games: board.length,
-    ready: board.filter((x) => ['ok', 'fixed', 'partial'].includes(x.status)).length,
+    ready: board.filter((x) => ['ok', 'fixed'].includes(x.status)).length,
+    review: board.filter((x) => ['review', 'partial'].includes(x.status)).length,
     held: board.filter((x) => ['held', 'manual'].includes(x.status)).length,
     waiting: board.filter((x) => ['quota', 'retry'].includes(x.status)).length,
     live: board.filter((x) => x.status === 'live').length,

@@ -34,8 +34,9 @@ export function gameColor(summary, f) {
       const margin = Math.abs(p.home - p.away);
       const big = charged.some((id) => (line.get(id)?.starter || (line.get(id)?.min || 0) >= 12));
       // relevance: does this change how the game is told? ordinary technicals and flagrants do not
+      // (Sport5 tells a flagrant / scuffle whenever it happens — Kuminga's elbow on Sengun in the 2nd quarter)
       const relevant = role.kind === 'ejection' ? big
-        : role.kind === 'flagrant-2' ? true
+        : ['flagrant-2', 'flagrant-1', 'double-technical'].includes(role.kind) ? true
         : isClutch(p) && margin <= 8;
       events.push({ kind: KIND[role.kind], player: players[0] || null, players, team: charged[0] ? teamOf.get(charged[0]) || null : null, ...when(p), text: p.text, relevant });
     } else if (/coach's challenge \(/i.test(p.type)) {

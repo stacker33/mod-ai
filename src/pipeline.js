@@ -66,6 +66,9 @@ export async function factsForGame(date, gameId, cfg) {
   // CONTEXT FACTS (streaks, head-to-head, highs) from schedules and game logs; a failed fetch = no such fact
   let context = {};
   try { context = await fetchContext(s, { cacheDir: join(ROOT, 'cache') }); } catch (e) { context = { errors: [e.message] }; }
+  // the table as it was before tonight's first tip-off (saved by the live runner), if there is one
+  const beforeFile = join(dayDir(date), 'standings-before.json');
+  if (existsSync(beforeFile)) context.standingsBefore = readJson(beforeFile).table;
   const f = analyzeGame(s, { israelis: cfg.israelis, histories, schedules, names, context });
   f.contextErrors = context.errors || [];
   f.endedAt = s.plays?.at(-1)?.wallclock || null;
@@ -92,6 +95,43 @@ function ctxFor(f) {
 
 const MAX_ROUNDS = 2;
 
+// ---------- the night's model budget (free tier: 20 calls a day per model, reset at midnight Pacific) ----------
+const USAGE_FILE = join(ROOT, 'out', 'model-usage.json');
+const pacificDay = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
+function usage() {
+  try { const u = readJson(USAGE_FILE); if (u.day === pacificDay()) return u; } catch { /* new day */ }
+  return { day: pacificDay(), calls: {} };
+}
+function countCall(model) {
+  const u = usage();
+  u.calls[model] = (u.calls[model] || 0) + 1;
+  mkdirSync(join(ROOT, 'out'), { recursive: true });
+  writeFileSync(USAGE_FILE, JSON.stringify(u));
+}
+// calls left on the good models (everything but the "lite" fallback) today
+function goodCallsLeft(cfg) {
+  const models = [cfg.ai.model, ...String(cfg.ai.fallback || '').split(',')].map((x) => x && x.trim()).filter((m) => m && !/lite/.test(m));
+  const u = usage();
+  return models.reduce((a, m) => a + Math.max(0, 20 - (u.calls[m] || 0)), 0);
+}
+
+// When no model is left for the day, the recap is still sent right away: written in code from the brief's
+// verified strings only (a plain, correct text the editor can polish) — never a wait until the morning.
+export function templateDraft(mode, b) {
+  const lines = (list) => list.map((p, i) => `${p.name_he} ${i ? 'הוסיף' : 'סיים עם'} ${p.line_he}`).join(', ו');
+  if (mode === 'game') {
+    const [W, L] = [b.winner_he, b.loser_he];
+    const p1 = [`${b.main_angle?.fact_he || `${W} ניצחה את ${L}`}.`, b.stars?.[W]?.length ? `${lines(b.stars[W].slice(0, 2))}.` : ''].filter(Boolean).join(' ');
+    const p2 = [b.details?.[0] ? `${b.details[0]}.` : '', b.records?.[L]?.sentence_he ? `${b.records[L].sentence_he}${b.stars?.[L]?.length ? `, ו${lines(b.stars[L].slice(0, 1))}` : ''}.` : ''].filter(Boolean).join(' ');
+    return { paragraphs: [p1, p2].filter(Boolean) };
+  }
+  // an Israeli article
+  const headline = `${b.player_he} ב${b.result_he} ${b.won ? 'על' : 'ל'}${b.opp_he}`;
+  const p1 = `${b.player_he} סיים עם ${b.line_full_he}.${b.team_record?.after_verb ? ` ${b.team_he} ${b.team_record.after_verb}.` : ''}`;
+  const others = (b.other_israelis || []).map((x) => `${x.sentence_he}.`).join(' ');
+  return { headline, subheadline: b.line_short_he ? `${b.player_he} ${b.line_short_he}` : b.team_he, paragraphs: [p1, others].filter(Boolean) };
+}
+
 export async function writeItem(cfg, mode, brief, f) {
   const inGame = new Set(['home', 'away'].flatMap((s) => f.players[s].map((p) => p.id)));
   const names = cfg.dict.map((d) => ({ ...d, inGame: inGame.has(d.id), status: d.approved ? 'approved' : d.status }));
@@ -99,9 +139,24 @@ export async function writeItem(cfg, mode, brief, f) {
   const { system, user } = buildPrompt(ROOT, mode, brief);
   const messages = [{ role: 'user', text: user }];
   let last;
+  // budget: when the good models are almost out, a routine game gets one round (Israeli articles and
+  // stand-out games keep two) so the night's quota reaches the last game
+  const routine = mode === 'game' && (f.candidates?.[0]?.weight || 0) < 70;
+  const rounds = routine && goodCallsLeft(cfg) < 25 ? 1 : MAX_ROUNDS;
   // two rounds with the model at most (the code fixes the rest) — the free daily quota has to last the night
-  for (let round = 1; round <= MAX_ROUNDS; round++) {
-    const res = await generateJSON({ ...cfg.ai, system, messages, schema: schemaFor(mode) });
+  for (let round = 1; round <= rounds; round++) {
+    let res;
+    try {
+      res = await generateJSON({ ...cfg.ai, system, messages, schema: schemaFor(mode) });
+      countCall(res.model);
+    } catch (e) {
+      if (!e.quota) throw e; // a busy model: the runner retries at the next check
+      if (last) break; // quota ran out after a first draft: keep it (the code fixes the rest)
+      // no model left today: the plain recap from verified strings, sent now
+      const draft = templateDraft(mode, brief);
+      last = { mode, gameId: f.gameId, model: 'template', template: true, rounds: 0, draft, check: verifyDraft(draft, brief, names, ctx), writtenAt: new Date().toISOString() };
+      break;
+    }
     const check = verifyDraft(res.data, brief, names, ctx);
     last = { mode, gameId: f.gameId, model: res.model, rounds: round, draft: res.data, check, writtenAt: new Date().toISOString() };
     if (!check.issues.length) break;
@@ -110,13 +165,21 @@ export async function writeItem(cfg, mode, brief, f) {
   // still contradicting the data after the model's rounds: fix in code — only the failing claim goes
   // (swap a pair, drop that sentence, rejoin a split paragraph, trim), then check again
   last.autoFixed = [];
+  last.fixKinds = [];
   for (let pass = 0; pass < 3 && !last.check.ok; pass++) {
     last.autoFixed.push(...last.check.issues.filter((i) => i.severity === 'block').map((i) => i.msg));
+    last.fixKinds.push(...last.check.issues.filter((i) => i.severity === 'block' && i.fix).map((i) => ({ type: i.fix.type, sentence: i.fix.sentence })));
     last.draft = autoFix(last.draft, last.check.issues, brief);
     last.check = verifyDraft(last.draft, brief, names, ctx);
   }
   // held only when a contradiction is left, or nothing usable is left after removing the bad claims
   last.held = !last.check.ok || (mode !== 'game' && !last.draft.headline) || !(last.draft.paragraphs || []).length;
+  // REVIEW (not READY): the code had to cut or add a sentence, or wrote the text from its template —
+  // the facts are right but the editor should read the flow. Each reason is one actionable line.
+  last.review = [
+    ...(last.template ? ['נכתב בתבנית קבועה כי המכסה היומית של המודל נגמרה — העובדות נכונות, כדאי ללטש את הניסוח'] : []),
+    ...(last.fixKinds || []).filter((k) => ['drop', 'prepend', 'append'].includes(k.type)).map((k) => (k.type === 'drop' ? `משפט הוסר כי לא תאם את הנתונים: "${String(k.sentence || '').slice(0, 60)}" — לבדוק שהפסקה עדיין זורמת` : k.type === 'prepend' ? 'הזווית המרכזית נוספה בתחילת הבלוק — לבדוק שהפתיחה זורמת' : 'שורה של שחקן ישראלי נוספה בסוף הפסקה — לבדוק את המיקום')),
+  ];
   // language-only proofreading for the stand-alone articles; thrown away if it touches any fact
   if (!last.held && cfg.proofread && mode === 'player') {
     try {
@@ -149,6 +212,7 @@ async function proofread(cfg, mode, draft, brief, names, ctx) {
 const checkBox = (it) => {
   const o = ['', '> **לעורך (לא להעתקה):**'];
   const issues = it.check.issues || []; // drafts written before the validation layer have no issue list
+  for (const r of it.review || []) o.push(`> ⚠️ לבדיקה: ${r}`);
   if (it.held) o.push(`> ⛔ לא פורסם — סתירה לנתונים שלא תוקנה: ${issues.filter((i) => i.severity === 'block').map((i) => i.msg).join('; ')}`);
   else if (it.check.issues) o.push('> נבדקו מול ESPN: תוצאה, רבעים, מאזנים, מספרים, סדר תוצאות, שמות, מי עשה מה (שחקן/קבוצה), מהלך המשחק מול התוצאה במחצית ובסיום הרבעים, שוויון/יתרון/סל ניצחון/באזר, ריצות, שיאים/רצפים (רק אם אומתו), עברית שבורה, אורך');
   if (it.autoFixed?.length) o.push(`> 🔧 תוקן אוטומטית: ${it.autoFixed.join('; ')}`);

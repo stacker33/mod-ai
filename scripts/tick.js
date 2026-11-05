@@ -8,7 +8,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { listGames } from '../src/espn.js';
+import { listGames, getStandings } from '../src/espn.js';
 import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, writeIntro, assembleClosing, boxHash } from '../src/pipeline.js';
 import { heTeam } from '../src/teams.js';
 import { telegramReady, sendTelegram, itemMessage, heldAlert } from '../src/notify.js';
@@ -61,6 +61,11 @@ async function tickDate(date, cfg) {
   if (!rows.length) return { date, rows: 0, changed: false };
   mkdirSync(dir, { recursive: true });
   const now = Date.now();
+  // the table BEFORE the night (free, one call): makes "lost / took first place" a verifiable story
+  const before = join(dir, 'standings-before.json');
+  if (!existsSync(before) && rows.every((x) => x.state === 'pre')) {
+    try { writeFileSync(before, JSON.stringify({ at: new Date().toISOString(), table: await getStandings() })); } catch { /* next check */ }
+  }
   let changed = false;
   const log = (m) => console.log(`[${stamp()}] ${date} ${m}`);
 
