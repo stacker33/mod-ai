@@ -187,8 +187,9 @@ export function gameBrief(f) {
   const leaderAt = (s) => (s.home === s.away ? null : s.home > s.away ? 'home' : 'away');
   const swingHalf = leaderAt(f.result.halftime) !== W || Math.abs(f.result.halftime.home - f.result.halftime.away) >= 15;
   const swingThree = leaderAt(f.result.after3) !== W;
-  b.halftime_clause = swingHalf ? halfClause : null;
-  b.after_three_clause = swingThree ? threeClause : null;
+  const hasPeriods = f.teams.home.periods.length >= 4 && f.teams.away.periods.length >= 4;
+  b.halftime_clause = hasPeriods && swingHalf ? halfClause : null;
+  b.after_three_clause = hasPeriods && swingThree ? threeClause : null;
   const lastReg = Math.min(4, f.teams.home.periods.length);
   b.quarters = b.quarters.filter((q, i) => {
     const h = f.teams.home.periods[i], a = f.teams.away.periods[i];

@@ -50,3 +50,26 @@ if (process.env.API_SPORTS_KEY) {
     show('api-sports players sample', { count: rows.length, first: rows[0] && { name: `${rows[0].player?.firstname} ${rows[0].player?.lastname}`, team: rows[0].team?.code, points: rows[0].points, min: rows[0].min } });
   }
 } else console.log('api-sports: no key');
+
+// the real modules, end to end, on two games of the night (no model calls)
+{
+  const { listGames, getSummary } = await import('../src/espn.js');
+  const { analyzeGame } = await import('../src/game.js');
+  const { gameBrief } = await import('../src/writer/brief.js');
+  const { verifyDraft } = await import('../src/writer/verify.js');
+  const { templateDraft } = await import('../src/pipeline.js');
+  const { crossCheck, backupGames, backupSummary } = await import('../src/secondary.js');
+  const env = process.env;
+  const d = date.replaceAll('-', '');
+  const espn = await listGames(d);
+  for (const r of espn.filter((x) => ['SA', 'HOU'].includes(x.home.abbr))) {
+    const f = analyzeGame(await getSummary(r.id));
+    const cc = await crossCheck(f, env, d);
+    show(`cross-check ${r.away.abbr}@${r.home.abbr}`, { source: cc.source, ok: cc.ok, notes: cc.notes });
+    const alt = (await backupGames(env, d)).find((x) => x.home.abbr === r.home.abbr && x.away.abbr === r.away.abbr);
+    const bf = analyzeGame(await backupSummary(env, alt));
+    const b = gameBrief(bf);
+    const v = verifyDraft(templateDraft('game', b), b, [], null);
+    show(`backup ${r.away.abbr}@${r.home.abbr}`, { provider: alt.backup.provider, factsOk: bf.ok, score: `${bf.teams.away.score}-${bf.teams.home.score}`, periods: bf.teams.home.periods, top: Object.values(b.stars).flat().map((p) => `${p.name_he} ${p.pts}`), templateBlocking: v.blocking });
+  }
+}

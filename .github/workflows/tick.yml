@@ -60,6 +60,8 @@ jobs:
       - name: Tick
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SPORTAPI_KEY: ${{ secrets.SPORTAPI_KEY }}
+          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
           AI_MODEL: ${{ vars.AI_MODEL || 'gemini-3.8-flash' }}
           AI_MODEL_FALLBACK: ${{ vars.AI_MODEL_FALLBACK || 'gemini-3.7-flash,gemini-3.5-flash,gemini-flash-latest,gemini-3.5-flash-lite' }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -71,6 +73,8 @@ jobs:
         if: github.event.inputs.resend != '' && github.event.inputs.rewrite == 'true'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SPORTAPI_KEY: ${{ secrets.SPORTAPI_KEY }}
+          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
           AI_MODEL: ${{ vars.AI_MODEL || 'gemini-3.8-flash' }}
           AI_MODEL_FALLBACK: ${{ vars.AI_MODEL_FALLBACK || 'gemini-3.7-flash,gemini-3.5-flash,gemini-flash-latest,gemini-3.5-flash-lite' }}
         run: |

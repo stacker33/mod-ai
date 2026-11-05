@@ -11,9 +11,10 @@ import { rankStory } from './story.js';
 export function analyzeGame(summary, { israelis = [], histories = new Map(), schedules = new Map(), names = new Map(), context = {} } = {}) {
   const f = buildFacts(summary, { israelis });
   const missing = [];
+  const byName = new Map([...names.values()].filter((n) => n.en).map((n) => [n.en.toLowerCase(), n]));
   for (const side of ['home', 'away']) {
     for (const p of f.players[side]) {
-      const n = names.get(p.id);
+      const n = names.get(p.id) || byName.get(String(p.name).toLowerCase());
       p.he = n?.he || null;
       p.heStatus = n ? (n.approved ? 'approved' : n.status) : 'missing';
       if (!n?.he && p.played) missing.push(p.name);

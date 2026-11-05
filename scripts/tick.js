@@ -9,6 +9,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { listGames, getStandings } from '../src/espn.js';
+import { backupGames } from '../src/secondary.js';
 import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, writeIntro, assembleClosing, boxHash } from '../src/pipeline.js';
 import { heTeam } from '../src/teams.js';
 import { telegramReady, sendTelegram, itemMessage, heldAlert } from '../src/notify.js';
@@ -57,7 +58,13 @@ async function tickDate(date, cfg) {
   const dir = dayDir(date);
   const stateFile = join(dir, 'state.json');
   const state = existsSync(stateFile) ? JSON.parse(readFileSync(stateFile, 'utf8')) : { games: {} };
-  const rows = await listGames(date);
+  // ESPN's scoreboard; if it fails, the night's games from a second source
+  let rows;
+  try { rows = await listGames(date); } catch (e) {
+    rows = await backupGames(cfg.env, date);
+    if (!rows.length) throw e;
+    console.log(`[${stamp()}] ${date} ESPN scoreboard unavailable — using ${rows[0].backup.provider}`);
+  }
   if (!rows.length) return { date, rows: 0, changed: false };
   mkdirSync(dir, { recursive: true });
   const now = Date.now();
@@ -73,6 +80,9 @@ async function tickDate(date, cfg) {
   // schedule order, roughly the order the games ended
   for (const r of rows.filter((x) => x.state === 'post')) {
     const s = state.games[r.id] || { attempts: 0 };
+    // the same game already written under the other source's id (ESPN came back after a backup night)
+    s.teams = `${r.away.abbr}@${r.home.abbr}`;
+    if (!s.status && Object.entries(state.games).some(([id, g]) => id !== r.id && g.teams === s.teams && g.status === 'done')) continue;
     const label = `${r.away.abbr} @ ${r.home.abbr} ${r.away.score}-${r.home.score}`;
     const due = !s.status || (s.status === 'retry' && now >= s.nextTry);
     const recheck = s.status === 'done' && !s.rechecked && now - s.doneAt >= RECHECK_AFTER;
@@ -80,7 +90,7 @@ async function tickDate(date, cfg) {
     const quotaUntil = readQuota().until || 0;
     if (quotaUntil > now) continue; // waiting for the daily writing quota; nothing is lost
     try {
-      const f = await factsForGame(date, r.id, cfg);
+      const f = await factsForGame(date, r.id, cfg, r);
       const hash = boxHash(f);
       if (recheck) {
         s.rechecked = true;

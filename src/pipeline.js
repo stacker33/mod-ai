@@ -22,6 +22,7 @@ import { buildPrompt, proofPrompt, introPrompt, schemaFor } from './writer/promp
 import { generateJSON } from './writer/gemini.js';
 import { verifyDraft, autoFix, draftText } from './writer/verify.js';
 import { fetchContext } from './context.js';
+import { crossCheck, backupSummary, backupGames } from './secondary.js';
 import { nightHe } from './writer/he.js';
 import { NICK_HE, heTeam } from './teams.js';
 
@@ -51,10 +52,20 @@ export const dayDir = (date) => join(ROOT, 'out', date);
 
 // ---------- facts for one game ----------
 
-export async function factsForGame(date, gameId, cfg) {
+export async function factsForGame(date, gameId, cfg, row = null) {
   const dir = dayDir(date);
   mkdirSync(join(dir, 'raw'), { recursive: true });
-  const s = await getSummary(gameId);
+  // ESPN first; if it cannot give this game, the same game from a second source (no play-by-play)
+  let s;
+  if (row?.backup) s = await backupSummary(cfg.env, row);
+  else {
+    try { s = await getSummary(gameId); } catch (e) {
+      const alt = row ? (await backupGames(cfg.env, date)).find((x) => x.home.abbr === row.home.abbr && x.away.abbr === row.away.abbr && x.completed) : null;
+      if (!alt) throw e;
+      s = await backupSummary(cfg.env, alt);
+      s.header.id = gameId; // keep the ESPN id: state and files stay the same
+    }
+  }
   writeFileSync(join(dir, 'raw', `${gameId}.json`), JSON.stringify(s));
   const abbrs = s.header.competitions[0].competitors.map((c) => c.team.abbreviation);
   const histories = new Map(), schedules = new Map();
@@ -71,6 +82,9 @@ export async function factsForGame(date, gameId, cfg) {
   if (existsSync(beforeFile)) context.standingsBefore = readJson(beforeFile).table;
   const f = analyzeGame(s, { israelis: cfg.israelis, histories, schedules, names, context });
   f.contextErrors = context.errors || [];
+  f.backupSource = s.backupSource || null;
+  // the second source's view of the same game: final score + every 10+ point scorer
+  if (!f.backupSource) { try { f.crossCheck = await crossCheck(f, cfg.env, date); } catch { f.crossCheck = null; } }
   f.endedAt = s.plays?.at(-1)?.wallclock || null;
   writeFileSync(join(dir, `${gameId}.json`), JSON.stringify(f, null, 2));
   return f;
@@ -176,7 +190,10 @@ export async function writeItem(cfg, mode, brief, f) {
   last.held = !last.check.ok || (mode !== 'game' && !last.draft.headline) || !(last.draft.paragraphs || []).length;
   // REVIEW (not READY): the code had to cut or add a sentence, or wrote the text from its template —
   // the facts are right but the editor should read the flow. Each reason is one actionable line.
+  // Also: the second source disagrees with ESPN, or the game came from the backup source.
   last.review = [
+    ...(f.crossCheck?.notes || []),
+    ...(f.backupSource ? [`ESPN לא היה זמין — המשחק נכתב לפי ${f.backupSource}, בלי פרטי מהלכים`] : []),
     ...(last.template ? ['נכתב בתבנית קבועה כי המכסה היומית של המודל נגמרה — העובדות נכונות, כדאי ללטש את הניסוח'] : []),
     ...(last.fixKinds || []).filter((k) => ['drop', 'prepend', 'append'].includes(k.type)).map((k) => (k.type === 'drop' ? `משפט הוסר כי לא תאם את הנתונים: "${String(k.sentence || '').slice(0, 60)}" — לבדוק שהפסקה עדיין זורמת` : k.type === 'prepend' ? 'הזווית המרכזית נוספה בתחילת הבלוק — לבדוק שהפתיחה זורמת' : 'שורה של שחקן ישראלי נוספה בסוף הפסקה — לבדוק את המיקום')),
   ];
