@@ -3,7 +3,7 @@
 //   SPORTAPI_KEY=… API_SPORTS_KEY=… node scripts/probe-apis.js 2026-11-04
 
 const date = process.argv[2] || '2026-11-04';
-const show = (label, x) => console.log(`${label}: ${JSON.stringify(x).slice(0, 900)}`);
+const show = (label, x) => console.log(`${label}: ${String(JSON.stringify(x)).slice(0, 900)}`);
 
 async function get(url, headers) {
   const r = await fetch(url, { headers, signal: AbortSignal.timeout(20000) });
@@ -31,7 +31,13 @@ if (process.env.SPORTAPI_KEY) {
 
 if (process.env.API_SPORTS_KEY) {
   const h = { 'x-apisports-key': process.env.API_SPORTS_KEY };
-  const g = await get(`https://v2.nba.api-sports.io/games?date=${date}`, h);
+  // API-Sports files games by UTC date: a US night spans two dates
+  const next = new Date(Date.parse(`${date}T12:00:00Z`) + 86400e3).toISOString().slice(0, 10);
+  const g0 = await get(`https://v2.nba.api-sports.io/games?date=${date}`, h);
+  const g = await get(`https://v2.nba.api-sports.io/games?date=${next}`, h);
+  show('api-sports counts (date / next UTC date)', [g0.body?.response?.length, g.body?.response?.length, g.body?.errors]);
+  const st = await get('https://v2.nba.api-sports.io/status', h);
+  show('api-sports account', st.body?.response && { plan: st.body.response.subscription?.plan, requests: st.body.response.requests });
   show('api-sports games status', g.status);
   show('api-sports errors', g.body?.errors);
   const games = g.body?.response || [];
