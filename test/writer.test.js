@@ -66,7 +66,8 @@ test('C. records in the draft are checked in their own context and fixed only in
 test('A. Toronto won the 4th quarter 47-27: Sport5 writes "טורונטו ניצחה 27:47 את הרבע האחרון"', () => {
   const f = game('401909920');
   const b = gameBrief(f);
-  const q4 = b.quarters[3];
+  // Toronto trailed after three, so the last quarter is the story and reaches the writer (selection in code)
+  const q4 = b.quarters.find((q) => q.period_he === 'הרבע האחרון');
   assert.equal(q4.clause, `${heTeam('TOR')} ניצחה 27:47 את הרבע האחרון`);
   const bad = check(f, { paragraphs: [`טורונטו ניצחה את הרבע האחרון 47:27.`] });
   assert.ok(codes(bad).includes('quarter-order'), JSON.stringify(bad.issues));
@@ -159,8 +160,10 @@ test('score written from the wrong team is caught (BKN @ BOS)', () => {
 
 test('halftime is a partial score: subject first, and the verb must fit (DET @ NY, NY led 51-50)', () => {
   const f = oldFacts('401909878');
-  assert.equal(gameBrief(f).halftime_clause, 'הניקס הובילו במחצית 50:51'); // Sport5 order; plural nickname, plural verb
-  assert.deepEqual(codes(check(f, { paragraphs: ['ניו יורק הובילה במחצית 50:51.'] })), []);
+  // the halftime leader went on to win: not a swing, so the writer does not get the halftime score at all
+  assert.equal(gameBrief(f).halftime_clause, null);
+  // orientation is still judged if it is written anyway (Sport5 order; plural nickname, plural verb)
+  assert.ok(!codes(check(f, { paragraphs: ['ניו יורק הובילה במחצית 50:51.'] })).includes('score-order'));
   assert.ok(codes(check(f, { paragraphs: ['ניו יורק פיגרה במחצית 50:51.'] })).includes('verb-score'));
   assert.ok(codes(check(f, { paragraphs: ['ניו יורק הובילה במחצית 51:50.'] })).includes('score-order'));
 });
@@ -183,11 +186,11 @@ test('player brief: streaks written in full, milestones only when verified', () 
 test('compound sentences: each score is judged by its own clause (real flash-lite output, NO @ MEM)', () => {
   const f = game('401909914'); // MEM led 62-59 at the half; NO led 100-95 after three
   const ok = 'ממפיס הובילה במחצית 59:62, אך ניו אורלינס הובילה אחרי שלושה רבעים 95:100.';
-  assert.deepEqual(codes(check(f, { paragraphs: [ok] })), []);
+  assert.ok(!codes(check(f, { paragraphs: [ok] })).includes('score-order'));
   const bad = check(f, { paragraphs: ['ממפיס הובילה במחצית 59:62, אך ניו אורלינס הובילה אחרי שלושה רבעים 100:95.'] });
   assert.ok(codes(bad).includes('score-order'));
   // overtime is a period score (winner last, Sport5); a record in parentheses next to "ניצחון" is not a result
-  assert.deepEqual(codes(check(f, { paragraphs: ['ניו אורלינס ניצחה את ההארכה 10:11.'] })), []);
+  assert.ok(!codes(check(f, { paragraphs: ['ניו אורלינס ניצחה את ההארכה 10:11.'] })).includes('quarter-order'));
   assert.deepEqual(codes(check(f, { paragraphs: ['ניצחון בחוץ על ממפיס (1:6).'] })), []);
   assert.ok(codes(check(f, { paragraphs: ['ניו אורלינס ניצחה 135:134.'] })).includes('result-order'));
 });

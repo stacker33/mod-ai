@@ -55,6 +55,16 @@ export function runClause(run, f) {
   return `${t} ${vb('רשמה', 'רשמו')} ריצת ${pr} בין ${P(r.start_period)} ${pre('ל', P(r.end_period))}`;
 }
 
+// the same run as a noun phrase, to sit inside a sentence: "ריצת 3:19 של סן אנטוניו בסיום הרבע השני"
+export function runNoun(run, f) {
+  const fp = f.clutch.finalPeriod;
+  const r = { start_period: run.from?.period, end_period: run.to?.period, points_for: run.for, points_against: run.against, ...run };
+  const t = heTeam(f.teams[r.side].abbr) || f.teams[r.side].heShort || f.teams[r.side].he;
+  const P = PERIOD_HE(r.start_period, fp);
+  const where = r.start_period !== r.end_period ? '' : r.closes_period ? ` בסיום ${P}` : r.opens_period ? ` בפתיחת ${P}` : ` ${pre('ב', P)}`;
+  return `ריצת ${pair(r.points_for, r.points_against)} של ${t}${where}`;
+}
+
 // the main angle, written as a Hebrew fact the lead must carry (only types the data proves)
 function angleHe(k, f, tn, names = new Map()) {
   const t = (s) => tn(s);
@@ -146,8 +156,20 @@ export function gameBrief(f) {
     by(s.home, s.away, 'partial', label);
     return lv ? `${tn(lv)} ${vb(lv, 'הובילה', 'הובילו')} ${word} ${pair(s[lv], s[other(lv)])}` : `שוויון ${word} ${s.home}:${s.away}`;
   };
-  b.halftime_clause = lead(f.result.halftime, 'במחצית', 'half');
-  b.after_three_clause = lead(f.result.after3, 'אחרי שלושה רבעים', 'after3');
+  const halfClause = lead(f.result.halftime, 'במחצית', 'half');
+  const threeClause = lead(f.result.after3, 'אחרי שלושה רבעים', 'after3');
+  // SELECTION IN CODE: a checkpoint / quarter score reaches the writer only when it tells the story
+  // (the leader then was not the winner, a dominant quarter, a lopsided half) — not as narration
+  const leaderAt = (s) => (s.home === s.away ? null : s.home > s.away ? 'home' : 'away');
+  const swingHalf = leaderAt(f.result.halftime) !== W || Math.abs(f.result.halftime.home - f.result.halftime.away) >= 15;
+  const swingThree = leaderAt(f.result.after3) !== W;
+  b.halftime_clause = swingHalf ? halfClause : null;
+  b.after_three_clause = swingThree ? threeClause : null;
+  const lastReg = Math.min(4, f.teams.home.periods.length);
+  b.quarters = b.quarters.filter((q, i) => {
+    const h = f.teams.home.periods[i], a = f.teams.away.periods[i];
+    return Math.abs(h - a) >= 12 || (i + 1 === lastReg && swingThree);
+  });
 
   // the angle is chosen by the story stage (story.js), in code; the lead must open with it
   b.main_angle = top ? { type: top.type, category: top.category || null, fact_he: angleHe(top, f, tn, names) || heText(names, top.why), tokens: angleTokens(top, names) } : null;
@@ -165,7 +187,8 @@ export function gameBrief(f) {
     // only runs inside one period: a cross-period run is computable but rarely a clean story
     b.runs = f.flow.spurts.filter((s) => s.start_period === s.end_period).slice(0, 2).map((s) => {
       states.push(s.side === 'home' ? { home: s.for, away: s.against, kind: 'last' } : { home: s.against, away: s.for, kind: 'last' });
-      return { team_he: tn(s.side), clause_he: runClause(s, f) };
+      // clause_he is a full sentence; noun_he fits INSIDE a sentence ("... אחרי ריצת 3:19 של סן אנטוניו ברבע השני")
+      return { team_he: tn(s.side), clause_he: runClause(s, f), noun_he: runNoun(s, f) };
     });
   }
 
@@ -191,8 +214,9 @@ export function gameBrief(f) {
     last_two_minutes: c.finalSequence.length ? keyPlays(f, fp).map((m) => ({ when_he: whenHe(fp, m.clock, fp), team_he: tn(m.side), player_he: names.get(m.player) || m.player, action_he: `${names.get(m.player) || m.player} ${shotActionHe(m.shot, m.made)}${m.andOne ? ' ועוד זריקת עונשין (סל ועבירה)' : ''}`, label_he: PLAY_LABEL_HE[m.label], score_after_by_subject: byS(m.after) })) : [],
   };
   b.stars = {
-    [tn(W)]: f.players[W].filter((p) => p.played).sort((x, y) => y.pts - x.pts).slice(0, 4).map((p) => starBrief(p)),
-    [tn(L)]: f.players[L].filter((p) => p.played).sort((x, y) => y.pts - x.pts).slice(0, 3).map((p) => starBrief(p)),
+    // SELECTION IN CODE: the writer gets the 3 / 2 players that matter, not the whole box score
+    [tn(W)]: f.players[W].filter((p) => p.played).sort((x, y) => y.pts - x.pts).slice(0, 3).map((p) => starBrief(p)),
+    [tn(L)]: f.players[L].filter((p) => p.played).sort((x, y) => y.pts - x.pts).slice(0, 2).map((p) => starBrief(p)),
   };
   const outInjured = ['home', 'away'].flatMap((s) => f.players[s].filter((p) => !p.played && p.dnpReason && !/coach/i.test(p.dnpReason)).map((p) => `${p.he || p.name} (${tn(s)}) לא שיחק — ${p.dnpReason}`));
   if (outInjured.length) b.did_not_play = outInjured;

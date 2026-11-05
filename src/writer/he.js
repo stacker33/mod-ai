@@ -82,11 +82,16 @@ export function nightHe(iso) {
 const shot = (x, what) => (x && x[1] > 0 ? `${x[0]} מ-${x[1]} ${what}` : null);
 const pm = (n) => (n > 0 ? `${n}+` : n < 0 ? `${-n}-` : '0');
 const one = (n, single, plural) => (n === 1 ? single : `${n} ${plural}`);
+// a counted noun: "ריבאונד אחד" / "נקודה אחת" / "בלי ריבאונדים" / "7 ריבאונדים"
+const FEM = new Set(['נקודה', 'חטיפה', 'חסימה']);
+const count = (n, single, plural) => (n === 0 ? `בלי ${plural}` : n === 1 ? `${single} ${FEM.has(single) ? 'אחת' : 'אחד'}` : `${n} ${plural}`);
 
 // the full line Sport5 uses for Avdija
 export function fullLineHe(p) {
   const shots = [shot(p.fg, 'מהשדה'), shot(p.tp, 'משלוש'), shot(p.ft, 'מהעונשין')].filter(Boolean).join(', ');
-  const parts = [`${p.pts} נקודות${shots ? ` (${shots})` : ''}`, `${p.reb} ריבאונדים`, `${p.ast} אסיסטים (${p.to} איבודים)`];
+  // Hebrew number agreement: "ריבאונד אחד", "בלי איבודים" — never "1 ריבאונדים" / "(0 איבודים)"
+  const to = p.to === 0 ? 'בלי איבודים' : p.to === 1 ? 'איבוד אחד' : `${p.to} איבודים`;
+  const parts = [`${count(p.pts, 'נקודה', 'נקודות')}${shots ? ` (${shots})` : ''}`, count(p.reb, 'ריבאונד', 'ריבאונדים'), `${count(p.ast, 'אסיסט', 'אסיסטים')} (${to})`];
   if (p.stl) parts.push(one(p.stl, 'חטיפה', 'חטיפות'));
   if (p.blk) parts.push(one(p.blk, 'חסימה', 'חסימות'));
   const last = parts.pop();

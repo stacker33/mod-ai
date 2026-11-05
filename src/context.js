@@ -92,12 +92,12 @@ export function playerContext(rows, line, gameId, gameDate) {
   const out = [];
   if (thisSeason.length >= 3) {
     const max = Math.max(...thisSeason.map((r) => r.pts));
-    if (line.pts > max) out.push({ type: 'SEASON_HIGH', value: line.pts, previous: max });
+    if (line.pts > max) out.push({ type: 'SEASON_HIGH', value: line.pts, previous: max, previousOpp: thisSeason.find((r) => r.pts === max)?.opp || null });
     else if (line.pts === max) out.push({ type: 'TIES_SEASON_HIGH', value: line.pts });
   }
   if (reg.length >= 20) {
     const max = Math.max(...reg.map((r) => r.pts));
-    if (line.pts > max) out.push({ type: 'CAREER_HIGH', value: line.pts, previous: max });
+    if (line.pts > max) out.push({ type: 'CAREER_HIGH', value: line.pts, previous: max, previousOpp: [...reg].reverse().find((r) => r.pts === max)?.opp || null });
     else if (line.pts === max) out.push({ type: 'TIES_CAREER_HIGH', value: line.pts });
   }
   // the longest run of games ending tonight with 30+ points; its threshold is the lowest game in it
@@ -221,9 +221,11 @@ export function buildContext(f, ext = {}) {
       const hiW = (base, cap) => Math.round(base + Math.min(cap, Math.max(0, p.pts - 25)) + (won ? 3 : -8));
       const career = ms.some((m) => m.type === 'CAREER_HIGH' || m.type === 'TIES_CAREER_HIGH');
       for (const m of ms.filter((x) => !(career && /SEASON_HIGH/.test(x.type)))) {
-        if (m.type === 'SEASON_HIGH' && p.pts >= 25) add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} קלע ${m.value} נקודות, שיא העונה שלו`, tokens: ['שיא העונה'], weight: hiW(58, 10), flag: 'season_high' });
+        if (m.type === 'SEASON_HIGH' && p.pts >= 25) add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} קלע ${m.value} נקודות, שיא העונה שלו${prevHe(m)}`, tokens: ['שיא העונה'], weight: hiW(58, 10), flag: 'season_high' });
         if (m.type === 'TIES_SEASON_HIGH' && p.pts >= 25) add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} השווה את שיא העונה שלו עם ${m.value} נקודות`, tokens: ['שיא העונה'], weight: hiW(50, 8), flag: 'season_high' });
-        if (m.type === 'CAREER_HIGH') add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} קלע ${m.value} נקודות, שיא הקריירה שלו`, tokens: ['שיא הקריירה'], weight: hiW(72, 15), flag: 'career_high' });
+        // the record he broke, as Sport5 writes it: "שבר את שיאו הקודם (50 נגד וושינגטון)"
+        const prevHe = (m2) => (m2.previous != null ? ` (שיאו הקודם: ${m2.previous}${m2.previousOpp ? ` נגד ${heTeam(m2.previousOpp) || m2.previousOpp}` : ''})` : '');
+        if (m.type === 'CAREER_HIGH') add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} קלע ${m.value} נקודות, שיא הקריירה שלו${prevHe(m)}`, tokens: ['שיא הקריירה'], weight: hiW(72, 15), flag: 'career_high' });
         if (m.type === 'TIES_CAREER_HIGH') add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} השווה את שיא הקריירה שלו עם ${m.value} נקודות`, tokens: ['שיא הקריירה'], weight: hiW(62, 10), flag: 'career_high' });
         if (m.type === 'SCORING_STREAK') add({ type: m.type, side, player: p.name, value: m.games, min: m.min, source, fact_he: `זה המשחק ה-${m.games} ברציפות שבו ${name} קולע ${m.min} נקודות ומעלה`, tokens: [`ה-${m.games}`], weight: m.games >= 5 ? 80 : 65, flag: 'streak' });
       }
