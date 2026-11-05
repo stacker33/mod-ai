@@ -1,0 +1,29 @@
+# Manual check of the secondary data sources (sportapi.ai, API-Sports): prints the shape of their answers.
+# Separate from "Mod-AI tick" so it never waits in (or bumps) the tick queue.
+name: Probe data sources
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'US date YYYY-MM-DD'
+        required: false
+        default: '2026-11-04'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Probe
+        env:
+          SPORTAPI_KEY: ${{ secrets.SPORTAPI_KEY }}
+          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
+        run: node scripts/probe-apis.js "${{ github.event.inputs.date }}"
