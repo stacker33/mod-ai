@@ -23,6 +23,7 @@ import { generateJSON } from './writer/gemini.js';
 import { verifyDraft, autoFix, draftText } from './writer/verify.js';
 import { fetchContext } from './context.js';
 import { crossCheck, backupSummary, backupGames } from './secondary.js';
+import { fetchSport5Night, compareNight } from './compare.js';
 import { nightHe } from './writer/he.js';
 import { NICK_HE, heTeam } from './teams.js';
 
@@ -327,6 +328,28 @@ export async function writeIntro(date, cfg) {
   if (!text) text = `${brief.games_count} משחקים נערכו הלילה ב-NBA (${nightHe(first.date)}).`;
   writeFileSync(join(dir, 'drafts', 'intro.txt'), text);
   return text;
+}
+
+// The morning comparison with the Sport5 editor's article (once it is up): saved as out/<date>/compare.json.
+// Only numbers and names are kept — never Sport5's text.
+export async function morningCompare(date, cfg) {
+  const dir = dayDir(date);
+  const itemsDir = join(dir, 'drafts', 'items');
+  if (!existsSync(itemsDir)) return null;
+  const s5 = await fetchSport5Night(date);
+  if (!s5) return null;
+  const games = [];
+  for (const file of readdirSync(itemsDir).filter((x) => x.endsWith('.json'))) {
+    const items = readJson(join(itemsDir, file));
+    const f = readJson(join(dir, file));
+    // our published piece for the game: the Israeli article if there is one, else the nightly block
+    const piece = items.find((x) => x.mode === 'player' && !x.held) || items.find((x) => x.mode === 'game' && !x.noSend && !x.held);
+    if (!piece || !f) continue;
+    games.push({ gameId: f.gameId, scorePair: `${f.teams.away.score}:${f.teams.home.score}`, text: draftText(piece.draft), facts: f });
+  }
+  const report = { url: s5.url, at: new Date().toISOString(), ...compareNight(s5.text, games, cfg.dict) };
+  writeFileSync(join(dir, 'compare.json'), JSON.stringify(report, null, 1));
+  return report;
 }
 
 // ---------- the night's closing page, from the games done so far ----------

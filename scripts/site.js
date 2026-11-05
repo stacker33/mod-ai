@@ -151,6 +151,9 @@ for (const d of dates) {
     const closing = existsSync(join(dd, 'closing.md')) ? withAnchors(readFileSync(join(dd, 'closing.md'), 'utf8'), headingsOf(dir)) : '';
     Object.assign(day, { pieces, closing, ...nightBoard(dir) });
   } else if (existsSync(join(dir, 'state.json'))) Object.assign(day, { pieces: [], closing: '', ...nightBoard(dir) });
+  // the morning comparison with Sport5's article: numbers and names only (no Sport5 text on this public page)
+  const cmp = readJ(join(dir, 'compare.json'));
+  if (cmp) day.compare = { url: cmp.url, games: cmp.games, namesCovered: cmp.namesCovered, numbersCovered: cmp.numbersCovered, sameAngle: cmp.sameAngle, lengthRatio: cmp.lengthRatio, missedInOurData: cmp.missedInOurData, missedNotInData: cmp.missedNotInData, rows: (cmp.rows || []).map((r) => ({ gameId: r.gameId, names: [r.names.covered, r.names.theirs], missedNames: r.names.missed.slice(0, 4), numbers: [r.numbers.covered, r.numbers.theirs], sameAngle: r.angle.same, theirLead: r.angle.theirs })) };
   days.push(day);
 }
 // open on the latest date that has finished games (or today)
@@ -178,6 +181,7 @@ form button{cursor:pointer;background:#c2185b;color:#fff;border:0}
 .topline .night{font-weight:600;color:var(--ink)}.topline .nums b{color:var(--brand)}.topline i{font-style:normal;margin:0 6px;opacity:.5}
 .topline .bad{color:var(--bad)}.topline .warn{color:var(--warn)}.topline .livet{color:var(--live);font-weight:600}
 .copy.small{float:none;margin-inline-start:auto;border-radius:999px}
+.topline.cmp{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}.topline.cmp a{color:var(--brand);font-weight:600}
 .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:0 0 22px}
 .card{display:flex;flex-direction:column;gap:3px;text-align:start;cursor:pointer;background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--line);border-radius:8px;padding:7px 10px}
 .card .row{display:flex;align-items:center;gap:6px}.card .row .score{flex:1}.card .st{font-size:14px}.card .t{font-size:13px;color:var(--mute)}

@@ -72,7 +72,9 @@ function topLine(d) {
   }
   const live = d.results.filter((r) => r.state === 'in').length;
   if (live) bits.push(`<span class="livet">${live} משוחקים עכשיו</span>`);
-  return `<div class="topline"><span class="night">${esc(d.night)}</span><span class="nums">${bits.join('<i>·</i>')}</span>${finals.length ? `<button class="copy small" data-t="${encodeURIComponent(copy)}">העתק תוצאות</button>` : ''}</div>`;
+  const c = d.compare;
+  const cmp = c ? `<div class="topline cmp"><a href="${esc(c.url)}" target="_blank" rel="noopener">השוואה לכתבת ערוץ הספורט</a><span class="nums"><b>${c.namesCovered ?? '—'}%</b> מהשחקנים שהעורך הזכיר<i>·</i><b>${c.numbersCovered ?? '—'}%</b> מהמספרים<i>·</i><b>${c.sameAngle ?? '—'}%</b> אותו שחקן בפתיחה<i>·</i>אורך <b>${c.lengthRatio ?? '—'}%</b>${c.missedInOurData ? `<i>·</i><span class="warn">${c.missedInOurData} נתונים שהיו אצלנו ולא נכתבו</span>` : ''}</span></div>` : '';
+  return `${cmp}<div class="topline"><span class="night">${esc(d.night)}</span><span class="nums">${bits.join('<i>·</i>')}</span>${finals.length ? `<button class="copy small" data-t="${encodeURIComponent(copy)}">העתק תוצאות</button>` : ''}</div>`;
 }
 
 // the scoreboard: one compact card per game (result / live / start time), status icon, angle, Israelis
@@ -83,7 +85,8 @@ function scoreboard(d) {
     const st = g ? g.status : r.state === 'in' ? 'live' : r.state === 'pre' ? 'upcoming' : 'final';
     const [cls, icon, words] = STATUS[st] || ['mute', '', st];
     const when = r.state === 'pre' ? `<span class="t">${esc(r.time)}</span>` : '';
-    const tip = [words, ...(g?.review || []), g?.minutes != null ? `${g.minutes} דקות מהבאזר לסיכום` : '', g?.late ? 'נכתב מאוחר' : g?.rewritten ? 'נכתב מחדש' : ''].filter(Boolean).join(' · ');
+    const cr = (d.compare?.rows || []).find((x) => x.gameId === r.id);
+    const tip = [words, ...(g?.review || []), cr ? `מול ערוץ הספורט: ${cr.names[0]}/${cr.names[1]} שחקנים, ${cr.numbers[0]}/${cr.numbers[1]} מספרים${cr.missedNames.length ? ` (חסרים: ${cr.missedNames.join(', ')})` : ''}${cr.sameAngle ? ', אותה פתיחה' : ''}` : '', g?.minutes != null ? `${g.minutes} דקות מהבאזר לסיכום` : '', g?.late ? 'נכתב מאוחר' : g?.rewritten ? 'נכתב מחדש' : ''].filter(Boolean).join(' · ');
     return `<button class="card ${cls}${r.israelis.length ? ' israeli' : ''}" data-go="g${r.id}" data-teams="${esc((g?.teams || []).join('|'))}" title="${esc(tip)}">
       <span class="row">${when}<span class="score">${esc(r.line)}</span><span class="st">${icon}</span></span>
       ${g?.angle ? `<span class="angle">${esc(g.angle)}</span>` : ''}

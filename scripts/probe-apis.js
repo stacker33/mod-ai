@@ -73,3 +73,12 @@ if (process.env.API_SPORTS_KEY) {
     show(`backup ${r.away.abbr}@${r.home.abbr}`, { provider: alt.backup.provider, factsOk: bf.ok, score: `${bf.teams.away.score}-${bf.teams.home.score}`, periods: bf.teams.home.periods, top: Object.values(b.stars).flat().map((p) => `${p.name_he} ${p.pts}`), templateBlocking: v.blocking });
   }
 }
+
+// the Sport5 editor's article for that night: found in the archive, split into game blocks (no text printed)
+{
+  const { fetchSport5Night, parseSport5, sport5Title } = await import('../src/compare.js');
+  try {
+    const s5 = await fetchSport5Night(date.replaceAll('-', ''));
+    show('sport5 article', s5 ? { title: sport5Title(date.replaceAll('-', '')), url: s5.url, blocks: parseSport5(s5.text).map((b) => b.scorePair) } : 'not found');
+  } catch (e) { show('sport5 error', e.message); }
+}

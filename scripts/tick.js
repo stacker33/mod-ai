@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync
 import { join } from 'node:path';
 import { listGames, getStandings } from '../src/espn.js';
 import { backupGames } from '../src/secondary.js';
-import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, writeIntro, assembleClosing, boxHash } from '../src/pipeline.js';
+import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, writeIntro, assembleClosing, boxHash, morningCompare } from '../src/pipeline.js';
 import { heTeam } from '../src/teams.js';
 import { telegramReady, sendTelegram, itemMessage, heldAlert } from '../src/notify.js';
 import { ROOT } from '../src/pipeline.js';
@@ -154,6 +154,18 @@ async function tickDate(date, cfg) {
   // every game of the night is in: write the opening paragraph once (Sport5's "לא פחות מ-14 משחקים...")
   if (rows.length && rows.every((x) => x.state === 'post') && rows.every((x) => state.games[x.id]?.status === 'done') && !state.introAt) {
     try { if (await writeIntro(date, cfg)) { state.introAt = Date.now(); assembleClosing(date, { pending: [] }); changed = true; log('opening paragraph written'); } } catch (e) { log(`opening paragraph: ${e.message.slice(0, 120)}`); }
+    writeFileSync(stateFile, JSON.stringify(state, null, 1));
+  }
+  // the morning comparison with the Sport5 editor's article: after 08:00 Israel time, every 15 minutes until
+  // the article is up (until 14:00), once per night
+  const ilHour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }).format(new Date()));
+  if (state.introAt && !state.compareAt && ilHour >= 8 && ilHour < 14 && now - (state.compareTriedAt || 0) >= 15 * 60e3) {
+    state.compareTriedAt = now;
+    try {
+      const r = await morningCompare(date, cfg);
+      if (r) { state.compareAt = now; changed = true; log(`Sport5 comparison: ${r.games} games, names ${r.namesCovered}%, numbers ${r.numbersCovered}%, same opening ${r.sameAngle}%`); }
+      else log('Sport5 article not up yet');
+    } catch (e) { log(`Sport5 comparison: ${e.message.slice(0, 120)}`); }
     writeFileSync(stateFile, JSON.stringify(state, null, 1));
   }
   // the night's schedule for the editor page board (which games are still to come / playing); saved only
