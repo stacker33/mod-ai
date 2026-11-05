@@ -1,26 +1,22 @@
 // Sport5 Hebrew formatting, done in code so the model never decides an order itself.
-// The orders below are the editor's rules (2026-11-03); each context has exactly one function.
-//
-//   final result ("ניצחון 129:136", "הפסד 124:103")   subject's score LAST   -> pair()
-//   partial scores: quarter, halftime, after three     subject's score FIRST  -> partialPair()
-//     ("טורונטו ניצחה את הרבע הרביעי 47:27")
-//   in-game moments (lead, late score, score after a play)  subject FIRST since round 3 -> formatScore(.., 'state')
-//   runs ("ריצת 0:17")                                    running team's points LAST -> formatScore(.., 'run')
-//   record in parentheses after a team name           WINS:LOSSES   ("ממפיס (6:1)")      -> formatRecord(..., 'standalone')
-//   record after "עלה/עלתה/ירד/ירדה למאזן"            LOSSES:WINS   ("עלתה למאזן 1:6")   -> formatRecord(..., 'relative')
+// The order is Sport5's own, character for character, as on its nightly NBA page (editor, 2026-11-05:
+// "exactly like Sport5"). In the stored text:
+//   every score in prose — final result, quarter, halftime, a lead, a late score, a run:
+//     the sentence subject's score LAST   ("הקליפרס ניצחו 19:43 את הרבע השני" = Clippers 43,
+//                                          "ניצחון 129:136", "ריצת 0:19")          -> pair() / formatScore()
+//   every record — in parentheses or after "עלתה/ירדה למאזן": LOSSES:WINS
+//     ("פילדלפיה (1:8)" = 8 wins, "בדרך למאזן 1:8")                                -> formatRecord()
+//   score line: home - away AWAY:HOME ("סן אנטוניו - דאלאס 111:112")
+// In a right-to-left page the subject's score / the wins are the number on the RIGHT.
 
 export const pair = (subject, other) => `${other}:${subject}`;
-export const partialPair = (subject, other) => `${subject}:${other}`;
+// kept for older callers: partial scores follow the same Sport5 rule now
+export const partialPair = pair;
 
 // THE score formatter: every score the prose may contain is rendered here, from the narrative subject's side.
-//   'state'  any game state — quarter, halftime, after three, a lead, a late score, the score after a play:
-//            the subject's score FIRST ("הקליפרס הובילו 78:62")          (editor, 2026-11-03, round 3)
-//   'final'  the final result after ניצחון/הפסד: the subject's score LAST ("ניצחון 129:136")
-//   'run'    a scoring run: the running team's points LAST ("ריצת 0:19")
 export function formatScore(score, side, context = 'state') {
   const me = score[side], them = score[side === 'home' ? 'away' : 'home'];
-  if (context === 'state') return partialPair(me, them);
-  if (context === 'final' || context === 'run') return pair(me, them);
+  if (['state', 'final', 'run'].includes(context)) return pair(me, them);
   throw new Error(`formatScore: unknown context ${context}`);
 }
 
@@ -37,9 +33,9 @@ export function parseRecord(rec) {
   return m ? { wins: Number(m[1]), losses: Number(m[2]) } : null;
 }
 
+// Sport5 writes LOSSES:WINS in both places ("(1:8)", "למאזן 1:8"); the context stays explicit
 export function formatRecord(wins, losses, context) {
-  if (context === 'standalone') return `${wins}:${losses}`;
-  if (context === 'relative') return `${losses}:${wins}`;
+  if (context === 'standalone' || context === 'relative') return `${losses}:${wins}`;
   throw new Error(`formatRecord: context must be 'standalone' or 'relative', got ${context}`);
 }
 

@@ -139,10 +139,10 @@ function scoreIssues(text, brief, ctx) {
       if (/מאזן\s*$/.test(before) || (/\(\s*$/.test(before) && recordPairs.has(m[0]))) continue;
       // the final score next to a result word is judged by that word (resultVerb), not by the subject
       if (isFinal(finalScores, a, b) && resultVerb(sentence, m.index)) continue;
-      // a quarter (or overtime) the subject WON: the higher number first
+      // a quarter (or overtime) the subject WON: Sport5 writes its (higher) score last
       // (only for pairs that ARE a period score — a final result in the same sentence keeps its own order)
-      if (quarterScores.has(`${a}:${b}`) && /רבע|הארכה/.test(clause.text) && /(ניצח|ניצחה|ניצחו|גבר|גברה|גברו|לקח|לקחה|לקחו|הכריע|הכריעה)/.test(clause.text) && a < b) {
-        out.push({ code: 'quarter-order', severity: 'block', msg: `"${sentence.slice(0, 80)}": הקבוצה שניצחה ברבע צריכה להופיע עם המספר הגבוה ראשון — ${b}:${a}`, fix: { type: 'replace', sentence, from: m[0], to: `${b}:${a}` } });
+      if (quarterScores.has(`${a}:${b}`) && /רבע|הארכה/.test(clause.text) && /(ניצח|ניצחה|ניצחו|גבר|גברה|גברו|לקח|לקחה|לקחו|הכריע|הכריעה)/.test(clause.text) && a > b) {
+        out.push({ code: 'quarter-order', severity: 'block', msg: `"${sentence.slice(0, 80)}": בכתיב של ערוץ הספורט הנקודות של הקבוצה שניצחה ברבע באות אחרונות — ${b}:${a}`, fix: { type: 'replace', sentence, from: m[0], to: `${b}:${a}` } });
         continue;
       }
       if (!first) continue;
@@ -209,7 +209,8 @@ export function verifyDraft(input, brief, names, ctx = null) {
   const finalScores = (brief.result_for_winner || brief.result_he || brief.game?.result_for_winner || '').match(/(\d+):(\d+)/)?.slice(1).map(Number) || null;
   for (const s of sentences(text)) {
     for (const n of new Set(s.replace(PAIR, ' ').match(NUM) || [])) if (!numbers.has(n)) push('number', 'block', `המספר ${n} לא מופיע בנתונים`, { type: 'drop', sentence: s });
-    for (const p of new Set(s.match(PAIR) || [])) if (!pairs.has(p) && !issues.some((i) => i.fix?.to === p || i.fix?.to?.includes?.(p))) push('pair', 'block', `התוצאה ${p} לא מופיעה בנתונים`, { type: 'drop', sentence: s });
+    // (a record in the wrong order is already a record issue with its own fix)
+    for (const p of new Set(s.match(PAIR) || [])) if (!pairs.has(p) && !issues.some((i) => i.fix?.to === p || i.fix?.to?.includes?.(p) || (/^record-/.test(i.code) && i.fix?.sentence === s))) push('pair', 'block', `התוצאה ${p} לא מופיעה בנתונים`, { type: 'drop', sentence: s });
     // the final result after "ניצחון"/"הפסד" keeps Sport5's form (subject last). Only the final score is
     // checked here: quarter, overtime and record pairs near those words have their own rules.
     for (const m of s.matchAll(/(\d+):(\d+)/g)) {

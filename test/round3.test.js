@@ -27,22 +27,23 @@ const one = (f, text, brief) => check(f, { paragraphs: [text] }, brief);
 const codes = (r) => r.issues.map((i) => i.code);
 
 // ---------- A. score perspective ----------
-test('A. a game state follows the sentence subject: "הקליפרס הובילו 78:62", never 62:78 (TOR @ LAC)', () => {
-  assert.equal(formatScore({ home: 78, away: 62 }, 'home'), '78:62');
-  assert.equal(formatScore({ home: 78, away: 62 }, 'away'), '62:78');
-  assert.equal(formatScore({ home: 78, away: 62 }, 'home', 'final'), '62:78'); // final result keeps "ניצחון 62:78"
+test('A. a game state follows the sentence subject, Sport5 order: "הקליפרס הובילו 62:78" (Clippers 78)', () => {
+  // editor, 2026-11-05: exactly as on Sport5's page ("הקליפרס ניצחו 19:43 את הרבע השני")
+  assert.equal(formatScore({ home: 78, away: 62 }, 'home'), '62:78');
+  assert.equal(formatScore({ home: 78, away: 62 }, 'away'), '78:62');
+  assert.equal(formatScore({ home: 78, away: 62 }, 'home', 'final'), '62:78');
   const f = game('401909920'); // Clippers' largest lead: 78-62 in the third quarter
   const b = gameBrief(f);
   const lead = b.largest_lead.find((x) => x.team_he === 'הקליפרס');
-  assert.equal(lead.score_by_subject['הקליפרס'], '78:62');
-  assert.equal(lead.score_by_subject['טורונטו'], '62:78');
-  const bad = one(f, 'הקליפרס הובילו 62:78 ברבע השלישי.');
+  assert.equal(lead.score_by_subject['הקליפרס'], '62:78');
+  assert.equal(lead.score_by_subject['טורונטו'], '78:62');
+  const bad = one(f, 'הקליפרס הובילו 78:62 ברבע השלישי.');
   const fix = bad.issues.find((i) => i.code === 'score-order');
   assert.ok(fix);
-  assert.equal(autoFix({ headline: 'טורונטו חזרה מפיגור 16', paragraphs: ['הקליפרס הובילו 62:78 ברבע השלישי.'] }, bad.issues).paragraphs[0], 'הקליפרס הובילו 78:62 ברבע השלישי.');
-  assert.ok(!codes(one(f, 'הקליפרס הובילו 78:62 ברבע השלישי.')).includes('score-order'));
+  assert.equal(autoFix({ headline: 'טורונטו חזרה מפיגור 16', paragraphs: ['הקליפרס הובילו 78:62 ברבע השלישי.'] }, bad.issues).paragraphs[0], 'הקליפרס הובילו 62:78 ברבע השלישי.');
+  assert.ok(!codes(one(f, 'הקליפרס הובילו 62:78 ברבע השלישי.')).includes('score-order'));
   // checkpoints too
-  assert.equal(b.after_three_clause, 'הקליפרס הובילו אחרי שלושה רבעים 91:78');
+  assert.equal(b.after_three_clause, 'הקליפרס הובילו אחרי שלושה רבעים 78:91');
 });
 
 // ---------- B. free-throw terminology ----------
@@ -80,12 +81,12 @@ test('D. go-ahead: 110:110 + 3 is go-ahead; 106:110 + 3 only cuts; leading + 2 e
 });
 
 // ---------- E. quarter score ----------
-test('E. "טורונטו ניצחה את הרבע האחרון 47:27" — those exact points, subject first', () => {
+test('E. "טורונטו ניצחה 27:47 את הרבע האחרון" — those exact points, Sport5 order', () => {
   const f = game('401909920');
-  assert.ok(gameBrief(f).quarters.some((q) => q.clause === 'טורונטו ניצחה את הרבע האחרון 47:27'));
-  assert.ok(codes(one(f, 'טורונטו ניצחה את הרבע האחרון 27:47.')).includes('quarter-order'));
-  assert.ok(codes(one(f, 'טורונטו ניצחה את הרבע האחרון 45:27.')).includes('semantic'));
-  assert.ok(!codes(one(f, 'טורונטו ניצחה את הרבע האחרון 47:27.')).includes('semantic'));
+  assert.ok(gameBrief(f).quarters.some((q) => q.clause === 'טורונטו ניצחה 27:47 את הרבע האחרון'));
+  assert.ok(codes(one(f, 'טורונטו ניצחה את הרבע האחרון 47:27.')).includes('quarter-order'));
+  assert.ok(codes(one(f, 'טורונטו ניצחה 27:45 את הרבע האחרון.')).includes('semantic'));
+  assert.ok(!codes(one(f, 'טורונטו ניצחה 27:47 את הרבע האחרון.')).includes('semantic'));
 });
 
 // ---------- F / G. story hierarchy ----------
@@ -159,11 +160,11 @@ test('K. a halftime state is never the result of the second half; second-half / 
 });
 
 // ---------- record convention kept ----------
-test('records unchanged: (W:L) after a team name, L:W after "ירדה למאזן"', () => {
-  assert.equal(formatRecord(6, 1, 'standalone'), '6:1');
+test('records: Sport5 writes losses:wins after a team name and after "ירדה למאזן"', () => {
+  assert.equal(formatRecord(6, 1, 'standalone'), '1:6');
   assert.equal(formatRecord(6, 1, 'relative'), '1:6');
   const b = gameBrief(game('401909914'));
-  assert.ok(b.heading.includes('ממפיס (6:1)'));
+  assert.ok(b.heading.includes('ממפיס (1:6)'));
   assert.equal(b.records['ממפיס'].after_verb, 'ירדה למאזן 1:6');
 });
 

@@ -63,7 +63,7 @@ const sideOfClause = (sentence, index, words) => {
 };
 
 const other = (s) => (s === 'home' ? 'away' : 'home');
-// a game-state pair is written subject-first (he.js formatScore 'state'): "a:b" for side S means S has a
+// a game-state pair is written Sport5's way (he.js): "a:b" for side S means S has b
 
 // ---------- 1. entity: team-level actions need the team as their subject ----------
 const TEAM_ACTION = new RegExp(`(^|\\s)(ו?)((?:עלתה|עלו|ירדה|ירדו|עלה|ירד)\\s+למאזן\\s+\\d+:\\d+|(?:רשמה|רשמו|רשם|ספגה|ספגו|ספג)\\s+(?:את\\s+)?ה?(?:ניצחון|הפסד)\\s+\\S+\\s+ברציפות|(?:האריכה|האריכו|האריך)\\s+את\\s+ה?רצף|(?:טיפסה|טיפסו|טיפס)\\s+למקום)`, 'g');
@@ -160,7 +160,7 @@ function narrativeIssues(sentence, brief, words) {
 // ---------- 3. impossible basketball ----------
 const THREE_CLOSE = /(שלש(ה|ות|ת)|זריקת\s+שלוש|קליעה\s+מחוץ\s+לקשת)[^.,]{0,25}(מחצי\s+מרחק|מטווח\s+(בינוני|קצר)|מתחת\s+לסל|מהצבע|מקרוב|בלייאפ|בדאנק|בהטבעה)|(מחצי\s+מרחק|לייאפ|הטבעה|דאנק)[^.,]{0,15}(שלשה|משלוש)/;
 const FT_FAR = /(זריק(ת|ות)\s+עונשין|מהעונשין|מהקו)[^.,]{0,20}(מחוץ\s+לקשת|משלוש|מחצי\s+מרחק|מטווח\s+רחוק)/;
-const QUARTER_WON = new RegExp(`(ניצח|ניצחה|ניצחו|לקחה|לקחו|גברה|גברו)\\s+(את\\s+|ב)?ה?רבע\\s+ה?(ראשון|שני|שלישי|רביעי|אחרון)${NOT_HE}`);
+const QUARTER_WON = new RegExp(`(ניצח|ניצחה|ניצחו|לקחה|לקחו|גברה|גברו)\\s+(?:\\d+:\\d+\\s+)?(את\\s+|ב)?ה?רבע\\s+ה?(ראשון|שני|שלישי|רביעי|אחרון)${NOT_HE}`);
 const Q_INDEX = { 'ראשון': 1, 'שני': 2, 'שלישי': 3, 'רביעי': 4, 'אחרון': 4 };
 const TIE = new RegExp(`(השווה|השוותה|השוו|סל\\s+השוויון|שלשת\\s+השוויון|קבע(ה|ו)?\\s+שוויון|איזן|איזנה|איזנו)${NOT_HE}`);
 const GO_AHEAD = new RegExp(`(העל(ה|תה|ו)\\s+את\\s+\\S+(\\s+\\S+)?\\s+ליתרון|(סל|שלשת|שלשה\\s+של|זריקת)\\s+היתרון|עבר(ה|ו)\\s+ליתרון|עלת(ה)?\\s+ליתרון|עלו\\s+ליתרון|החזיר(ה|ו)?\\s+את\\s+ה?יתרון|החזיר(ה|ו)?\\s+את\\s+\\S+(\\s+\\S+)?\\s+ליתרון|קבע(ה|ו)?\\s+יתרון)${NOT_HE}`);
@@ -241,7 +241,7 @@ function semanticIssues(sentence, brief, words) {
 
   // plays: the claim must match the score the play produced
   const pairsIn = (text) => [...text.matchAll(/(\d+):(\d+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
-  const momentFor = (a, b, side) => (ck.moments || []).find((m) => m.after[side] === a && m.after[other(side)] === b);
+  const momentFor = (a, b, side) => (ck.moments || []).find((m) => m.after[side] === b && m.after[other(side)] === a);
   const claim = (re, test, msg) => {
     const m = sentence.match(re);
     if (!m) return;
@@ -258,15 +258,15 @@ function semanticIssues(sentence, brief, words) {
   claim(TIE, ([a, b]) => a === b, ([a, b]) => `"שוויון" אבל התוצאה ${a}:${b} אינה שוויון`);
   claim(GO_AHEAD, ([a, b], side) => {
     if (!side) return null;
-    if (a <= b) return false; // subject-first: the subject has a
+    if (b <= a) return false; // Sport5 order: the subject has b
     const m = momentFor(a, b, side);
     if (!m) return null;
     return m.side === side && m.before[side] <= m.before[other(side)];
   }, ([a, b]) => `"יתרון" — אבל ${a}:${b} לא העלה את הקבוצה ליתרון (או שכבר הובילה)`);
-  claim(CUT, ([a, b], side) => (side ? a < b : null), ([a, b]) => `"צימקה" — אבל ב-${a}:${b} הקבוצה כבר לא בפיגור`);
+  claim(CUT, ([a, b], side) => (side ? b < a : null), ([a, b]) => `"צימקה" — אבל ב-${a}:${b} הקבוצה כבר לא בפיגור`);
   claim(EXTEND, ([a, b], side) => {
     if (!side) return null;
-    if (a <= b) return false;
+    if (b <= a) return false;
     const m = momentFor(a, b, side);
     return m ? m.before[side] > m.before[other(side)] : null;
   }, ([a, b]) => `"הגדילה את היתרון" — אבל לפני ${a}:${b} הקבוצה לא הובילה`);

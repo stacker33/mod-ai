@@ -96,14 +96,14 @@ test('D. a basket called tying must leave the score equal', () => {
 });
 
 // ---------- E. go-ahead ----------
-test('E. a basket called go-ahead must turn a tie or deficit into a lead (scores subject-first)', () => {
+test('E. a basket called go-ahead must turn a tie or deficit into a lead (Sport5 order: subject last)', () => {
   const f = game('401909918'); // Denver went from 87:87 to 89:87
-  assert.ok(!codes(one(f, "ג'מאל מארי העלה את דנבר ליתרון 89:87.")).includes('semantic'));
-  // Portland was behind after that basket: "took the lead 87:89" is false
-  assert.ok(codes(one(f, 'פורטלנד עלתה ליתרון 87:89.')).includes('semantic'));
+  assert.ok(!codes(one(f, "ג'מאל מארי העלה את דנבר ליתרון 87:89.")).includes('semantic'));
+  // Portland was behind after that basket: "took the lead 89:87" is false
+  assert.ok(codes(one(f, 'פורטלנד עלתה ליתרון 89:87.')).includes('semantic'));
   // lead-cutting: still behind afterwards
-  assert.ok(!codes(one(f, 'פורטלנד צימקה ל-87:89.')).includes('semantic'));
-  assert.ok(codes(one(f, 'דנבר צימקה ל-89:87.')).includes('semantic'));
+  assert.ok(!codes(one(f, 'פורטלנד צימקה ל-89:87.')).includes('semantic'));
+  assert.ok(codes(one(f, 'דנבר צימקה ל-87:89.')).includes('semantic'));
 });
 
 // ---------- F. runs from the play-by-play ----------
@@ -142,18 +142,18 @@ test('G. random Hebrew typos are not code rules (editor, round 3); translated id
 });
 
 // ---------- H. record convention (kept from round 1) ----------
-test('H. record convention: (W:L) after a team name, L:W after "עלתה/ירדה למאזן"', () => {
-  assert.equal(formatRecord(6, 1, 'standalone'), '6:1');
+test('H. record convention: Sport5 writes losses:wins, in parentheses and after "עלתה/ירדה למאזן"', () => {
+  assert.equal(formatRecord(6, 1, 'standalone'), '1:6');
   assert.equal(formatRecord(6, 1, 'relative'), '1:6');
-  assert.equal(formatRecord(1, 6, 'standalone'), '1:6');
+  assert.equal(formatRecord(1, 6, 'standalone'), '6:1');
   assert.equal(formatRecord(1, 6, 'relative'), '6:1');
   const r = recordForms('6-1', true);
-  assert.equal(r.in_parentheses, '(6:1)');
+  assert.equal(r.in_parentheses, '(1:6)');
   assert.equal(r.phrase, 'עלתה למאזן 1:6');
   assert.equal(recordForms('6-1', true, false).phrase, 'עלו למאזן 1:6'); // plural team name
   const f = game('401909908'); // Detroit 6-1
   const b = gameBrief(f);
-  assert.ok(b.heading.includes('דטרויט (6:1)'));
+  assert.ok(b.heading.includes('דטרויט (1:6)'));
   assert.equal(b.records['דטרויט'].after_verb, 'עלתה למאזן 1:6');
   assert.ok(codes(one(f, 'דטרויט עלתה למאזן 6:1.')).includes('record-relative'));
 });

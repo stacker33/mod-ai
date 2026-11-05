@@ -81,7 +81,7 @@ function angleHe(k, f, tn, names = new Map()) {
     case 'FIRST_WIN': return `${t(k.side)} ${vb(k.side, 'רשמה', 'רשמו')} ניצחון ראשון העונה, אחרי ${k.n} הפסדים בפתיחת העונה`;
     case 'UNBEATEN': return `${t(k.side)} ${vb(k.side, 'נשארה', 'נשארו')} בלי הפסד: ${k.n} ניצחונות ב-${k.n} משחקים`;
     case 'WINLESS': return `${t(k.side)} עדיין בלי ניצחון: ${k.n} הפסדים ב-${k.n} משחקים`;
-    case 'DOMINANT_QUARTER': return `${t(k.side)} ${vb(k.side, 'הכריעה', 'הכריעו')} ${pre('ב', PERIOD_HE(k.period, f.clutch.finalPeriod))}: ${partialPair(k.score[k.side], k.score[k.side === 'home' ? 'away' : 'home'])}`;
+    case 'DOMINANT_QUARTER': return `${t(k.side)} ${vb(k.side, 'הכריעה', 'הכריעו')} ${pre('ב', PERIOD_HE(k.period, f.clutch.finalPeriod))}: ${pair(k.score[k.side], k.score[k.side === 'home' ? 'away' : 'home'])}`;
     case 'SHORT_ROSTER': return `${t(k.side)} ${vb(k.side, 'שיחקה', 'שיחקו')} עם ${COUNT_HE[k.n] || k.n} שחקנים בלבד`;
     case 'DECISIVE_RUN': return runClause(k.run, f);
     default: return null;
@@ -98,11 +98,11 @@ export function gameBrief(f) {
   // every score state, once per team. kind 'partial' = subject first, 'last' = subject last (he.js)
   const states = [];
   const by = (h, a, kind, label = null) => {
-    states.push({ home: h, away: a, kind, label });
-    const fmt = kind === 'partial' ? partialPair : pair;
+    states.push({ home: h, away: a, kind: 'last', label });
+    const fmt = pair; // Sport5: the subject's score last, for every kind of score
     return h === a ? `${h}:${a}` : { [tn('home')]: fmt(h, a), [tn('away')]: fmt(a, h) };
   };
-  // a game state (lead, late score, score after a play): the subject's score first (he.js formatScore 'state')
+  // a game state (lead, late score, score after a play): Sport5 order, the subject's score last (he.js)
   const byS = (s, kind = 'partial') => by(s.home, s.away, kind);
   const recs = { home: recordForms(f.teams.home.record, W === 'home', !f.teams.home.plural), away: recordForms(f.teams.away.record, W === 'away', !f.teams.away.plural) };
   const story = f.story || { main: f.candidates[0] || null, secondary: f.candidates.slice(1, 3) };
@@ -129,7 +129,7 @@ export function gameBrief(f) {
       const win = h === a ? null : h > a ? 'home' : 'away';
       return {
         period_he: PERIOD_HE(i + 1, fp),
-        clause: win ? `${tn(win)} ${vb(win, 'ניצחה', 'ניצחו')} את ${PERIOD_HE(i + 1, fp)} ${partialPair(f.teams[win].periods[i], f.teams[other(win)].periods[i])}` : `${PERIOD_HE(i + 1, fp)} הסתיים בשוויון ${h}:${a}`,
+        clause: win ? `${tn(win)} ${vb(win, 'ניצחה', 'ניצחו')} ${pair(f.teams[win].periods[i], f.teams[other(win)].periods[i])} את ${PERIOD_HE(i + 1, fp)}` : `${PERIOD_HE(i + 1, fp)} הסתיים בשוויון ${h}:${a}`,
         score_by_subject: by(h, a, 'partial', 'quarter'),
       };
     }),
@@ -137,7 +137,7 @@ export function gameBrief(f) {
   const lead = (s, word, label) => {
     const lv = s.home === s.away ? null : s.home > s.away ? 'home' : 'away';
     by(s.home, s.away, 'partial', label);
-    return lv ? `${tn(lv)} ${vb(lv, 'הובילה', 'הובילו')} ${word} ${partialPair(s[lv], s[other(lv)])}` : `שוויון ${word} ${s.home}:${s.away}`;
+    return lv ? `${tn(lv)} ${vb(lv, 'הובילה', 'הובילו')} ${word} ${pair(s[lv], s[other(lv)])}` : `שוויון ${word} ${s.home}:${s.away}`;
   };
   b.halftime_clause = lead(f.result.halftime, 'במחצית', 'half');
   b.after_three_clause = lead(f.result.after3, 'אחרי שלושה רבעים', 'after3');
@@ -241,7 +241,7 @@ export function playerBrief(f, t) {
   const g = gameBrief(f);
   const names = heOf(f);
   const tnp = (side) => f.teams[side].heShort || f.teams[side].he;
-  const subject = (s) => { g.states.push({ home: s.home, away: s.away, kind: 'partial' }); return s.home === s.away ? `${s.home}:${s.away}` : { [tnp('home')]: formatScore(s, 'home'), [tnp('away')]: formatScore(s, 'away') }; };
+  const subject = (s) => { g.states.push({ home: s.home, away: s.away, kind: 'last' }); return s.home === s.away ? `${s.home}:${s.away}` : { [tnp('home')]: formatScore(s, 'home'), [tnp('away')]: formatScore(s, 'away') }; };
   const rec = recordForms(t.team.record, t.won);
   const ms = t.milestones.map((m) => m.type);
   const streak = t.team.context.streak;
