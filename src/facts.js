@@ -408,7 +408,8 @@ function candidates(f) {
   }
   for (const i of f.israelis) {
     // Avdija (full track) leads his game; Wolf / Saraf have their own short item, so they lead only with a big night
-    const w = i.track === 'full' ? 85 : i.pts >= 15 ? 70 : 45;
+    const big = i.pts >= 15 || (i.min >= 25 && i.pts >= 10);
+    const w = i.track === 'full' && big ? 85 : big ? 70 : 45;
     if (i.played) add('ISRAELI_ANGLE', w, `${i.name} (${i.team}): ${i.pts} pts, ${i.reb} reb, ${i.ast} ast in ${i.min} min`, 'box', { side: i.side, player: i.name, pts: i.pts });
     else add('ISRAELI_ANGLE', 60, `${i.name} (${i.team}) did not play${i.dnpReason ? ': ' + i.dnpReason : ''}`, 'box');
   }

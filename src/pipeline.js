@@ -18,12 +18,15 @@ import { getSummary, getTeamSchedule } from './espn.js';
 import { playerHistory } from './gamelog.js';
 import { analyzeGame } from './game.js';
 import { gameBrief, playerBrief, FEATURED } from './writer/brief.js';
-import { buildPrompt, proofPrompt, schemaFor } from './writer/prompt.js';
+import { buildPrompt, proofPrompt, introPrompt, schemaFor } from './writer/prompt.js';
 import { generateJSON } from './writer/gemini.js';
 import { verifyDraft, autoFix, draftText } from './writer/verify.js';
 import { fetchContext } from './context.js';
 import { nightHe } from './writer/he.js';
-import { NICK_HE } from './teams.js';
+import { NICK_HE, heTeam } from './teams.js';
+
+// a team in Sport5's results list: the short name, nicknames without the article ("קליפרס - מיאמי")
+const listName = (t) => (heTeam(t.abbr) || t.heShort || t.he).replace(/^ה(?=קליפרס|לייקרס|ניקס)/, '');
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = (p) => JSON.parse(readFileSync(p, 'utf8'));
@@ -87,19 +90,22 @@ function ctxFor(f) {
   };
 }
 
-async function writeItem(cfg, mode, brief, f) {
+const MAX_ROUNDS = 2;
+
+export async function writeItem(cfg, mode, brief, f) {
   const inGame = new Set(['home', 'away'].flatMap((s) => f.players[s].map((p) => p.id)));
   const names = cfg.dict.map((d) => ({ ...d, inGame: inGame.has(d.id), status: d.approved ? 'approved' : d.status }));
   const ctx = ctxFor(f);
   const { system, user } = buildPrompt(ROOT, mode, brief);
   const messages = [{ role: 'user', text: user }];
   let last;
-  for (let round = 1; round <= 3; round++) {
+  // two rounds with the model at most (the code fixes the rest) — the free daily quota has to last the night
+  for (let round = 1; round <= MAX_ROUNDS; round++) {
     const res = await generateJSON({ ...cfg.ai, system, messages, schema: schemaFor(mode) });
     const check = verifyDraft(res.data, brief, names, ctx);
     last = { mode, gameId: f.gameId, model: res.model, rounds: round, draft: res.data, check, writtenAt: new Date().toISOString() };
     if (!check.issues.length) break;
-    if (round < 3) messages.push({ role: 'model', text: res.text }, { role: 'user', text: `הטיוטה לא עברה את הבדיקה. תקן רק את אלה והחזר את כל ה-JSON מחדש:\n- ${check.errors.join('\n- ')}` });
+    if (round < MAX_ROUNDS) messages.push({ role: 'model', text: res.text }, { role: 'user', text: `הטיוטה לא עברה את הבדיקה. תקן רק את אלה והחזר את כל ה-JSON מחדש:\n- ${check.errors.join('\n- ')}` });
   }
   // still contradicting the data after the model's rounds: fix in code — only the failing claim goes
   // (swap a pair, drop that sentence, rejoin a split paragraph, trim), then check again
@@ -110,9 +116,9 @@ async function writeItem(cfg, mode, brief, f) {
     last.check = verifyDraft(last.draft, brief, names, ctx);
   }
   // held only when a contradiction is left, or nothing usable is left after removing the bad claims
-  last.held = !last.check.ok || !last.draft.headline || !(last.draft.paragraphs || []).length;
-  // language-only proofreading; thrown away if it touches any fact
-  if (!last.held && cfg.proofread) {
+  last.held = !last.check.ok || (mode !== 'game' && !last.draft.headline) || !(last.draft.paragraphs || []).length;
+  // language-only proofreading for the stand-alone articles; thrown away if it touches any fact
+  if (!last.held && cfg.proofread && mode === 'player') {
     try {
       const p = await proofread(cfg, mode, last.draft, brief, names, ctx);
       last.proofread = p.note;
@@ -168,36 +174,25 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   const base = { heading: gb.heading, end: f.endedAt || f.date, weight, angle: gb.main_angle, corrected, leads: { highlights: f.color?.highlights || [], unverified: f.research, namesMissing: f.namesMissing } };
   // Israelis who actually played (box score minutes); one who did not play changes nothing: normal recap
   const tracks = (f.tracks || []).filter((t) => t.inGame && t.played && t.ok);
-  // ONE piece per game (editor, 2026-11-03/04): when a full-track Israeli (Avdija, Sharp) played, his article IS the game's
-  // piece; a big game gets its stand-alone article INSTEAD of the short block. The nightly page then shows
-  // that piece's opening. Both are written only when the main piece is held (no other choice).
+  // editor, 2026-11-05 (as on Sport5's page): a game with an Israeli who played gets a separate article and
+  // is NOT a block of the nightly page (it stays in "כל התוצאות"). One article per game: Avdija / Sharp lead
+  // it, any other Israeli in the game is inside it. Big games stay on the nightly page, as a longer block.
   let main = null;
-  const full = tracks.find((t) => t.player.track === 'full');
-  if (full) {
-    main = await writeItem(cfg, 'player', { ...playerBrief(f, full), max_paragraphs: 3, final_score_in: 'headline' }, f);
-    Object.assign(main, { player: full.player, corrected });
-    log(`  player ${full.player.name} ${main.held ? 'HELD' : 'ok'} (${main.rounds} rounds, ${main.model})`);
-  } else if (weight >= FEATURED) {
-    main = await writeItem(cfg, 'article', { ...gb, max_paragraphs: 3, final_score_in: 'headline' }, f);
-    Object.assign(main, { heading: gb.heading, corrected });
-    log(`  big-game article ${main.held ? 'HELD' : 'ok'} (${main.rounds} rounds, ${main.model})`);
+  if (tracks.length) {
+    const lead = tracks.find((t) => t.player.track === 'full') || [...tracks].sort((x, y) => (y.line?.pts || 0) - (x.line?.pts || 0))[0];
+    main = await writeItem(cfg, 'player', { ...playerBrief(f, lead), max_paragraphs: 3, final_score_in: 'headline' }, f);
+    Object.assign(main, { player: lead.player, players: tracks.map((t) => t.player.he || t.player.name), corrected, heading: gb.heading, end: f.endedAt || f.date, weight, angle: gb.main_angle });
+    items.push(main);
+    log(`  article ${tracks.map((t) => t.player.name).join(' + ')} ${main.held ? 'HELD' : 'ok'} (${main.rounds} rounds, ${main.model})`);
   }
-  if (main) items.push(main);
-  if (main && !main.held) {
-    // the nightly page's block for this game = the article's headline, sub-headline and first paragraph;
-    // not sent to Telegram on its own (the article already was)
-    const d = main.draft;
-    items.push({ ...base, mode: 'game', gameId: f.gameId, model: main.model, rounds: 0, check: main.check, held: false, noSend: true, from: main.mode,
-      draft: { headline: d.headline, deck: d.subheadline || d.deck || '', paragraphs: (d.paragraphs || []).slice(0, 1) }, writtenAt: main.writtenAt });
-    log('  block = opening of the article (not sent separately)');
-  } else {
-    const game = await writeItem(cfg, 'game', gb, f);
+  if (!main || main.held) {
+    // no Israeli played (or his article could not be published): the game's block on the nightly page
+    const featured = weight >= FEATURED;
+    const game = await writeItem(cfg, 'game', { ...gb, max_paragraphs: featured ? 4 : 3 }, f);
     Object.assign(game, base);
     items.push(game);
     log(`  block ${game.held ? 'HELD' : game.autoFixed?.length ? 'ok (auto-fixed)' : 'ok'} (${game.rounds} rounds, ${game.model})`);
   }
-  // Wolf / Saraf (short track) have no piece of their own: the game's one piece includes them
-  // (brief.israelis_featured / other_israelis; the validator adds a missing one's line)
   writeFileSync(join(dd, 'items', `${f.gameId}.json`), JSON.stringify(items, null, 1));
   for (const it of items.filter((x) => x.mode !== 'game' && x.draft)) {
     const name = it.player ? `${it.mode}-${it.player.name.replace(/\W+/g, '-')}-${it.gameId}` : `article-${it.gameId}`;
@@ -207,6 +202,52 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   return items;
 }
 
+// After ESPN corrects a box score: check the recap already sent against the corrected facts. Only if
+// something in it is now wrong is it rewritten (and sent again as "עדכון"); otherwise nothing is sent.
+export async function recheckGame(date, f, cfg, { log = () => {} } = {}) {
+  const file = join(dayDir(date), 'drafts', 'items', `${f.gameId}.json`);
+  if (!existsSync(file)) return { rewritten: false, items: await draftsForGame(date, f, cfg, { corrected: true, log }) };
+  const items = readJson(file);
+  const inGame = new Set(['home', 'away'].flatMap((s) => f.players[s].map((p) => p.id)));
+  const names = cfg.dict.map((d) => ({ ...d, inGame: inGame.has(d.id), status: d.approved ? 'approved' : d.status }));
+  const ctx = ctxFor(f);
+  const wrong = [];
+  for (const it of items.filter((x) => x.draft && !x.held && !x.noSend)) {
+    const t = it.player ? (f.tracks || []).find((x) => x.player.id === it.player.id) : null;
+    const brief = it.mode === 'player' && t ? { ...playerBrief(f, t), max_paragraphs: 3, final_score_in: 'headline' } : gameBrief(f);
+    const check = verifyDraft(it.draft, brief, names, ctx);
+    if (!check.ok) wrong.push(...check.issues.filter((i) => i.severity === 'block').map((i) => i.msg));
+  }
+  if (!wrong.length) { log(`  ESPN correction does not touch the recap — nothing re-sent`); return { rewritten: false, items: [] }; }
+  log(`  ESPN correction changes the recap (${wrong.length}) — rewriting`);
+  return { rewritten: true, items: await draftsForGame(date, f, cfg, { corrected: true, log }) };
+}
+
+// The night's opening paragraph (Sport5: "לא פחות מ-14 משחקים נערכו הלילה..., כשבמוקד ..."), written once
+// all games are in, from the games' verified angles only. Fallback: a plain sentence in code.
+export async function writeIntro(date, cfg) {
+  const dir = dayDir(date);
+  const itemsDir = join(dir, 'drafts', 'items');
+  if (!existsSync(itemsDir)) return null;
+  const games = readdirSync(itemsDir).filter((x) => x.endsWith('.json')).flatMap((x) => readJson(join(itemsDir, x))).filter((x) => x.angle && !x.noSend && x.mode !== 'game' || (x.mode === 'game' && x.angle));
+  const seen = new Set();
+  const facts = games.filter((x) => (seen.has(x.gameId) ? false : seen.add(x.gameId))).sort((a, b) => (b.weight || 0) - (a.weight || 0)).slice(0, 6).map((x) => ({ game: x.heading, story_he: x.angle.fact_he }));
+  if (!facts.length) return null;
+  const first = readJson(join(dir, `${games[0].gameId}.json`));
+  // the stories are verified angles already: their streak / high / table wording is allowed
+  const brief = { kind: 'intro', verified: { season_high: true, career_high: true, streak: true, standings: true, historical: false }, night_he: `הלילה (${nightHe(first.date)})`, games_count: readdirSync(dir).filter((x) => /^\d+\.json$/.test(x)).length, top_stories: facts };
+  const { system, user } = introPrompt(ROOT, brief);
+  let text = null;
+  try {
+    const res = await generateJSON({ ...cfg.ai, system, messages: [{ role: 'user', text: user }], schema: { type: 'OBJECT', properties: { intro: { type: 'STRING' } }, required: ['intro'] } });
+    const check = verifyDraft({ paragraphs: [res.data.intro] }, brief, [], null);
+    if (check.ok) text = res.data.intro.trim();
+  } catch { /* keep the plain sentence */ }
+  if (!text) text = `${brief.games_count} משחקים נערכו הלילה ב-NBA (${nightHe(first.date)}).`;
+  writeFileSync(join(dir, 'drafts', 'intro.txt'), text);
+  return text;
+}
+
 // ---------- the night's closing page, from the games done so far ----------
 
 export function assembleClosing(date, { pending = [] } = {}) {
@@ -214,24 +255,27 @@ export function assembleClosing(date, { pending = [] } = {}) {
   const dd = join(dir, 'drafts');
   const itemsDir = join(dd, 'items');
   if (!existsSync(itemsDir)) return null;
-  const blocks = readdirSync(itemsDir).filter((x) => x.endsWith('.json')).flatMap((x) => readJson(join(itemsDir, x))).filter((x) => x.mode === 'game' && x.draft)
-    .sort((a, b) => String(b.end).localeCompare(String(a.end))); // newest game first, like Sport5's live page
-  const facts = blocks.map((b) => readJson(join(dir, `${b.gameId}.json`)));
+  // games with an Israeli article are not blocks here (Sport5); they stay in the results list
+  const blocks = readdirSync(itemsDir).filter((x) => x.endsWith('.json')).flatMap((x) => readJson(join(itemsDir, x))).filter((x) => x.mode === 'game' && x.draft && !x.noSend)
+    .sort((a, b) => String(b.end).localeCompare(String(a.end))); // newest game first, like Sport5's page
+  const facts = readdirSync(dir).filter((x) => /^\d+\.json$/.test(x)).map((x) => readJson(join(dir, x))).filter((x) => x.status?.final)
+    .sort((a, b) => String(b.endedAt).localeCompare(String(a.endedAt)));
   const night = facts[0] ? nightHe(facts[0].date) : '';
-  const total = blocks.length + pending.length;
+  const total = facts.length + pending.length;
   const o = ['# סגירת הלילה ב-NBA — טיוטה', ''];
   o.push(pending.length
-    ? `_עודכן ${new Date().toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' })} · ${blocks.length} מתוך ${total} משחקים הסתיימו · בהמשך: ${pending.join(', ')}_`
+    ? `_עודכן ${new Date().toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' })} · ${facts.length} מתוך ${total} משחקים הסתיימו · בהמשך: ${pending.join(', ')}_`
     : `_כל ${total} המשחקים הסתיימו_`, '');
-  o.push(`בוקר טוב לכל גולשי אתר ערוץ הספורט! ${total} משחקי NBA שוחקו הלילה (${night}), וכאן תוכלו למצוא את כל מה שפספסתם.`, '', 'כל התוצאות:');
-  for (const f of [...facts].sort((a, b) => String(b.endedAt).localeCompare(String(a.endedAt)))) o.push(`${f.teams.home.heShort} - ${f.teams.away.heShort} ${f.teams.away.score}:${f.teams.home.score}`);
+  const intro = existsSync(join(dd, 'intro.txt')) ? readFileSync(join(dd, 'intro.txt'), 'utf8').trim() : `${total} משחקים נערכו הלילה ב-NBA (${night}).`;
+  o.push(intro, 'כל התוצאות:');
+  const ot = (f) => (f.clutch?.overtimes ? (f.clutch.overtimes === 1 ? ' בהארכה' : ` אחרי ${f.clutch.overtimes} הארכות`) : '');
+  for (const f of facts) o.push(`${listName(f.teams.home)} - ${listName(f.teams.away)} ${f.teams.away.score}:${f.teams.home.score}${ot(f)}`);
   for (const g of blocks) {
     const when = new Date(g.end).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
     const d = g.draft;
     // a held draft (known contradiction) is shown to the editor as such, never as copy
-    const body = g.held ? ['⛔ הטיוטה לא פורסמה — ראו הערות לעורך'] : [...(d.headline ? [`**${d.headline}**`, ''] : []), ...(d.deck ? [d.deck, ''] : []), ...(d.lead ? [d.lead] : []), ...d.paragraphs.flatMap((p, i) => (i ? ['', p] : [p]))];
-    const from = g.from === 'player' ? ['', '_(פתיחת הכתבה על השחקן הישראלי — הכתבה המלאה בנפרד)_'] : g.from === 'article' ? ['', '_(פתיחת הכתבה על המשחק — הכתבה המלאה בנפרד)_'] : [];
-    o.push('', '---', '', `{#g${g.gameId}}`, `_${when}_`, '', `**${g.heading}**`, ...body, ...from, checkBox(g));
+    const body = g.held ? ['⛔ הטיוטה לא פורסמה — ראו הערות לעורך'] : [...(d.headline ? [`**${d.headline}**`, ''] : []), ...d.paragraphs.flatMap((p, i) => (i ? ['', p] : [p]))];
+    o.push('', '---', '', `{#g${g.gameId}}`, `_${when}_`, '', `**${g.heading}**`, ...body, checkBox(g));
   }
   writeFileSync(join(dd, 'closing.md'), o.join('\n') + '\n');
   return join(dd, 'closing.md');

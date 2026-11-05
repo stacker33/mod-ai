@@ -46,6 +46,7 @@ export const BANNED = [
   [/על הלוח/, '"פתחה את החשבון" / "קלעה ראשונה"'],
   [/בדרך הקשה/, 'משפט קונקרטי: מה היה קשה'],
   [/(על|באש)\s+בוערת|עלה באש/, '"היה חם" / "קלע שלשה אחרי שלשה"'],
+  [/תוצאת האמת/, 'כותרת חדשה שמספרת מה קרה — בלי פתיח קבוע'],
 ];
 const LEAK = /נבדק|נבדקו|אומת|מאומת|לבדיקת|לעורך|הערת עורך|BRIEF|JSON|https?:|www\.|✅|❌|✏️|🔎|\bQA\b|TODO|\[|\]/;
 
@@ -260,6 +261,10 @@ export function verifyDraft(input, brief, names, ctx = null) {
   if (brief.kind === 'game' && draft.headline && tokens.length) {
     const top = [draft.headline, draft.deck, draft.subheadline].filter(Boolean).join(' ');
     if (!tokens.some((t) => top.includes(t))) push('angle', 'block', `הכותרת לא מובילה בזווית המרכזית (${brief.main_angle.fact_he})`, { type: 'headline', to: brief.main_angle.fact_he });
+  } else if (brief.kind === 'game' && !draft.headline && tokens.length && draft.paragraphs?.length) {
+    // a nightly-page block has no headline: the story leads its first paragraph
+    const lead = sentences(draft.paragraphs[0]).slice(0, 2).join(' ');
+    if (!tokens.some((t) => lead.includes(t))) push('angle', 'block', `הבלוק לא נפתח בזווית המרכזית (${brief.main_angle.fact_he})`, { type: 'prepend', text: `${brief.main_angle.fact_he}.` });
   }
 
   const toApprove = names.filter((x) => x.inGame && x.he && x.status !== 'approved' && x.status !== 'sport5' && (text.includes(x.he) || (x.surname && x.surname.length >= 3 && text.includes(x.surname)))).map((x) => `${x.he} (${x.en})`);
@@ -286,6 +291,9 @@ export function autoFix(draft, issues, brief = null) {
   for (const i of issues.filter((x) => x.severity === 'block' && x.fix)) {
     if (i.fix.type === 'replace') edit((t) => (t.includes(i.fix.sentence) ? t.replace(i.fix.sentence, i.fix.sentence.replace(i.fix.from, i.fix.to)) : t));
     else if (i.fix.type === 'drop') edit((t) => t.replace(i.fix.sentence, ''));
+  }
+  for (const a of issues.filter((x) => x.severity === 'block' && x.fix?.type === 'prepend')) {
+    if (d.paragraphs?.length) d.paragraphs[0] = `${a.fix.text} ${d.paragraphs[0].trim()}`;
   }
   for (const a of issues.filter((x) => x.severity === 'block' && x.fix?.type === 'append')) {
     if (!d.paragraphs?.length) d.paragraphs = [a.fix.text];

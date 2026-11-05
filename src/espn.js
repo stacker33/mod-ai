@@ -49,3 +49,12 @@ export async function getTeamSchedule(abbr, { season = null, seasonType = null }
   const q = [season && `season=${season}`, seasonType && `seasontype=${seasonType}`].filter(Boolean).join('&');
   return getJson(`${BASE}/teams/${abbr.toLowerCase()}/schedule${q ? `?${q}` : ''}`);
 }
+
+// both conferences, every team with wins, losses and its seed (place in the conference)
+export async function getStandings() {
+  const j = await getJson('https://site.api.espn.com/apis/v2/sports/basketball/nba/standings');
+  return (j.children || []).flatMap((c) => (c.standings?.entries || []).map((e) => {
+    const st = (n) => e.stats?.find((x) => x.name === n);
+    return { conf: c.abbreviation, teamId: e.team?.id, abbr: e.team?.abbreviation, wins: st('wins')?.value, losses: st('losses')?.value, seed: st('playoffSeed')?.value, pct: st('winPercent')?.value };
+  }));
+}

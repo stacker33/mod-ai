@@ -9,13 +9,13 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { listGames } from '../src/espn.js';
-import { loadConfig, dayDir, factsForGame, draftsForGame, assembleClosing, boxHash } from '../src/pipeline.js';
+import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, writeIntro, assembleClosing, boxHash } from '../src/pipeline.js';
 import { heTeam } from '../src/teams.js';
 import { telegramReady, sendTelegram, itemMessage, heldAlert } from '../src/notify.js';
 import { ROOT } from '../src/pipeline.js';
 
 const RECHECK_AFTER = 45 * 60e3; // ESPN stat corrections usually land within the hour
-const RETRY_AFTER = 10 * 60e3;
+const RETRY_AFTER = 4 * 60e3; // = the next 5-minute check
 const MAX_ATTEMPTS = 6;
 const EVERY = 5 * 60e3;
 // nights whose Telegram messages also show game end -> recap sent (a one-off timing check)
@@ -80,7 +80,8 @@ async function tickDate(date, cfg) {
       if (recheck) {
         s.rechecked = true;
         if (hash === s.hash) { state.games[r.id] = s; changed = true; log(`${label}: re-check, no ESPN changes`); continue; }
-        log(`${label}: ESPN corrected the box score — rewriting`);
+        if (!f.ok) { state.games[r.id] = s; changed = true; log(`${label}: ESPN changed the box score but it does not add up yet — recap kept`); continue; }
+        log(`${label}: ESPN corrected the box score — checking the recap that was sent`);
       } else log(`${label}: final — writing`);
       if (!f.ok) {
         s.attempts++;
@@ -88,7 +89,9 @@ async function tickDate(date, cfg) {
         log(`${label}: facts failed checks (${s.why.join(', ')}) — ${s.status}`);
         if (s.status === 'blocked' && telegramReady(cfg.env)) await sendTelegram(cfg.env, `⚠️ ${label}: הנתונים של ESPN לא עברו את הבדיקות (${s.why.join(', ')}) — לא נכתב סיכום. צריך לכתוב ידנית.`).catch(() => {});
       } else {
-        const items = await draftsForGame(date, f, cfg, { corrected: recheck, log });
+        // a re-check rewrites (and re-sends) only when the corrected facts make the sent recap wrong
+        const items = recheck ? (await recheckGame(date, f, cfg, { log })).items : await draftsForGame(date, f, cfg, { log });
+        if (recheck && !items.length) { Object.assign(s, { hash }); state.games[r.id] = s; changed = true; continue; }
         Object.assign(s, { status: 'done', doneAt: s.doneAt || now, hash, items: items.map((i) => ({ mode: i.mode, ok: i.check.ok })) });
         if (recheck) s.correctedAt = now;
         if (telegramReady(cfg.env)) {
@@ -114,6 +117,12 @@ async function tickDate(date, cfg) {
         if (recheck) s.rechecked = false;
         else Object.assign(s, { status: 'retry', nextTry: until, error: 'daily writing quota used up' });
         log(`${label}: writing quota used up — waiting until ${new Date(until).toISOString()}`);
+      } else if (/Gemini \S+ (5\d\d|429)/.test(e.message) && (s.transient || 0) < 30) {
+        // the model is busy / rate-limited: try again at the very next check, and it is not a failure
+        s.transient = (s.transient || 0) + 1;
+        if (recheck) s.rechecked = false;
+        else Object.assign(s, { status: 'retry', nextTry: now, error: e.message.slice(0, 200) });
+        log(`${label}: model busy — trying again at the next check`);
       } else {
         s.attempts++;
         Object.assign(s, { status: s.attempts >= MAX_ATTEMPTS ? 'failed' : 'retry', nextTry: now + RETRY_AFTER, error: e.message.slice(0, 300) });
@@ -126,6 +135,11 @@ async function tickDate(date, cfg) {
     state.updatedAt = Date.now();
     writeFileSync(stateFile, JSON.stringify(state, null, 1));
     assembleClosing(date, { pending });
+  }
+  // every game of the night is in: write the opening paragraph once (Sport5's "לא פחות מ-14 משחקים...")
+  if (rows.length && rows.every((x) => x.state === 'post') && rows.every((x) => state.games[x.id]?.status === 'done') && !state.introAt) {
+    try { if (await writeIntro(date, cfg)) { state.introAt = Date.now(); assembleClosing(date, { pending: [] }); changed = true; log('opening paragraph written'); } } catch (e) { log(`opening paragraph: ${e.message.slice(0, 120)}`); }
+    writeFileSync(stateFile, JSON.stringify(state, null, 1));
   }
   // the night's schedule for the editor page board (which games are still to come / playing); saved only
   // when a game changes state, so live score changes do not rebuild the page every check

@@ -47,12 +47,16 @@ const RULES = `אתה עורך NBA באתר ערוץ הספורט (Sport5). את
 18. החזר JSON בלבד, לפי הסכמה.`;
 
 const MODES = {
-  game: `משימה: סיכום משחק לעמוד "סגירת הלילה ב-NBA" (הקוד מוסיף את שורת התוצאה).
-- headline: הסיפור החזק ביותר = main_angle. לא "שחקן X קלע 34" כשהזווית היא משהו אחר.
-- deck: מוסיף משהו שאין בכותרת — הכוכב והמספר המרכזי או זווית משנית. לא חוזר על הכותרת.
-- paragraphs: לכל היותר max_paragraphs פסקאות קצרות (בדרך כלל 1–2, לא יותר). פסקה ראשונה: מי ניצחה + המאזן כשרלוונטי + הסיפור + הכוכבים. פסקה שנייה: איך זה הוכרע (הריצה / המהפך / המהלך המכריע) + מי בלט במפסידה. בלי שחזור כרונולוגי ובלי לעבור רבע אחרי רבע.`,
+  game: `משימה: בלוק של משחק אחד בעמוד "סגירת הלילה ב-NBA" — בדיוק כמו בדוגמה הראשונה מערוץ הספורט.
+הקוד מוסיף מעל את שורת התוצאה (heading). אין כותרת ואין כותרת משנה לבלוק — רק פסקאות.
+- paragraphs: 2 עד max_paragraphs פסקאות קצרות (2–4 שורות כל אחת).
+  פסקה 1: המשפט הראשון הוא הסיפור (main_angle), בעברית עיתונאית חיה — לא סיכום יבש; ואז הכוכבים של המנצחת עם המספרים שלהם.
+  פסקה 2: איך זה הוכרע (הריצה / המהפך / המהלך המכריע / הרבע שהכריע) + הקשר מ-context_game כשהוא מוסיף (המשחק הבא, היעדרויות, המפגש הקודם) ומהטבלה (context_facts).
+  פסקה 3 (אם יש): המפסידה ומי בלט אצלה.
+- אל תחזור על התוצאה הסופית (היא בשורה שמעל). בלי שחזור כרונולוגי ובלי לעבור רבע אחרי רבע.`,
   player: `משימה: כתבה נפרדת על השחקן הישראלי, בסגנון כתבות דני אבדיה בערוץ הספורט.
-- headline: וו (hook) קצר + שם השחקן + ההישג + התוצאה + היריבה, למשל "תוצאת האמת: דני אבדיה כיכב בניצחון 129:136 הענק על הלייקרס". השתמש ב-result_he.
+- headline: כותרת שמספרת מה השחקן עשה + התוצאה + היריבה (result_he). כל כותרת חדשה — בלי פתיח קבוע ובלי משחקי מילים חוזרים (לעולם לא "תוצאת האמת").
+- אם יש other_israelis (ישראלי נוסף באותו משחק) — הוא חלק מהכתבה, עם השורה שלו.
 - subheadline: משפט-שניים: מצב רוח הקבוצה, השורה הקצרה שלו בסוגריים (line_short_he), כוכבים נוספים, מאזן (team_record).
 - paragraphs: לכל היותר max_paragraphs (3) פסקאות: (1) התוצאה ומה היא אומרת + night_he + השורה המלאה שלו (line_full_he, העתק כמות שהיא); (2) הרגעים שלו שהכריעו (crunch_time, his_go_ahead_or_tying_baskets) והקבוצה; (3) המשחק הבא (next_game, שעון ישראל). הישגים רק מ-verified_milestones; רצף רק מ-team_streak_he.`,
   short: `משימה: ידיעה קצרה על שחקן ישראלי שעלה לפרקט.
@@ -65,7 +69,7 @@ const MODES = {
 };
 
 const SCHEMAS = {
-  game: { type: 'OBJECT', properties: { headline: { type: 'STRING' }, deck: { type: 'STRING' }, paragraphs: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['headline', 'deck', 'paragraphs'] },
+  game: { type: 'OBJECT', properties: { paragraphs: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['paragraphs'] },
   player: { type: 'OBJECT', properties: { headline: { type: 'STRING' }, subheadline: { type: 'STRING' }, paragraphs: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['headline', 'subheadline', 'paragraphs'] },
   short: { type: 'OBJECT', properties: { headline: { type: 'STRING' }, paragraphs: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['headline', 'paragraphs'] },
   article: { type: 'OBJECT', properties: { headline: { type: 'STRING' }, subheadline: { type: 'STRING' }, paragraphs: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['headline', 'subheadline', 'paragraphs'] },
@@ -73,7 +77,8 @@ const SCHEMAS = {
 export const schemaFor = (mode) => SCHEMAS[mode];
 
 function examples(root, mode) {
-  const pick = mode === 'player' || mode === 'short' ? ['style/avdija/a565431.txt', 'style/avdija/a565665.txt'] : ['style/nights/d564949.txt'];
+  // the nightly page the editor chose as THE format (2026-11-05) comes first
+  const pick = mode === 'player' || mode === 'short' ? ['style/avdija/a565431.txt', 'style/avdija/a565665.txt'] : ['style/nights/d566493.txt', 'style/nights/d564949.txt'].slice(0, 1);
   return pick.filter((p) => existsSync(join(root, p))).map((p) => {
     const t = readFileSync(join(root, p), 'utf8').replace(/<div id="taboola[\s\S]*$/, '');
     // the nightly page footer (site menu) is noise
@@ -91,6 +96,19 @@ const PROOF = `אתה עורך לשון בערוץ הספורט. לפניך טי
 - מינוח כדורסל שבור ("שלשה מחייבת")
 אסור: לשנות, להוסיף או להוריד מספר, תוצאה, שם, זמן או עובדה; להוסיף פסקה; לשנות סדר של מספרים ("47:27" נשאר "47:27").
 אם אין מה לתקן — החזר את הטקסט כמו שהוא. החזר JSON בלבד באותו מבנה.`;
+
+// the night's opening paragraph, from the games' verified story lines only
+export function introPrompt(root, brief) {
+  const ex = examples(root, 'game')[0] || '';
+  const system = `אתה עורך NBA בערוץ הספורט. כתוב את פסקת הפתיחה של "סגירת הלילה ב-NBA": משפט-שניים, בסגנון הדוגמה —
+"לא פחות מ-14 משחקים נערכו הלילה (בין רביעי לחמישי), כשבמוקד ..., ... ו...".
+רק מהעובדות ב-top_stories (העתק מספרים ושמות כמו שהם), 3–4 סיפורים לכל היותר, בלי להמציא ובלי שיאים שלא כתובים שם.
+החזר JSON בלבד: {"intro": "..."}
+
+דוגמה (סגנון בלבד):
+${ex.slice(0, 1500)}`;
+  return { system, user: `BRIEF:\n${JSON.stringify(brief, null, 1)}` };
+}
 
 export function proofPrompt(mode, draft) {
   return { system: PROOF, user: `סוג: ${mode}\nטיוטה:\n${JSON.stringify(draft, null, 1)}` };

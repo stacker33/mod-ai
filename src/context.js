@@ -7,9 +7,10 @@
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { getTeamSchedule } from './espn.js';
+import { getTeamSchedule, getStandings } from './espn.js';
 import { playerHistory } from './gamelog.js';
-import { v, withLamed } from './teams.js';
+import { v, withLamed, heTeam } from './teams.js';
+import { pair, nightHe } from './writer/he.js';
 
 const MAX_SEASONS_BACK = 6; // how far a head-to-head streak is followed before it counts as unknown
 
@@ -23,7 +24,7 @@ export function trimSchedule(j) {
         id: e.id,
         date: e.date,
         state: c.status?.type?.state || null,
-        teams: (c.competitors || []).map((x) => ({ id: x.team?.id || x.id, abbr: x.team?.abbreviation, winner: !!x.winner })),
+        teams: (c.competitors || []).map((x) => ({ id: x.team?.id || x.id, abbr: x.team?.abbreviation, winner: !!x.winner, home: x.homeAway === 'home', score: Number(x.score?.value ?? x.score?.displayValue ?? NaN) })),
       };
     }),
   };
@@ -149,6 +150,8 @@ export async function fetchContext(summary, { cacheDir }) {
     }
     ext.h2h[winner.team.id] = { opp: loser.team.id, ...res };
   }
+  // the conference table (ESPN standings) — used only where it already includes this game
+  try { ext.standings = await getStandings(); } catch (e) { ext.errors.push(`standings: ${e.message}`); }
   // game logs of each team's top scorer when the line could be a season / career high or a streak
   for (const tb of summary.boxscore?.players || []) {
     const st = tb.statistics?.[0];
@@ -226,5 +229,69 @@ export function buildContext(f, ext = {}) {
       }
     }
   }
+  return out;
+}
+
+// ---------- game context (not story angles): next game, previous meeting, absences, the table ----------
+
+const CONF_HE = { East: 'המזרח', West: 'המערב' };
+const DAY_MS = 86400e3;
+const agoHe = (days) => (days <= 1 ? 'אתמול' : days === 2 ? 'לפני יומיים' : `לפני ${days} ימים`);
+const reasonHe = (detail = '') => (/rest/i.test(detail) ? 'מנוחה' : /ill/i.test(detail) ? 'מחלה' : /suspen/i.test(detail) ? 'הרחקה' : /personal/i.test(detail) ? 'סיבות אישיות' : 'פציעה');
+
+// standings facts (verified only when ESPN's table already counts this game: same wins and losses)
+export function standingsFacts(f, ext = {}) {
+  const out = [];
+  const tn = (s) => f.teams[s].heShort || f.teams[s].he;
+  for (const side of ['home', 'away']) {
+    const e = (ext.standings || []).find((x) => x.teamId === f.teams[side].id || x.abbr === f.teams[side].abbr);
+    const rec = String(f.teams[side].record || '').match(/^(\d+)-(\d+)$/);
+    if (!e || !rec || e.wins !== Number(rec[1]) || e.losses !== Number(rec[2]) || !e.seed || !CONF_HE[e.conf]) continue;
+    const tied = (ext.standings || []).some((x) => x !== e && x.conf === e.conf && x.pct === e.pct && x.seed <= 2);
+    const conf = CONF_HE[e.conf];
+    const fem = !f.teams[side].plural;
+    const fact = e.seed === 1 ? (tied ? `${tn(side)} ${fem ? 'שותפה' : 'שותפים'} למקום הראשון ב${conf.slice(1)}` : `${tn(side)} ${fem ? 'מוליכת' : 'מוליכים את'} ${conf}`)
+      : `${tn(side)} ${fem ? 'נמצאת' : 'נמצאים'} במקום ה-${e.seed} ב${conf.slice(1)}`;
+    out.push({ type: e.seed === 1 ? 'CONFERENCE_LEADER' : 'STANDINGS', side, value: e.seed, verified: true, source: 'ESPN standings (after this game)', fact_he: fact, tokens: ['מוליכת', 'מוליכים', 'במקום', 'שותפה', 'שותפים', 'ראשות', 'פסגת'], weight: e.seed === 1 && !tied ? 58 : 25, flag: 'standings' });
+  }
+  return out;
+}
+
+// what the recap may add around the game, all from ESPN structured data, already in Hebrew
+export function gameContext(f, ext = {}, enToHe = new Map()) {
+  const tn = (s) => f.teams[s].heShort || f.teams[s].he;
+  const other = (s) => (s === 'home' ? 'away' : 'home');
+  const t = new Date(f.date);
+  const out = { next_games: [], previous_meeting: null, absences: [] };
+  for (const side of ['home', 'away']) {
+    const sched = ext.schedules?.[f.teams[side].id];
+    const next = (sched?.events || []).filter((e) => e.id !== f.gameId && new Date(e.date) > t && e.state !== 'post').sort((a, b) => a.date.localeCompare(b.date))[0];
+    if (next) {
+      const me = next.teams.find((x) => x.id === f.teams[side].id);
+      const opp = next.teams.find((x) => x !== me);
+      if (me && opp) out.next_games.push(`המשחק הבא של ${tn(side)}: ${me.home ? 'בבית נגד' : 'בחוץ מול'} ${heTeam(opp.abbr) || opp.abbr} (${nightHe(next.date)})`);
+    }
+  }
+  // the previous meeting of these two this season
+  const sched = ext.schedules?.[f.teams.home.id];
+  const prev = (sched?.events || []).filter((e) => e.id !== f.gameId && e.state === 'post' && new Date(e.date) < t && e.teams.some((x) => x.id === f.teams.away.id))
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  if (prev) {
+    const w = prev.teams.find((x) => x.winner), l = prev.teams.find((x) => !x.winner);
+    const side = w && w.id === f.teams.home.id ? 'home' : 'away';
+    const days = Math.round((t - new Date(prev.date)) / DAY_MS);
+    if (w && l && Number.isFinite(w.score) && Number.isFinite(l.score)) {
+      out.previous_meeting = `במפגש הקודם ביניהן העונה, ${agoHe(days)}, ${tn(side)} ${v(f.teams[side].abbr, 'ניצחה', 'ניצחו')} ${pair(w.score, l.score)} ${w.home ? 'בבית' : 'בחוץ'}`;
+    }
+  }
+  // players who were OUT before the game (pre-game injury report) and did not play
+  const played = new Set(['home', 'away'].flatMap((s) => f.players[s].filter((p) => p.played).map((p) => p.name)));
+  for (const i of f.context?.injuryReport || []) {
+    if (!/^out$/i.test(i.status || '') || played.has(i.name)) continue;
+    const side = f.teams.home.abbr === i.team ? 'home' : f.teams.away.abbr === i.team ? 'away' : null;
+    if (!side) continue;
+    out.absences.push(`${enToHe.get(i.name) || i.name} (${tn(side)}) לא שיחק — ${reasonHe(i.detail)}`);
+  }
+  out.absences = out.absences.slice(0, 6);
   return out;
 }

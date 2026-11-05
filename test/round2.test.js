@@ -27,7 +27,10 @@ const ctx = (f) => {
   const alias = (t) => [t.he, t.heShort, ...(NICK_HE[t.abbr] || [])].filter(Boolean);
   return { teams: { home: alias(f.teams.home), away: alias(f.teams.away) }, players: [], winner: f.result.winner, loser: f.result.loser };
 };
-const check = (f, draft, brief = gameBrief(f)) => verifyDraft(draft, brief, [], ctx(f));
+// one-line test drafts have no story; the "block must open with the main angle" check (a prepend fix) is
+// tested on its own, so these helpers leave it out
+const noLeadAngle = (r) => { const issues = r.issues.filter((i) => i.fix?.type !== 'prepend'); const blocking = issues.filter((i) => i.severity === 'block').length; return { ...r, issues, errors: issues.map((i) => i.msg), blocking, ok: blocking === 0 }; };
+const check = (f, draft, brief = gameBrief(f)) => noLeadAngle(verifyDraft(draft, brief, [], ctx(f)));
 const codes = (r) => r.issues.map((i) => i.code);
 const one = (f, text) => check(f, { paragraphs: [text] });
 

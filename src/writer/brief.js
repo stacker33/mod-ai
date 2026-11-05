@@ -31,6 +31,9 @@ function starBrief(p, full = false) {
   return { name_he: p.he || p.name, starter: p.starter, line_he: full ? fullLineHe(p) : shortLineHe(p), pts: p.pts, reb: p.reb, ast: p.ast, bench: !p.starter };
 }
 
+// overtime in the score line, as Sport5 writes it ("117:116 בהארכה")
+export const otHe = (n) => (!n ? '' : n === 1 ? ' בהארכה' : ` אחרי ${n} הארכות`);
+
 // "ב" / "ל" + a name that starts with the definite article: "ברבע השלישי", "בהארכה"
 export const pre = (prefix, name) => `${prefix}${name.startsWith('ה') ? name.slice(1) : name}`;
 const COUNT_HE = { 3: 'שלושה', 4: 'ארבעה', 5: 'חמישה', 6: 'שישה', 7: 'שבעה' };
@@ -77,6 +80,10 @@ function angleHe(k, f, tn, names = new Map()) {
     case 'TRIPLE_DOUBLE': return who ? `${who} רשם טריפל-דאבל: ${k.pts} נקודות, ${k.reb} ריבאונדים ו-${k.ast} אסיסטים` : null;
     case 'UNUSUAL_STAT_LINE': return who ? `${who} קלע ${k.pts} נקודות ולקח ${k.reb} ריבאונדים` : null;
     case 'EJECTION': return who ? `${who} הורחק מהמשחק` : null;
+    case 'ISRAELI_ANGLE': {
+      const tr = (f.tracks || []).find((x) => x.player?.name === k.player && x.line);
+      return tr ? `${who} (${t(k.side)}) סיים עם ${shortLineHe(tr.line)} ב-${tr.line.min} דקות` : null;
+    }
     case 'FIRST_LOSS': return `${t(k.side)} ${vb(k.side, 'ספגה', 'ספגו')} הפסד ראשון העונה, אחרי ${k.n} ניצחונות בפתיחת העונה`;
     case 'FIRST_WIN': return `${t(k.side)} ${vb(k.side, 'רשמה', 'רשמו')} ניצחון ראשון העונה, אחרי ${k.n} הפסדים בפתיחת העונה`;
     case 'UNBEATEN': return `${t(k.side)} ${vb(k.side, 'נשארה', 'נשארו')} בלי הפסד: ${k.n} ניצחונות ב-${k.n} משחקים`;
@@ -112,7 +119,7 @@ export function gameBrief(f) {
   const b = {
     kind: 'game',
     night_he: `הלילה (${nightHe(f.date)})`,
-    heading: `${f.teams.home.he} ${recs.home?.in_parentheses || ''} - ${f.teams.away.he} ${recs.away?.in_parentheses || ''} ${f.teams.away.score}:${f.teams.home.score}`.replace(/\s+/g, ' '),
+    heading: `${f.teams.home.he} ${recs.home?.in_parentheses || ''} - ${f.teams.away.he} ${recs.away?.in_parentheses || ''} ${f.teams.away.score}:${f.teams.home.score}${otHe(f.clutch.overtimes)}`.replace(/\s+/g, ' '),
     home_is: tn('home'),
     away_is: tn('away'),
     winner_he: tn(W),
@@ -148,6 +155,8 @@ export function gameBrief(f) {
   // CONTEXT FACTS (streaks, highs, head-to-head): the only season / history claims the text may make
   const ctxFacts = (f.contextFacts || []).filter((x) => x.verified);
   b.context_facts = ctxFacts.map((x) => x.fact_he);
+  // background from ESPN data, ready in Hebrew: next games, the previous meeting, who was out
+  if (f.gameContext) b.context_game = f.gameContext;
 
   if (f.flow.available) {
     b.largest_lead = ['home', 'away'].filter((s) => f.flow.largestLead[s].pts > 0).map((s) => ({ team_he: tn(s), pts: f.flow.largestLead[s].pts, period_he: f.flow.largestLead[s].at ? PERIOD_HE(f.flow.largestLead[s].at.period, fp) : null, score_by_subject: byS(f.flow.largestLead[s].score) }));

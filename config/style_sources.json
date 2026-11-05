@@ -1,5 +1,5 @@
 {
   "_comment": "Real Sport5 pages used as style examples in the prompt. Downloaded at run time, not stored in the repo.",
-  "nights": ["https://www.sport5.co.il/dayevents.aspx?FolderID=5374&docID=564949"],
+  "nights": ["https://www.sport5.co.il/dayevents.aspx?FolderID=5374&docID=566493", "https://www.sport5.co.il/dayevents.aspx?FolderID=5374&docID=564949"],
   "avdija": ["https://nba.sport5.co.il/articles.aspx?FolderID=403&docID=565431", "https://www.sport5.co.il/articles.aspx?FolderID=8166&docID=565665"]
 }

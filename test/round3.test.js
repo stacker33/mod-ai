@@ -22,7 +22,10 @@ const ctx = (f) => {
   const alias = (t) => [t.he, t.heShort, ...(NICK_HE[t.abbr] || [])].filter(Boolean);
   return { teams: { home: alias(f.teams.home), away: alias(f.teams.away) }, players: [], winner: f.result.winner, loser: f.result.loser };
 };
-const check = (f, draft, brief = gameBrief(f)) => verifyDraft(draft, brief, [], ctx(f));
+// one-line test drafts have no story; the "block must open with the main angle" check (a prepend fix) is
+// tested on its own, so these helpers leave it out
+const noLeadAngle = (r) => { const issues = r.issues.filter((i) => i.fix?.type !== 'prepend'); const blocking = issues.filter((i) => i.severity === 'block').length; return { ...r, issues, errors: issues.map((i) => i.msg), blocking, ok: blocking === 0 }; };
+const check = (f, draft, brief = gameBrief(f)) => noLeadAngle(verifyDraft(draft, brief, [], ctx(f)));
 const one = (f, text, brief) => check(f, { paragraphs: [text] }, brief);
 const codes = (r) => r.issues.map((i) => i.code);
 
@@ -189,4 +192,26 @@ test('Israelis: one piece per game; every one who played is in it; one who did n
   assert.equal(pb.game.israelis_featured, undefined);
   // nobody played: nothing featured
   assert.equal(gameBrief(game('401909918', { israelis: [dnp] })).israelis_featured, undefined);
+});
+
+// ---------- Sport5 nightly-page format (editor, 2026-11-05) ----------
+test('Sport5 format: the score line says "בהארכה"; a block has no headline and opens with the story', () => {
+  const ot = game('401909914'); // NO won at Memphis in overtime
+  assert.ok(gameBrief(ot).heading.endsWith('135:134 בהארכה'));
+  assert.ok(!gameBrief(game('401909920')).heading.includes('בהארכה'));
+  const f = game('401909909'); // the story: Indiana with six players
+  const b = gameBrief(f);
+  const r = verifyDraft({ paragraphs: ['אטלנטה ניצחה באינדיאנה.'] }, b, [], ctx(f));
+  assert.ok(r.issues.some((i) => i.code === 'angle' && i.fix?.type === 'prepend'));
+  assert.ok(autoFix({ paragraphs: ['אטלנטה ניצחה באינדיאנה.'] }, r.issues, b).paragraphs[0].startsWith(b.main_angle.fact_he));
+  assert.ok(!verifyDraft({ paragraphs: ['אינדיאנה שיחקה עם שישה שחקנים בלבד, ואטלנטה ניצחה.'] }, b, [], ctx(f)).issues.some((i) => i.code === 'angle'));
+});
+
+test('an Israeli with a small night is not the story of his game (Sharp 3 pts in 10 min vs Doncic 40)', () => {
+  const avdija = { id: '4683021', name: 'Deni Avdija', he: 'דני אבדיה', team: 'POR', track: 'full' };
+  const f = game('401909918', { israelis: [avdija] }); // Avdija 28 points: a big night
+  assert.equal(f.candidates.find((c) => c.type === 'ISRAELI_ANGLE').weight, 85);
+  assert.ok(/דני אבדיה \(פורטלנד\) סיים עם 28 נקודות/.test(gameBrief(f).secondary_angles.concat(gameBrief(f).main_angle).map((a) => a.fact_he).join(' ')));
+  const small = { id: '4066399', name: 'Micah Potter', he: 'מייקה פוטר', team: 'POR', track: 'full' }; // did not play
+  assert.equal(game('401909918', { israelis: [small] }).candidates.find((c) => c.type === 'ISRAELI_ANGLE' && c.player), undefined);
 });
