@@ -14,6 +14,7 @@ import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, correctio
 import { heTeam } from '../src/teams.js';
 import { telegramReady, sendTelegram, itemMessage, heldAlert } from '../src/notify.js';
 import { ROOT } from '../src/pipeline.js';
+import { buildTracker } from '../src/tracker.js';
 
 const RECHECK_AFTER = 45 * 60e3; // ESPN stat corrections usually land within the hour
 const RETRY_AFTER = 4 * 60e3; // = the next 5-minute check
@@ -74,6 +75,7 @@ async function tickDate(date, cfg) {
     try { writeFileSync(before, JSON.stringify({ at: new Date().toISOString(), table: await getStandings() })); } catch { /* next check */ }
   }
   let changed = false;
+  let israeliDone = false; // an Israeli's game was written: refresh the tracker now
   const log = (m) => console.log(`[${stamp()}] ${date} ${m}`);
 
   const pending = rows.filter((x) => x.state !== 'post').map((x) => `${heTeam(x.home.abbr) || x.home.abbr} - ${heTeam(x.away.abbr) || x.away.abbr}`);
@@ -137,6 +139,7 @@ async function tickDate(date, cfg) {
         }
         // follow-up links for the editor page (ESPN recap, clips, team news) — web only
         try { await saveFollowups(date, r.id); } catch { /* the morning refresh will add them */ }
+        if (f.israelis?.some((i) => i.played)) israeliDone = true;
       }
     } catch (e) {
       if (e.quota) {
@@ -203,7 +206,7 @@ async function tickDate(date, cfg) {
     changed = true;
   }
   const done = Object.values(state.games).filter((g) => g.status === 'done').length;
-  return { date, rows: rows.length, done, live: rows.filter((x) => x.state === 'in').length, upcoming: rows.filter((x) => x.state === 'pre').length, changed };
+  return { date, rows: rows.length, done, live: rows.filter((x) => x.state === 'in').length, upcoming: rows.filter((x) => x.state === 'pre').length, changed, israeliDone };
 }
 
 // keep 10 nights of drafts; raw ESPN files only 3 days (they are big)
@@ -221,10 +224,22 @@ async function tick(cfg) {
   for (const date of watchedDates()) {
     try { out.push(await tickDate(date, cfg)); } catch (e) { console.log(`[${stamp()}] ${date} scoreboard error: ${e.message}`); }
   }
-  // tells the workflow whether the page needs a new deploy
   mkdirSync(join(ROOT, 'out'), { recursive: true });
+  // the Israeli tracker (editor page tab): every 2 hours, and right after an Israeli's game is written
+  const trackerFile = join(ROOT, 'out', 'tracker.json');
+  let prev = null;
+  try { prev = JSON.parse(readFileSync(trackerFile, 'utf8')); } catch { /* first run */ }
+  if (!prev || Date.now() - new Date(prev.at).getTime() > 2 * 3600e3 || out.some((x) => x.israeliDone)) {
+    try {
+      const t = await buildTracker(cfg.israelis || [], { cacheDir: join(ROOT, 'cache') });
+      writeFileSync(trackerFile, JSON.stringify(t, null, 1));
+      if (JSON.stringify(t.players) !== JSON.stringify(prev?.players)) out.push({ date: 'tracker', changed: true });
+      console.log(`[${stamp()}] Israeli tracker refreshed (${t.players.map((p) => `${p.name}${p.error ? ' ERROR' : ''}`).join(', ')})`);
+    } catch (e) { console.log(`[${stamp()}] tracker: ${e.message.slice(0, 120)}`); }
+  }
+  // tells the workflow whether the page needs a new deploy
   writeFileSync(join(ROOT, 'out', 'changed'), out.some((x) => x.changed) ? 'yes' : 'no');
-  console.log(`[${stamp()}] ${out.map((x) => `${x.date}: ${x.rows ? `${x.done}/${x.rows} written, ${x.live} live, ${x.upcoming} upcoming` : 'no games'}`).join(' | ')}`);
+  console.log(`[${stamp()}] ${out.filter((x) => x.date !== 'tracker').map((x) => `${x.date}: ${x.rows ? `${x.done}/${x.rows} written, ${x.live} live, ${x.upcoming} upcoming` : 'no games'}`).join(' | ')}`);
 }
 
 const cfg = loadConfig();

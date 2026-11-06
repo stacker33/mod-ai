@@ -160,7 +160,8 @@ for (const d of dates) {
 }
 // open on the latest date that has finished games (or today)
 const openOn = [...days].reverse().findIndex((x) => !x.future && x.results.some((r) => r.state === 'post'));
-const db = { builtAt: new Date().toISOString(), days, open: openOn >= 0 ? days.length - 1 - openOn : days.findIndex((x) => x.today) };
+const tracker = readJ(join(outDir, 'tracker.json'));
+const db = { builtAt: new Date().toISOString(), tracker, days, open: openOn >= 0 ? days.length - 1 - openOn : days.findIndex((x) => x.today) };
 
 const client = readFileSync(join(ROOT, 'scripts', 'site-client.js'), 'utf8');
 
@@ -191,6 +192,16 @@ form button{cursor:pointer;background:#c2185b;color:#fff;border:0}
 .fu-game ul{list-style:none;margin:0;padding:0}.fu-game li{display:flex;gap:8px;align-items:baseline;padding:4px 0;border-bottom:1px dashed var(--line)}.fu-game li:last-child{border:0}
 .fu-game li a{color:var(--ink);text-decoration:none;direction:ltr;text-align:left;flex:1}.fu-game li a:hover{text-decoration:underline}
 .fu-game .tm{color:var(--mute);font-size:12px;white-space:nowrap}
+.trk{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;margin:10px 0}
+.trk-card{background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--isr);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.trk-card h3{margin:0;font-size:17px;color:var(--isr)}.trk-card h3 small{color:var(--mute);font-weight:400;font-size:13px;margin-inline-start:6px}
+.trk-nums{display:flex;gap:14px;flex-wrap:wrap}.trk-nums div{display:flex;flex-direction:column}.trk-nums b{font-size:20px;line-height:1.1;color:var(--ink)}.trk-nums span{font-size:12px;color:var(--mute)}
+.trk-sub{font-size:13px;color:var(--mute)}
+.trk-min{display:flex;align-items:flex-end;gap:2px;height:34px}.trk-min i{flex:1;max-width:14px;background:var(--isr);opacity:.75;border-radius:2px 2px 0 0;min-height:2px}.trk-min i.dnp{background:var(--line);opacity:1}
+.trk-card table{width:100%;border-collapse:collapse;font-size:13px}.trk-card td{padding:3px 4px;border-top:1px dashed var(--line);white-space:nowrap}.trk-card td.ln{white-space:normal;width:100%}
+.trk-card .w{color:var(--ok);font-weight:600}.trk-card .l{color:var(--bad);font-weight:600}
+.trk-foot{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+@media (max-width:420px){.trk{grid-template-columns:1fr}}
 .topline.cmp{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}.topline.cmp a{color:var(--brand);font-weight:600}
 .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:0 0 22px}
 .card{display:flex;flex-direction:column;gap:3px;text-align:start;cursor:pointer;background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--line);border-radius:8px;padding:7px 10px}

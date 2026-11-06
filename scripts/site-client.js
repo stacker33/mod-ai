@@ -106,6 +106,36 @@ function followupsView(d) {
     return `<li><span class="chip ${cls}">${label}</span><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a><span class="tm" dir="ltr">${esc(ilTime(x.published))}</span></li>`;
   }).join('')}</ul></div>`).join('');
 }
+// Israeli tracker: one card per player (season, last 5 team games, minutes, next game, milestones)
+const awayHe = (opp) => `ב${opp.replace(/^ה/, '')}`; // "בלייקרס" / "באטלנטה"
+const vsHe = (home, opp) => (home ? `נגד ${opp}` : awayHe(opp));
+function trackerView() {
+  const T = DB.tracker;
+  if (!T?.players?.length) return '<p class="empty-day">אין עדיין נתוני מעקב לישראלים.</p>';
+  const dm = (iso) => new Date(iso).toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem', day: 'numeric', month: 'numeric' });
+  const fmtP = (x) => (x == null ? '—' : `${x}%`);
+  const order = [...T.players].sort((a, b) => (a.track === 'full' ? 0 : 1) - (b.track === 'full' ? 0 : 1));
+  const cards = order.map((p) => {
+    if (p.error) return `<div class="trk-card"><h3>${esc(p.he)}<small>${esc(p.team_he)}</small></h3><p class="trk-sub">הנתונים לא נטענו (${esc(p.error)})</p></div>`;
+    const a = p.avg;
+    const line = a.gp ? `${p.he} העונה: ${a.pts} נקודות, ${a.reb} ריבאונדים ו-${a.ast} אסיסטים ב-${a.min} דקות למשחק (${a.gp} משחקים).` : '';
+    const nums = a.gp ? `<div class="trk-nums">${[['נק׳', a.pts], ['ריב׳', a.reb], ['אס׳', a.ast], ['דק׳', a.min]].map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join('')}</div>
+      <div class="trk-sub">שדה ${fmtP(a.fg)} · שלוש ${fmtP(a.tp)} · עונשין ${fmtP(a.ft)} · שיחק ${a.gp} מתוך ${a.teamGp} משחקי הקבוצה${p.seasonHigh && a.gp >= 3 ? ` · שיא העונה: ${p.seasonHigh.pts} נק׳ נגד ${esc(p.seasonHigh.opp_he)}` : ''}</div>`
+      : `<div class="trk-sub">עוד לא שיחק העונה (${a.teamGp} משחקי קבוצה).</div>`;
+    const maxM = Math.max(40, ...p.minutes);
+    const tr = p.trend ? { up: '↗ עולות', down: '↘ יורדות', flat: '→ יציבות' }[p.trend.dir] : '';
+    const mins = p.minutes.length ? `<div><div class="trk-sub">דקות לפי משחק${tr ? ` — ${tr} (${p.trend.last5} ב-5 האחרונים, ${p.trend.season} בעונה, כולל משחקים שלא שיחק)` : ''}</div>
+      <div class="trk-min" title="${esc(p.minutes.join(', '))}">${p.minutes.map((m) => `<i class="${m ? '' : 'dnp'}" style="height:${m ? Math.max(6, Math.round((m / maxM) * 100)) : 6}%"></i>`).join('')}</div></div>` : '';
+    const rows = p.last5.map((g) => `<tr><td>${dm(g.date)}</td><td>${esc(vsHe(g.home, g.opp_he))}</td><td class="${g.won ? 'w' : 'l'}">${g.won ? 'נ' : 'ה'} ${esc(g.score_he || '')}</td><td class="ln">${g.played ? `${g.pts} נק׳, ${g.reb} ריב׳, ${g.ast} אס׳ · ${g.min} ד׳${g.fg ? ` · ${g.fg[0]}/${g.fg[1]} שדה` : ''}` : '<span class="chip mute">לא שיחק</span>'}</td></tr>`).join('');
+    const next = p.next ? `<span class="chip live">${p.next.live ? 'משחק עכשיו' : 'הבא'}: ${esc(vsHe(p.next.home, p.next.opp_he))} · ${esc(p.next.when_he)}</span>` : '';
+    const ms = (p.milestones || []).map((m) => `<span class="chip isr">🎯 ${esc(m.text_he)}</span>`).join(' ');
+    return `<div class="trk-card"><h3>${p.track === 'full' ? '★ ' : ''}${esc(p.he)}<small>${esc(p.team_he)} · ${esc(p.season || '')}</small></h3>${nums}${mins}
+      <table><tbody>${rows}</tbody></table>
+      <div class="trk-foot">${next}${ms}${line ? `<button class="copy" data-t="${encodeURIComponent(line)}">העתק שורת עונה</button>` : ''}</div></div>`;
+  }).join('');
+  const at = new Date(T.at).toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return `<p class="extra">הישראלים ב-NBA — ממוצעי העונה, 5 משחקי הקבוצה האחרונים, דקות, המשחק הבא ואבן דרך קרובה. נתוני ESPN, עודכן ${esc(at)}.</p><div class="trk">${cards}</div>`;
+}
 let TAB = 'recaps';
 try { TAB = sessionStorage.getItem('mtab') || 'recaps'; } catch { /* default */ }
 
@@ -113,10 +143,16 @@ function show(i) {
   const d = DB.days[i];
   CUR = i;
   document.querySelectorAll('nav.dates button').forEach((b, k) => b.classList.toggle('on', k === i));
-  if (!d.results.length) { document.getElementById('app').innerHTML = `<p class="empty-day">אין משחקי NBA ב${esc(d.label)}.</p>`; return; }
-  let h = topLine(d) + scoreboard(d);
   const nFu = Object.values(d.followups?.games || {}).reduce((a, x) => a + x.length, 0);
-  if (d.board || nFu) h += `<div class="tabs"><button data-tab="recaps" class="${TAB === 'recaps' ? 'on' : ''}">סגירת הלילה וכתבות</button><button data-tab="followups" class="${TAB === 'followups' ? 'on' : ''}">מעקב${nFu ? ` (${nFu})` : ''}</button></div>`;
+  const tabs = `<div class="tabs"><button data-tab="recaps" class="${TAB === 'recaps' ? 'on' : ''}">סגירת הלילה וכתבות</button><button data-tab="followups" class="${TAB === 'followups' ? 'on' : ''}">מעקב${nFu ? ` (${nFu})` : ''}</button>${DB.tracker ? `<button data-tab="israelis" class="${TAB === 'israelis' ? 'on' : ''}">הישראלים</button>` : ''}</div>`;
+  if (!d.results.length) { document.getElementById('app').innerHTML = (TAB === 'israelis' && DB.tracker) ? tabs + trackerView() : `${DB.tracker ? tabs : ''}<p class="empty-day">אין משחקי NBA ב${esc(d.label)}.</p>`; return; }
+  let h = topLine(d) + scoreboard(d);
+  if (d.board || nFu || DB.tracker) h += tabs;
+  if (TAB === 'israelis' && DB.tracker) {
+    document.getElementById('app').innerHTML = h + trackerView();
+    try { sessionStorage.setItem('mday', d.date); } catch { /* private mode */ }
+    return;
+  }
   if (TAB === 'followups' && (d.board || nFu)) {
     document.getElementById('app').innerHTML = h + followupsView(d);
     try { sessionStorage.setItem('mday', d.date); } catch { /* private mode */ }
