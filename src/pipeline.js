@@ -284,25 +284,46 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   return items;
 }
 
-// After ESPN corrects a box score: check the recap already sent against the corrected facts. Only if
-// something in it is now wrong is it rewritten (and sent again as "עדכון"); otherwise nothing is sent.
-export async function recheckGame(date, f, cfg, { log = () => {} } = {}) {
-  const file = join(dayDir(date), 'drafts', 'items', `${f.gameId}.json`);
-  if (!existsSync(file)) return { rewritten: false, items: await draftsForGame(date, f, cfg, { corrected: true, log }) };
-  const items = readJson(file);
-  const inGame = new Set(['home', 'away'].flatMap((s) => f.players[s].map((p) => p.id)));
-  const names = cfg.dict.map((d) => ({ ...d, inGame: inGame.has(d.id), status: d.approved ? 'approved' : d.status }));
-  const ctx = ctxFor(f);
-  const wrong = [];
-  for (const it of items.filter((x) => x.draft && !x.held && !x.noSend)) {
-    const t = it.player ? (f.tracks || []).find((x) => x.player.id === it.player.id) : null;
-    const brief = it.mode === 'player' && t ? { ...playerBrief(f, t), max_paragraphs: 3, final_score_in: 'headline' } : gameBrief(f);
-    const check = verifyDraft(it.draft, brief, names, ctx);
-    if (!check.ok) wrong.push(...check.issues.filter((i) => i.severity === 'block').map((i) => i.msg));
+// What ESPN corrected between two box-score hashes (boxHash): the final score and each player's
+// points / rebounds / assists / minutes — nothing else (the table or tomorrow's schedule moving is not a correction)
+export function boxChanges(oldHash, f) {
+  let old;
+  try { old = JSON.parse(oldHash); } catch { return null; }
+  const out = [];
+  if (old[0] !== f.teams.home.score || old[1] !== f.teams.away.score) out.push({ kind: 'score', from: `${old[1]}:${old[0]}`, to: `${f.teams.away.score}:${f.teams.home.score}` });
+  const prev = new Map(old.slice(2).map((r) => [r[0], r]));
+  const LABEL = ['', 'נקודות', 'ריבאונדים', 'אסיסטים', 'דקות'];
+  for (const side of ['home', 'away']) {
+    for (const p of f.players[side]) {
+      const r = prev.get(p.id);
+      if (!r) continue;
+      [p.pts, p.reb, p.ast, p.min].forEach((v, i) => {
+        if ((r[i + 1] ?? null) !== (v ?? null)) out.push({ kind: 'stat', player: p.he || p.name, surname: (p.he || p.name).split(' ').slice(1).join(' '), stat: LABEL[i + 1], from: r[i + 1], to: v });
+      });
+    }
   }
-  if (!wrong.length) { log(`  ESPN correction does not touch the recap — nothing re-sent`); return { rewritten: false, items: [] }; }
-  log(`  ESPN correction changes the recap (${wrong.length}) — rewriting`);
-  return { rewritten: true, items: await draftsForGame(date, f, cfg, { corrected: true, log }) };
+  return out;
+}
+
+// After ESPN corrects a box score: only a correction that touches the TEXT already sent matters —
+// the final score, or a corrected number next to that player's name. Then the recap is rewritten (the page
+// shows the new version) and Telegram gets a short correction note, not the whole recap again.
+export async function recheckGame(date, f, cfg, { log = () => {}, oldHash = null } = {}) {
+  const file = join(dayDir(date), 'drafts', 'items', `${f.gameId}.json`);
+  if (!existsSync(file)) return { rewritten: false, items: await draftsForGame(date, f, cfg, { corrected: true, log }), changes: [] };
+  const items = readJson(file);
+  const sent = items.filter((x) => x.draft && !x.held && !x.noSend).map((x) => draftText(x.draft)).join('\n');
+  const changes = boxChanges(oldHash, f) || [];
+  const touching = changes.filter((c) => (c.kind === 'score' ? true : sent.split(/[.!?\n]/).some((sentence) => (sentence.includes(c.player) || (c.surname.length >= 3 && sentence.includes(c.surname))) && new RegExp(`(^|[^\\d])${c.from}([^\\d]|$)`).test(sentence))));
+  if (!touching.length) { log(`  ESPN corrected ${changes.length} number(s), none of them in the recap — nothing re-sent`); return { rewritten: false, items: [], changes }; }
+  log(`  ESPN correction touches the recap (${touching.map((c) => (c.kind === 'score' ? `score ${c.from} -> ${c.to}` : `${c.player} ${c.stat} ${c.from} -> ${c.to}`)).join('; ')}) — rewriting`);
+  return { rewritten: true, items: await draftsForGame(date, f, cfg, { corrected: true, log }), changes: touching };
+}
+
+// the short Telegram note for a correction (the full new text is on the page)
+export function correctionNote(heading, changes, pageUrl = null) {
+  const what = changes.map((c) => (c.kind === 'score' ? `התוצאה הסופית ${c.to} (במקום ${c.from})` : `${c.player}: ${c.to} ${c.stat} (במקום ${c.from})`)).join(' · ');
+  return `🔁 עדכון ל${heading}: ESPN תיקן — ${what}. הטקסט בדף עודכן${pageUrl ? `: ${pageUrl}` : '.'}`;
 }
 
 // The night's opening paragraph (Sport5: "לא פחות מ-14 משחקים נערכו הלילה..., כשבמוקד ..."), written once

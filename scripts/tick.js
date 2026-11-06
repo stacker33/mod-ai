@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync
 import { join } from 'node:path';
 import { listGames, getStandings } from '../src/espn.js';
 import { backupGames } from '../src/secondary.js';
-import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, writeIntro, assembleClosing, boxHash, morningCompare } from '../src/pipeline.js';
+import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, correctionNote, writeIntro, assembleClosing, boxHash, morningCompare } from '../src/pipeline.js';
 import { heTeam } from '../src/teams.js';
 import { telegramReady, sendTelegram, itemMessage, heldAlert } from '../src/notify.js';
 import { ROOT } from '../src/pipeline.js';
@@ -107,8 +107,17 @@ async function tickDate(date, cfg) {
         if (s.status === 'blocked' && telegramReady(cfg.env)) await sendTelegram(cfg.env, `⚠️ ${label}: הנתונים של ESPN לא עברו את הבדיקות (${s.why.join(', ')}) — לא נכתב סיכום. צריך לכתוב ידנית.`).catch(() => {});
       } else {
         // a re-check rewrites (and re-sends) only when the corrected facts make the sent recap wrong
-        const items = recheck ? (await recheckGame(date, f, cfg, { log })).items : await draftsForGame(date, f, cfg, { log });
+        const rc = recheck ? await recheckGame(date, f, cfg, { log, oldHash: s.hash }) : null;
+        const items = rc ? rc.items : await draftsForGame(date, f, cfg, { log });
         if (recheck && !items.length) { Object.assign(s, { hash }); state.games[r.id] = s; changed = true; continue; }
+        if (rc?.rewritten) {
+          // a real correction: the page has the new text; Telegram gets one short note, not the recap again
+          Object.assign(s, { hash, correctedAt: now });
+          if (telegramReady(cfg.env)) await sendTelegram(cfg.env, correctionNote(items[0]?.heading || label, rc.changes, cfg.pageUrl)).catch(() => {});
+          state.games[r.id] = s;
+          changed = true;
+          continue;
+        }
         Object.assign(s, { status: 'done', doneAt: s.doneAt || now, hash, items: items.map((i) => ({ mode: i.mode, ok: i.check.ok })) });
         if (recheck) s.correctedAt = now;
         if (telegramReady(cfg.env)) {

@@ -86,3 +86,22 @@ test('a new season / career high with the previous record renders (the code path
   const season = buildContext(f, { gamelogs: { [wemby.id]: rows.slice(0, 3) } }).find((x) => x.type === 'SEASON_HIGH');
   assert.match(season.fact_he, /שיא העונה שלו \(שיאו הקודם: 41/);
 });
+
+test('an ESPN correction re-sends only when a corrected number is in the text, and as a short note', async () => {
+  const { boxHash, boxChanges, correctionNote } = await import('../src/pipeline.js');
+  const f = game('401909933');
+  const before = boxHash(f);
+  const wemby = f.players.home.find((p) => /Wembanyama/.test(p.name)) || f.players.away.find((p) => /Wembanyama/.test(p.name));
+  const bench = [...f.players.home, ...f.players.away].find((p) => p.played && p.pts > 0 && p.pts < 6);
+  // ESPN corrects a bench player's minutes and Wemby's rebounds (24 -> 25)
+  const g = JSON.parse(JSON.stringify(f));
+  const find = (x) => [...g.players.home, ...g.players.away].find((p) => p.id === x.id);
+  find(bench).min += 1;
+  find(wemby).reb += 1;
+  const ch = boxChanges(before, g);
+  assert.equal(ch.length, 2);
+  assert.ok(ch.some((c) => c.stat === 'ריבאונדים' && c.from === 24 && c.to === 25));
+  assert.equal(boxChanges(before, f).length, 0); // nothing changed -> nothing to do
+  const note = correctionNote('סן אנטוניו (2:6) - דאלאס (4:4) 111:112', ch.filter((c) => c.stat === 'ריבאונדים'));
+  assert.match(note, /^🔁 עדכון לסן אנטוניו .* ESPN תיקן — .*: 25 ריבאונדים \(במקום 24\)\. הטקסט בדף עודכן\.$/);
+});
