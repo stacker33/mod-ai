@@ -62,3 +62,17 @@ test('names are matched across sources without accents / suffixes', () => {
   assert.equal(nameKey('Luka Dončić'), nameKey('Luka Doncic'));
   assert.equal(nameKey('Jaren Jackson Jr.'), nameKey('Jaren Jackson'));
 });
+
+test('follow-ups: only items about this game\'s teams, from tip-off on; no league-wide lists or fantasy', async () => {
+  const { relevantNews, kindOf } = await import('../src/followups.js');
+  const f = { teams: { home: { id: '25', name: 'Oklahoma City Thunder' }, away: { id: '5', name: 'Cleveland Cavaliers' } }, gameId: '1' };
+  const since = '2026-11-04T22:00:00Z';
+  const team = (id, d) => ({ type: 'team', teamId: id, description: d });
+  assert.ok(relevantNews({ headline: 'SGA scores 42', published: '2026-11-05T04:00:00Z', categories: [team('25', 'Oklahoma City Thunder')] }, f, since));
+  assert.ok(!relevantNews({ headline: 'Old story', published: '2026-11-03T04:00:00Z', categories: [team('25')] }, f, since));
+  assert.ok(!relevantNews({ headline: 'Power Rankings', published: '2026-11-05T04:00:00Z', categories: [team('1'), team('2'), team('25'), team('5')] }, f, since));
+  assert.ok(!relevantNews({ headline: 'Fantasy basketball: waiver adds', published: '2026-11-05T04:00:00Z', categories: [team('25')] }, f, since));
+  assert.ok(!relevantNews({ headline: 'Lakers news', published: '2026-11-05T04:00:00Z', categories: [team('13', 'Los Angeles Lakers')] }, f, since));
+  assert.equal(kindOf({ type: 'HeadlineNews', headline: 'Holmgren out with ankle sprain' }), 'injury');
+  assert.equal(kindOf({ type: 'Media', headline: 'Highlights' }), 'video');
+});
