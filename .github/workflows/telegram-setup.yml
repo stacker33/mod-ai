@@ -1,0 +1,23 @@
+# Connect the operator's private Telegram chat for alerts. Run by hand (see scripts/telegram-setup.js).
+name: Telegram alerts setup
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Find the chat / send a test alert
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ALERT_CHAT: ${{ secrets.TELEGRAM_ALERT_CHAT }}
+        run: node scripts/telegram-setup.js

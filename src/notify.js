@@ -1,11 +1,21 @@
-// Telegram: recaps only — one message per finished game (and per stand-alone article). Alerts, corrections
-// and waits are shown on the editor page, never sent here.
+// Telegram, two destinations with the same bot:
+//   TELEGRAM_CHAT        the channel — recaps only: one message per finished game (and per stand-alone article)
+//   TELEGRAM_ALERT_CHAT  the operator's private chat — problems that need a person now, and the 08:00 summary
+// Corrections are never sent anywhere (the editor page shows the new text).
 // Needs TELEGRAM_BOT_TOKEN (secret) and TELEGRAM_CHAT ("@channel" or "-100…"). Without them nothing is sent.
 
 const API = 'https://api.telegram.org/bot';
 const LIMIT = 4000; // Telegram allows 4096 characters per message
 
 export const telegramReady = (env) => !!(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT);
+
+export const alertReady = (env) => !!(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_ALERT_CHAT);
+
+// to the operator's private chat only; never fails the run
+export async function sendAlert(env, text) {
+  if (!alertReady(env)) return false;
+  try { await sendTelegram({ ...env, TELEGRAM_CHAT: env.TELEGRAM_ALERT_CHAT }, text); return true; } catch { return false; }
+}
 
 export async function sendTelegram(env, text) {
   const parts = [];

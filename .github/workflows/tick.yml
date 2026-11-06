@@ -66,6 +66,7 @@ jobs:
           AI_MODEL_FALLBACK: ${{ vars.AI_MODEL_FALLBACK || 'gemini-3.7-flash,gemini-3.5-flash,gemini-flash-latest,gemini-3.5-flash-lite' }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT: ${{ vars.TELEGRAM_CHAT }}
+          TELEGRAM_ALERT_CHAT: ${{ secrets.TELEGRAM_ALERT_CHAT }}
           PAGE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: node scripts/tick.js
 
@@ -95,7 +96,7 @@ jobs:
       - name: Page code changed?
         run: |
           mkdir -p out
-          h=$(cat scripts/site.js scripts/site-client.js src/teams.js assets/* | sha1sum | cut -c1-12)
+          h=$(cat scripts/site.js scripts/site-client.js src/board.js src/teams.js assets/* | sha1sum | cut -c1-12)
           if [ "$h" != "$(cat out/site-hash 2>/dev/null)" ]; then echo "$h" > out/site-hash; echo yes > out/changed; echo "page code changed ($h)"; fi
 
       - name: Save state

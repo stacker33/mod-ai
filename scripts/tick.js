@@ -12,7 +12,8 @@ import { listGames, getStandings } from '../src/espn.js';
 import { backupGames } from '../src/secondary.js';
 import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, writeIntro, assembleClosing, boxHash, morningCompare, saveFollowups } from '../src/pipeline.js';
 import { heTeam } from '../src/teams.js';
-import { telegramReady, sendTelegram, itemMessage } from '../src/notify.js';
+import { telegramReady, sendTelegram, itemMessage, heldAlert, sendAlert } from '../src/notify.js';
+import { nightBoard, morningSummary, compareLine, nightHe8 } from '../src/board.js';
 import { ROOT } from '../src/pipeline.js';
 import { buildTracker } from '../src/tracker.js';
 
@@ -49,6 +50,7 @@ async function quotaOut(cfg, now) {
   mkdirSync(join(ROOT, 'out'), { recursive: true });
   writeFileSync(QUOTA_FILE, JSON.stringify({ until, since: now }));
   const il = new Date(until).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
+  await sendAlert(cfg.env, `⏳ המכסה היומית של מודל הכתיבה נגמרה. משחקים שמסתיימים עכשיו ייכתבו וישלחו לערוץ אוטומטית אחרי ${il} (שעון ישראל).`);
   return until;
 }
 
@@ -103,6 +105,7 @@ async function tickDate(date, cfg) {
         s.attempts++;
         Object.assign(s, { status: s.attempts >= MAX_ATTEMPTS ? 'blocked' : 'retry', nextTry: now + RETRY_AFTER, why: f.checks.filter((c) => c.severity === 'error').map((c) => c.name) });
         log(`${label}: facts failed checks (${s.why.join(', ')}) — ${s.status}`);
+        if (s.status === 'blocked') await sendAlert(cfg.env, `⚠️ ${label}: הנתונים של ESPN לא עברו את הבדיקות (${s.why.join(', ')}) — לא נכתב סיכום. צריך לכתוב ידנית.`);
       } else {
         // a re-check rewrites (and re-sends) only when the corrected facts make the sent recap wrong
         const rc = recheck ? await recheckGame(date, f, cfg, { log, oldHash: s.hash }) : null;
@@ -121,7 +124,7 @@ async function tickDate(date, cfg) {
           for (const it of items.filter((x) => !x.noSend)) {
             // Telegram is for recaps only: a held draft, a failure or a quota wait shows on the editor page
             const msg = itemMessage(it);
-            if (!msg) continue;
+            if (!msg) { await sendAlert(cfg.env, heldAlert(it)); continue; }
             try { await sendTelegram(cfg.env, msg); } catch (e) { log(`  telegram error: ${e.message.slice(0, 120)}`); }
           }
           s.notifiedAt = Date.now();
@@ -149,7 +152,8 @@ async function tickDate(date, cfg) {
         log(`${label}: error (${s.status}): ${e.message.slice(0, 160)}`);
         if (s.status === 'failed') {
           s.failedSha = process.env.GITHUB_SHA || null;
-          // shown on the editor page as a game to write by hand (Telegram is for recaps only)
+          // shown on the editor page as a game to write by hand; the operator hears about it now (private chat)
+          await sendAlert(cfg.env, `⚠️ ${label}: לא נכתב סיכום בגלל תקלה במערכת (${String(e.message).slice(0, 80)}). ננסה שוב אחרי תיקון — בינתיים צריך לכתוב ידנית.`);
         }
       }
     }
@@ -177,6 +181,19 @@ async function tickDate(date, cfg) {
     } catch (e) { log(`Sport5 comparison: ${e.message.slice(0, 120)}`); }
     writeFileSync(stateFile, JSON.stringify(state, null, 1));
   }
+  // the 08:00 summary to the operator's private chat: how the night went, in one message
+  if (!state.summaryAt && rows.length && ilHour >= 8 && ilHour < 14 && (state.introAt || ilHour >= 9)) {
+    state.summaryAt = now;
+    await sendAlert(cfg.env, morningSummary(date, nightBoard(dayDir(date)), readCompare(date), cfg.pageUrl));
+    writeFileSync(stateFile, JSON.stringify(state, null, 1));
+  }
+  // the Sport5 comparison usually comes after 08:00: one more line when it lands
+  if (state.summaryAt && state.compareAt && !state.compareSentAt) {
+    state.compareSentAt = now;
+    const c = readCompare(date);
+    if (c) await sendAlert(cfg.env, `📊 ${nightHe8(date)} מול Sport5: ${compareLine(c)}`);
+    writeFileSync(stateFile, JSON.stringify(state, null, 1));
+  }
   // follow-ups again in the morning and at midday: injury updates, quotes and stories come after the game
   for (const [key, hour] of [['followups8', 8], ['followups13', 13]]) {
     if (state.introAt && !state[key] && ilHour >= hour && ilHour < hour + 4) {
@@ -196,6 +213,8 @@ async function tickDate(date, cfg) {
   const done = Object.values(state.games).filter((g) => g.status === 'done').length;
   return { date, rows: rows.length, done, live: rows.filter((x) => x.state === 'in').length, upcoming: rows.filter((x) => x.state === 'pre').length, changed, israeliDone };
 }
+
+const readCompare = (date) => { try { return JSON.parse(readFileSync(join(dayDir(date), 'compare.json'), 'utf8')); } catch { return null; } };
 
 // keep 10 nights of drafts; raw ESPN files only 3 days (they are big)
 function prune() {
