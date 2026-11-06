@@ -69,3 +69,20 @@ test('the plain template recap (no model left) passes every check on every game 
     assert.ok(d.paragraphs[0].startsWith(b.main_angle.fact_he), id);
   }
 });
+
+test('a new season / career high with the previous record renders (the code path that crashed on 2026-11-05)', async () => {
+  const { buildContext } = await import('../src/context.js');
+  const f = game('401909933'); // Wembanyama 52
+  const wemby = f.players.home.find((p) => /Wembanyama/.test(p.name)) || f.players.away.find((p) => /Wembanyama/.test(p.name));
+  const rows = [
+    ...[30, 41, 38].map((pts, i) => ({ type: 'regular', season: '2026-27', eventId: `s${i}`, date: `2026-10-2${i}T00:00Z`, pts, opp: 'WSH' })),
+    ...Array.from({ length: 20 }, (_, i) => ({ type: 'regular', season: '2025-26', eventId: `c${i}`, date: `2026-0${1 + (i % 8)}-1${i % 9}T00:00Z`, pts: i === 3 ? 50 : 20, opp: 'WSH' })),
+  ];
+  const facts = buildContext(f, { gamelogs: { [wemby.id]: rows } });
+  const career = facts.find((x) => x.type === 'CAREER_HIGH');
+  assert.ok(career, JSON.stringify(facts.map((x) => x.type)));
+  assert.match(career.fact_he, /שיאו הקודם: 50 נגד וושינגטון/);
+  // a season high that is not a career high (only the season rows)
+  const season = buildContext(f, { gamelogs: { [wemby.id]: rows.slice(0, 3) } }).find((x) => x.type === 'SEASON_HIGH');
+  assert.match(season.fact_he, /שיא העונה שלו \(שיאו הקודם: 41/);
+});

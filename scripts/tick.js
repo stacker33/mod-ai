@@ -80,6 +80,8 @@ async function tickDate(date, cfg) {
   // schedule order, roughly the order the games ended
   for (const r of rows.filter((x) => x.state === 'post')) {
     const s = state.games[r.id] || { attempts: 0 };
+    // a game that failed on an older version of the code is tried again once the code changes
+    if (s.status === 'failed' && process.env.GITHUB_SHA && s.failedSha && s.failedSha !== process.env.GITHUB_SHA) Object.assign(s, { status: 'retry', attempts: 0, nextTry: 0 });
     // the same game already written under the other source's id (ESPN came back after a backup night)
     s.teams = `${r.away.abbr}@${r.home.abbr}`;
     if (!s.status && Object.entries(state.games).some(([id, g]) => id !== r.id && g.teams === s.teams && g.status === 'done')) continue;
@@ -142,6 +144,11 @@ async function tickDate(date, cfg) {
         s.attempts++;
         Object.assign(s, { status: s.attempts >= MAX_ATTEMPTS ? 'failed' : 'retry', nextTry: now + RETRY_AFTER, error: e.message.slice(0, 300) });
         log(`${label}: error (${s.status}): ${e.message.slice(0, 160)}`);
+        if (s.status === 'failed') {
+          s.failedSha = process.env.GITHUB_SHA || null;
+          // the editor must know now, not find a missing game in the morning
+          if (telegramReady(cfg.env)) await sendTelegram(cfg.env, `⚠️ ${label}: לא נכתב סיכום בגלל תקלה במערכת. ננסה שוב אחרי התיקון — בינתיים צריך לכתוב ידנית.`).catch(() => {});
+        }
       }
     }
     state.games[r.id] = s;
