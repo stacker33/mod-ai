@@ -81,7 +81,7 @@ async function tickDate(date, cfg) {
   for (const r of rows.filter((x) => x.state === 'post')) {
     const s = state.games[r.id] || { attempts: 0 };
     // a game that failed on an older version of the code is tried again once the code changes
-    if (s.status === 'failed' && process.env.GITHUB_SHA && s.failedSha && s.failedSha !== process.env.GITHUB_SHA) Object.assign(s, { status: 'retry', attempts: 0, nextTry: 0 });
+    if (s.status === 'failed' && process.env.GITHUB_SHA && s.failedSha !== process.env.GITHUB_SHA) Object.assign(s, { status: 'retry', attempts: 0, nextTry: 0 });
     // the same game already written under the other source's id (ESPN came back after a backup night)
     s.teams = `${r.away.abbr}@${r.home.abbr}`;
     if (!s.status && Object.entries(state.games).some(([id, g]) => id !== r.id && g.teams === s.teams && g.status === 'done')) continue;
