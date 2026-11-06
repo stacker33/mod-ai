@@ -24,6 +24,7 @@ import { verifyDraft, autoFix, draftText } from './writer/verify.js';
 import { fetchContext } from './context.js';
 import { crossCheck, backupSummary, backupGames } from './secondary.js';
 import { fetchSport5Night, compareNight } from './compare.js';
+import { collectFollowups } from './followups.js';
 import { nightHe } from './writer/he.js';
 import { NICK_HE, heTeam } from './teams.js';
 
@@ -371,6 +372,23 @@ export async function morningCompare(date, cfg) {
   const report = { url: s5.url, at: new Date().toISOString(), ...compareNight(s5.text, games, cfg.dict) };
   writeFileSync(join(dir, 'compare.json'), JSON.stringify(report, null, 1));
   return report;
+}
+
+// Follow-up links per game (ESPN recap, clips, team news since the game): out/<date>/followups.json.
+// Collected when a game is written and refreshed in the morning (news keeps coming after the game).
+export async function saveFollowups(date, onlyId = null) {
+  const dir = dayDir(date);
+  const file = join(dir, 'followups.json');
+  const all = existsSync(file) ? readJson(file) : { games: {} };
+  const ids = readdirSync(dir).filter((x) => /^\d+\.json$/.test(x)).map((x) => x.slice(0, -5)).filter((id) => !onlyId || id === onlyId);
+  for (const id of ids) {
+    const f = readJson(join(dir, `${id}.json`));
+    if (!f?.status?.final) continue;
+    try { all.games[id] = await collectFollowups(f); } catch { /* keep what we had */ }
+  }
+  all.at = new Date().toISOString();
+  writeFileSync(file, JSON.stringify(all, null, 1));
+  return all;
 }
 
 // ---------- the night's closing page, from the games done so far ----------

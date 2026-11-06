@@ -58,3 +58,9 @@ export async function getStandings() {
     return { conf: c.abbreviation, teamId: e.team?.id, abbr: e.team?.abbreviation, wins: st('wins')?.value, losses: st('losses')?.value, seed: st('playoffSeed')?.value, pct: st('winPercent')?.value };
   }));
 }
+
+// a team's latest ESPN news (recaps, highlights, injury / roster news, previews)
+export async function getTeamNews(teamId, limit = 25) {
+  const j = await getJson(`${BASE}/news?team=${teamId}&limit=${limit}`);
+  return j.articles || [];
+}

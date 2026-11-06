@@ -152,6 +152,8 @@ for (const d of dates) {
     Object.assign(day, { pieces, closing, ...nightBoard(dir) });
   } else if (existsSync(join(dir, 'state.json'))) Object.assign(day, { pieces: [], closing: '', ...nightBoard(dir) });
   // the morning comparison with Sport5's article: numbers and names only (no Sport5 text on this public page)
+  const fu = readJ(join(dir, 'followups.json'));
+  if (fu?.games) day.followups = { at: fu.at, games: fu.games };
   const cmp = readJ(join(dir, 'compare.json'));
   if (cmp) day.compare = { url: cmp.url, games: cmp.games, namesCovered: cmp.namesCovered, numbersCovered: cmp.numbersCovered, sameAngle: cmp.sameAngle, lengthRatio: cmp.lengthRatio, missedInOurData: cmp.missedInOurData, missedNotInData: cmp.missedNotInData, rows: (cmp.rows || []).map((r) => ({ gameId: r.gameId, names: [r.names.covered, r.names.theirs], missedNames: r.names.missed.slice(0, 4), numbers: [r.numbers.covered, r.numbers.theirs], sameAngle: r.angle.same, theirLead: r.angle.theirs })) };
   days.push(day);
@@ -181,6 +183,14 @@ form button{cursor:pointer;background:#c2185b;color:#fff;border:0}
 .topline .night{font-weight:600;color:var(--ink)}.topline .nums b{color:var(--brand)}.topline i{font-style:normal;margin:0 6px;opacity:.5}
 .topline .bad{color:var(--bad)}.topline .warn{color:var(--warn)}.topline .livet{color:var(--live);font-weight:600}
 .copy.small{float:none;margin-inline-start:auto;border-radius:999px}
+.tabs{display:flex;gap:4px;margin:6px 0 10px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:6px 12px;cursor:pointer;color:var(--mute);font-weight:600}
+.tabs button.on{color:var(--brand);border-bottom-color:var(--brand)}
+.fu-game{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:10px 0}
+.fu-game h3{margin:0 0 6px;font-size:16px;color:var(--brand)}
+.fu-game ul{list-style:none;margin:0;padding:0}.fu-game li{display:flex;gap:8px;align-items:baseline;padding:4px 0;border-bottom:1px dashed var(--line)}.fu-game li:last-child{border:0}
+.fu-game li a{color:var(--ink);text-decoration:none;direction:ltr;text-align:left;flex:1}.fu-game li a:hover{text-decoration:underline}
+.fu-game .tm{color:var(--mute);font-size:12px;white-space:nowrap}
 .topline.cmp{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}.topline.cmp a{color:var(--brand);font-weight:600}
 .board{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin:0 0 22px}
 .card{display:flex;flex-direction:column;gap:3px;text-align:start;cursor:pointer;background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--line);border-radius:8px;padding:7px 10px}

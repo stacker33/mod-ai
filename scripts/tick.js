@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync
 import { join } from 'node:path';
 import { listGames, getStandings } from '../src/espn.js';
 import { backupGames } from '../src/secondary.js';
-import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, correctionNote, writeIntro, assembleClosing, boxHash, morningCompare } from '../src/pipeline.js';
+import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, correctionNote, writeIntro, assembleClosing, boxHash, morningCompare, saveFollowups } from '../src/pipeline.js';
 import { heTeam } from '../src/teams.js';
 import { telegramReady, sendTelegram, itemMessage, heldAlert } from '../src/notify.js';
 import { ROOT } from '../src/pipeline.js';
@@ -135,6 +135,8 @@ async function tickDate(date, cfg) {
           }
           s.notifiedAt = Date.now();
         }
+        // follow-up links for the editor page (ESPN recap, clips, team news) — web only
+        try { await saveFollowups(date, r.id); } catch { /* the morning refresh will add them */ }
       }
     } catch (e) {
       if (e.quota) {
@@ -183,6 +185,13 @@ async function tickDate(date, cfg) {
       else log('Sport5 article not up yet');
     } catch (e) { log(`Sport5 comparison: ${e.message.slice(0, 120)}`); }
     writeFileSync(stateFile, JSON.stringify(state, null, 1));
+  }
+  // follow-ups again in the morning and at midday: injury updates, quotes and stories come after the game
+  for (const [key, hour] of [['followups8', 8], ['followups13', 13]]) {
+    if (state.introAt && !state[key] && ilHour >= hour && ilHour < hour + 4) {
+      try { await saveFollowups(date); state[key] = now; changed = true; log(`follow-up links refreshed (${hour}:00)`); } catch (e) { log(`follow-ups: ${e.message.slice(0, 100)}`); }
+      writeFileSync(stateFile, JSON.stringify(state, null, 1));
+    }
   }
   // the night's schedule for the editor page board (which games are still to come / playing); saved only
   // when a game changes state, so live score changes do not rebuild the page every check

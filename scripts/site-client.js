@@ -95,11 +95,33 @@ function scoreboard(d) {
   }).join('')}</div>`;
 }
 
+// follow-ups: per game, ESPN's links (headlines stay in English — they are links, not our text)
+const FU_KIND = { recap: ['ok', 'סיכום ESPN'], injury: ['bad', 'פציעה'], news: ['live', 'חדשות'], story: ['mute', 'כתבה'], next: ['warn', 'המשחק הבא'], video: ['mute', 'וידאו'] };
+function followupsView(d) {
+  const ilTime = (iso) => (iso ? new Date(iso).toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '');
+  const games = d.results.filter((r) => d.followups?.games?.[r.id]?.length);
+  if (!games.length) return '<p class="empty-day">אין עדיין קישורי מעקב לתאריך הזה.</p>';
+  return `<p class="extra">קישורים של ESPN לכל משחק — הסיכום, קטעי וידאו, וחדשות שהגיעו אחריו (פציעות, ציטוטים, המשחק הבא). מתעדכן בבוקר ובצהריים.</p>` + games.map((r) => `<div class="fu-game${r.israelis.length ? ' israeli' : ''}"><h3>${esc(r.line)} ${isrTags(r.israelis)}</h3><ul>${d.followups.games[r.id].map((x) => {
+    const [cls, label] = FU_KIND[x.kind] || ['mute', x.kind];
+    return `<li><span class="chip ${cls}">${label}</span><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a><span class="tm" dir="ltr">${esc(ilTime(x.published))}</span></li>`;
+  }).join('')}</ul></div>`).join('');
+}
+let TAB = 'recaps';
+try { TAB = sessionStorage.getItem('mtab') || 'recaps'; } catch { /* default */ }
+
 function show(i) {
   const d = DB.days[i];
+  CUR = i;
   document.querySelectorAll('nav.dates button').forEach((b, k) => b.classList.toggle('on', k === i));
   if (!d.results.length) { document.getElementById('app').innerHTML = `<p class="empty-day">אין משחקי NBA ב${esc(d.label)}.</p>`; return; }
   let h = topLine(d) + scoreboard(d);
+  const nFu = Object.values(d.followups?.games || {}).reduce((a, x) => a + x.length, 0);
+  if (d.board || nFu) h += `<div class="tabs"><button data-tab="recaps" class="${TAB === 'recaps' ? 'on' : ''}">סגירת הלילה וכתבות</button><button data-tab="followups" class="${TAB === 'followups' ? 'on' : ''}">מעקב${nFu ? ` (${nFu})` : ''}</button></div>`;
+  if (TAB === 'followups' && (d.board || nFu)) {
+    document.getElementById('app').innerHTML = h + followupsView(d);
+    try { sessionStorage.setItem('mday', d.date); } catch { /* private mode */ }
+    return;
+  }
   if (d.board) {
     // the nightly page is always the first article; stand-alone articles follow it
     if (d.closing) h += '<h2 class="sec">סגירת הלילה ב-NBA</h2>' + render(d.closing);
@@ -127,7 +149,10 @@ function start() {
   try { const m = sessionStorage.getItem('mday'); const k = DB.days.findIndex((d) => d.date === m); if (k >= 0) i = k; } catch { /* none */ }
   show(i >= 0 ? i : 0);
 }
+let CUR = 0;
 document.addEventListener('click', async (e) => {
+  const tb = e.target.closest('[data-tab]');
+  if (tb) { TAB = tb.dataset.tab; try { sessionStorage.setItem('mtab', TAB); } catch { /* private */ } show(CUR); return; }
   const b = e.target.closest('.copy');
   if (b) { try { await navigator.clipboard.writeText(decodeURIComponent(b.dataset.t)); b.textContent = 'הועתק ✓'; } catch { b.textContent = 'לא הועתק'; } return; }
   const c = e.target.closest('[data-go]');
