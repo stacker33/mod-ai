@@ -1,4 +1,5 @@
-// Telegram: one message per finished game (and per stand-alone article), sent to the Mod-AI channel.
+// Telegram: recaps only — one message per finished game (and per stand-alone article). Alerts, corrections
+// and waits are shown on the editor page, never sent here.
 // Needs TELEGRAM_BOT_TOKEN (secret) and TELEGRAM_CHAT ("@channel" or "-100…"). Without them nothing is sent.
 
 const API = 'https://api.telegram.org/bot';

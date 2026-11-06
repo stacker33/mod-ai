@@ -10,9 +10,9 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync
 import { join } from 'node:path';
 import { listGames, getStandings } from '../src/espn.js';
 import { backupGames } from '../src/secondary.js';
-import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, correctionNote, writeIntro, assembleClosing, boxHash, morningCompare, saveFollowups } from '../src/pipeline.js';
+import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, writeIntro, assembleClosing, boxHash, morningCompare, saveFollowups } from '../src/pipeline.js';
 import { heTeam } from '../src/teams.js';
-import { telegramReady, sendTelegram, itemMessage, heldAlert } from '../src/notify.js';
+import { telegramReady, sendTelegram, itemMessage } from '../src/notify.js';
 import { ROOT } from '../src/pipeline.js';
 import { buildTracker } from '../src/tracker.js';
 
@@ -20,8 +20,6 @@ const RECHECK_AFTER = 45 * 60e3; // ESPN stat corrections usually land within th
 const RETRY_AFTER = 4 * 60e3; // = the next 5-minute check
 const MAX_ATTEMPTS = 6;
 const EVERY = 5 * 60e3;
-// nights whose Telegram messages also show game end -> recap sent (a one-off timing check)
-const TIMING_NIGHTS = new Set(['20261104']);
 
 // the US-Eastern dates that can still have games ending: yesterday and today
 function watchedDates(now = new Date()) {
@@ -51,7 +49,6 @@ async function quotaOut(cfg, now) {
   mkdirSync(join(ROOT, 'out'), { recursive: true });
   writeFileSync(QUOTA_FILE, JSON.stringify({ until, since: now }));
   const il = new Date(until).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
-  if (telegramReady(cfg.env)) await sendTelegram(cfg.env, `⏳ המכסה היומית של מודל הכתיבה נגמרה. משחקים שמסתיימים עכשיו ייכתבו וישלחו אוטומטית אחרי ${il} (שעון ישראל).`).catch(() => {});
   return until;
 }
 
@@ -106,16 +103,14 @@ async function tickDate(date, cfg) {
         s.attempts++;
         Object.assign(s, { status: s.attempts >= MAX_ATTEMPTS ? 'blocked' : 'retry', nextTry: now + RETRY_AFTER, why: f.checks.filter((c) => c.severity === 'error').map((c) => c.name) });
         log(`${label}: facts failed checks (${s.why.join(', ')}) — ${s.status}`);
-        if (s.status === 'blocked' && telegramReady(cfg.env)) await sendTelegram(cfg.env, `⚠️ ${label}: הנתונים של ESPN לא עברו את הבדיקות (${s.why.join(', ')}) — לא נכתב סיכום. צריך לכתוב ידנית.`).catch(() => {});
       } else {
         // a re-check rewrites (and re-sends) only when the corrected facts make the sent recap wrong
         const rc = recheck ? await recheckGame(date, f, cfg, { log, oldHash: s.hash }) : null;
         const items = rc ? rc.items : await draftsForGame(date, f, cfg, { log });
         if (recheck && !items.length) { Object.assign(s, { hash }); state.games[r.id] = s; changed = true; continue; }
         if (rc?.rewritten) {
-          // a real correction: the page has the new text; Telegram gets one short note, not the recap again
+          // a real correction: the page shows the new text; nothing is re-sent to Telegram (recaps only)
           Object.assign(s, { hash, correctedAt: now });
-          if (telegramReady(cfg.env)) await sendTelegram(cfg.env, correctionNote(items[0]?.heading || label, rc.changes, cfg.pageUrl)).catch(() => {});
           state.games[r.id] = s;
           changed = true;
           continue;
@@ -124,15 +119,9 @@ async function tickDate(date, cfg) {
         if (recheck) s.correctedAt = now;
         if (telegramReady(cfg.env)) {
           for (const it of items.filter((x) => !x.noSend)) {
-            let msg = itemMessage(it) || heldAlert(it);
-            // one trial night only: when the game ended and when the recap went out (editor's request)
-            if (TIMING_NIGHTS.has(date) && f.endedAt) {
-              const il = (t) => new Date(t).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
-              const mins = Math.round((Date.now() - Date.parse(f.endedAt)) / 60e3);
-              msg += `
-
-⏱️ המשחק הסתיים ${il(f.endedAt)} · הסיכום נשלח ${il(Date.now())} (${mins} דקות)`;
-            }
+            // Telegram is for recaps only: a held draft, a failure or a quota wait shows on the editor page
+            const msg = itemMessage(it);
+            if (!msg) continue;
             try { await sendTelegram(cfg.env, msg); } catch (e) { log(`  telegram error: ${e.message.slice(0, 120)}`); }
           }
           s.notifiedAt = Date.now();
@@ -160,8 +149,7 @@ async function tickDate(date, cfg) {
         log(`${label}: error (${s.status}): ${e.message.slice(0, 160)}`);
         if (s.status === 'failed') {
           s.failedSha = process.env.GITHUB_SHA || null;
-          // the editor must know now, not find a missing game in the morning
-          if (telegramReady(cfg.env)) await sendTelegram(cfg.env, `⚠️ ${label}: לא נכתב סיכום בגלל תקלה במערכת. ננסה שוב אחרי התיקון — בינתיים צריך לכתוב ידנית.`).catch(() => {});
+          // shown on the editor page as a game to write by hand (Telegram is for recaps only)
         }
       }
     }
