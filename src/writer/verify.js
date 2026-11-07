@@ -242,6 +242,14 @@ export function verifyDraft(input, brief, names, ctx = null) {
     if (!text.includes(x.player_he) && !(sur.length >= 3 && text.includes(sur))) push('israeli-missing', 'block', `${x.player_he} שיחק ולא מופיע בטקסט — ${x.sentence_he}`, { type: 'append', text: `${x.sentence_he}.` });
   }
 
+  // the story beats the code chose (his arc, the other side's 53 points) must be told in the body — a deck
+  // mention is not the story. Missing -> the code-written sentence goes into the second paragraph.
+  const body = (draft.paragraphs || []).flatMap((p) => sentences(p));
+  for (const x of brief.must_tell || []) {
+    const told = body.some((s) => x.who.some((w) => w && w.length >= 3 && s.includes(w)) && (!x.num || new RegExp(`(^|[^\\d])${x.num}([^\\d]|$)`).test(s)));
+    if (!told) push('must-tell', 'block', `סיפור המשחק חסר בגוף הכתבה: ${x.fact_he}`, { type: 'insert', para: 1, text: `${x.fact_he}.` });
+  }
+
   // the final score appears once: in the score line above a block, or in an article's headline
   const fsc = finalOf(brief);
   if (fsc && brief.final_score_in) {
@@ -299,6 +307,12 @@ export function autoFix(draft, issues, brief = null) {
   for (const a of issues.filter((x) => x.severity === 'block' && x.fix?.type === 'append')) {
     if (!d.paragraphs?.length) d.paragraphs = [a.fix.text];
     else d.paragraphs[0] = `${d.paragraphs[0].trim()} ${a.fix.text}`;
+  }
+  // a missing story beat: at the end of the given paragraph (the last one if there are fewer)
+  for (const a of issues.filter((x) => x.severity === 'block' && x.fix?.type === 'insert')) {
+    if (!d.paragraphs?.length) { d.paragraphs = [a.fix.text]; continue; }
+    const i = Math.min(a.fix.para, d.paragraphs.length - 1);
+    d.paragraphs[i] = `${d.paragraphs[i].trim()} ${a.fix.text}`;
   }
   const head = issues.find((x) => x.severity === 'block' && x.fix?.type === 'headline');
   if (head) d.headline = head.fix.to;

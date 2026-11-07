@@ -7,6 +7,6 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "facts": "node scripts/facts.js",
-    "test": "node --test test/facts.test.js test/writer.test.js test/round2.test.js test/round3.test.js test/night1104.test.js test/secondary.test.js test/compare.test.js test/tracker.test.js test/alerts.test.js"
+    "test": "node --test test/facts.test.js test/writer.test.js test/round2.test.js test/round3.test.js test/night1104.test.js test/secondary.test.js test/compare.test.js test/tracker.test.js test/alerts.test.js test/story.test.js"
   }
 }

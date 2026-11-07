@@ -292,7 +292,64 @@ function notableMoments(plays, f) {
   const a3 = f.result.after3, L = f.result.loser;
   const q4 = { home: f.teams.home.periods[3], away: f.teams.away.periods[3] };
   if (a3[L] > a3[other(L)] && q4[other(L)] - q4[L] >= 10) out.push({ type: 'Q4_COLLAPSE', side: L, after3: a3, q4, wow: 60 });
+  out.push(...playerArcs(plays, f, fp));
+  // one story per quarter: the player who carried the last quarter goes inside the collapse sentence
+  const col = out.find((x) => x.type === 'Q4_COLLAPSE');
+  const tk4 = out.find((x) => x.type === 'PERIOD_TAKEOVER' && x.period === 4);
+  if (col && tk4) { col.by = { playerId: tk4.playerId, pts: tk4.pts }; out.splice(out.indexOf(tk4), 1); }
+  // a big first half says more than one big quarter inside it
+  for (const h of out.filter((x) => x.type === 'BIG_HALF')) {
+    const i = out.findIndex((x) => x.type === 'PERIOD_TAKEOVER' && x.playerId === h.playerId && x.period <= 2);
+    if (i >= 0) out.splice(i, 1);
+  }
   return out.sort((x, y) => y.wow - x.wow);
+}
+
+// ARCS: the story of a key player's night, not only his line — who carried the quarter that decided the
+// game, who went quiet in it after a strong first half, who lost the ball again and again.
+function playerArcs(plays, f, fp) {
+  const out = [];
+  const other = (s) => (s === 'home' ? 'away' : 'home');
+  const per = new Map(); // player id -> points / turnovers by period
+  const bump = (id, k, period) => {
+    if (!per.has(id)) per.set(id, { pts: Array(fp + 1).fill(0), to: Array(fp + 1).fill(0) });
+    return per.get(id)[k];
+  };
+  for (const p of plays) {
+    if (!p.ids[0]) continue;
+    if (p.scoring) bump(p.ids[0], 'pts', p.period)[p.period] += p.value;
+    else if (/turnover/i.test(p.type)) bump(p.ids[0], 'to', p.period)[p.period] += 1;
+  }
+  const at = (id, k, period) => per.get(id)?.[k][period] || 0;
+  const sum = (id, k, from, to) => { let n = 0; for (let q = from; q <= to; q++) n += at(id, k, q); return n; };
+  const margin = (side, q) => (f.teams[side].periods[q - 1] ?? 0) - (f.teams[other(side)].periods[q - 1] ?? 0);
+  const score = (side, q) => ({ for: f.teams[side].periods[q - 1], against: f.teams[other(side)].periods[q - 1] });
+  // the quarter that decided it: the winner's biggest quarter, by 10 or more
+  const W = f.result.winner;
+  let swing = null;
+  for (let q = 1; q <= fp; q++) if (margin(W, q) >= 10 && (!swing || margin(W, q) > margin(W, swing))) swing = q;
+
+  // a fade is a story for a team's leading men, not for a role player
+  const top2 = Object.fromEntries(['home', 'away'].map((s) => [s, f.players[s].filter((x) => x.played).sort((a, b) => b.pts - a.pts).slice(0, 2).map((x) => x.id)]));
+  for (const side of ['home', 'away']) {
+    for (const p of f.players[side].filter((x) => x.played)) {
+      const h1 = sum(p.id, 'pts', 1, 2), h2 = sum(p.id, 'pts', 3, fp);
+      // carried the deciding quarter for the winner
+      // (a second-half quarter decides more than a first-half one)
+      if (swing && side === W && at(p.id, 'pts', swing) >= 12) out.push({ type: 'PERIOD_TAKEOVER', side, playerId: p.id, period: swing, pts: at(p.id, 'pts', swing), score: score(side, swing), wow: (swing >= 3 ? 58 : 50) + Math.min(10, at(p.id, 'pts', swing) - 12) });
+      // strong first half, then quiet in the quarter his team lost big (or in the whole second half)
+      if (side !== W && h1 >= 10 && (top2[side].includes(p.id) || (p.starter && (p.min || 0) >= 30))) {
+        if (swing && swing >= 3 && at(p.id, 'pts', swing) <= 2) out.push({ type: 'PLAYER_FADE', side, playerId: p.id, h1, period: swing, ptsInPeriod: at(p.id, 'pts', swing), toInPeriod: at(p.id, 'to', swing), toTotal: p.to, score: score(side, swing), wow: 54 });
+        else if (h1 >= 15 && h2 <= Math.max(4, Math.floor(h1 / 3)) && f.teams[side].score - h1 < f.teams[other(side)].score) out.push({ type: 'PLAYER_FADE', side, playerId: p.id, h1, h2, wow: 50 });
+      }
+      // quiet first half, then the second half that turned it (for the winner)
+      if (side === W && h2 >= 18 && h1 <= Math.floor(h2 / 3)) out.push({ type: 'PLAYER_SURGE', side, playerId: p.id, h1, h2, wow: 52 });
+      // the ball lost again and again (box-score count; the play-by-play only places them)
+      // (told inside his fade when he has one: one sentence, not two)
+      if ((p.to || 0) >= 7 && !out.some((x) => x.type === 'PLAYER_FADE' && x.playerId === p.id && x.period)) out.push({ type: 'TURNOVERS', side, playerId: p.id, to: p.to, wow: 40 + 4 * (p.to - 7) });
+    }
+  }
+  return out;
 }
 
 // score after the last play that happened with more than `secondsLeft` on the clock in `period`

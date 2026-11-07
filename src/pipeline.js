@@ -144,8 +144,9 @@ export function templateDraft(mode, b) {
   // an Israeli article
   const headline = `${b.player_he} ב${b.result_he} ${b.won ? 'על' : 'ל'}${b.opp_he}`;
   const p1 = `${b.player_he} סיים עם ${b.line_full_he}.${b.team_record?.after_verb ? ` ${b.team_he} ${b.team_record.after_verb}.` : ''}`;
+  const story = (b.must_tell || []).map((x) => `${x.fact_he}.`).join(' ');
   const others = (b.other_israelis || []).map((x) => `${x.sentence_he}.`).join(' ');
-  return { headline, subheadline: b.line_short_he ? `${b.player_he} ${b.line_short_he}` : b.team_he, paragraphs: [p1, others].filter(Boolean) };
+  return { headline, subheadline: b.line_short_he ? `${b.player_he} ${b.line_short_he}` : b.team_he, paragraphs: [p1, story, others].filter(Boolean) };
 }
 
 export async function writeItem(cfg, mode, brief, f) {
@@ -197,7 +198,7 @@ export async function writeItem(cfg, mode, brief, f) {
     ...(f.crossCheck?.notes || []),
     ...(f.backupSource ? [`ESPN לא היה זמין — המשחק נכתב לפי ${f.backupSource}, בלי פרטי מהלכים`] : []),
     ...(last.template ? ['נכתב בתבנית קבועה כי המכסה היומית של המודל נגמרה — העובדות נכונות, כדאי ללטש את הניסוח'] : []),
-    ...(last.fixKinds || []).filter((k) => ['drop', 'prepend', 'append'].includes(k.type)).map((k) => (k.type === 'drop' ? `משפט הוסר כי לא תאם את הנתונים: "${String(k.sentence || '').slice(0, 60)}" — לבדוק שהפסקה עדיין זורמת` : k.type === 'prepend' ? 'הזווית המרכזית נוספה בתחילת הבלוק — לבדוק שהפתיחה זורמת' : 'שורה של שחקן ישראלי נוספה בסוף הפסקה — לבדוק את המיקום')),
+    ...(last.fixKinds || []).filter((k) => ['drop', 'prepend', 'append', 'insert'].includes(k.type)).map((k) => (k.type === 'drop' ? `משפט הוסר כי לא תאם את הנתונים: "${String(k.sentence || '').slice(0, 60)}" — לבדוק שהפסקה עדיין זורמת` : k.type === 'prepend' ? 'הזווית המרכזית נוספה בתחילת הבלוק — לבדוק שהפתיחה זורמת' : k.type === 'insert' ? 'משפט על סיפור המשחק נוסף בסוף הפסקה השנייה — לבדוק את המיקום' : 'שורה של שחקן ישראלי נוספה בסוף הפסקה — לבדוק את המיקום')),
   ];
   // language-only proofreading for the stand-alone articles; thrown away if it touches any fact
   if (!last.held && cfg.proofread && mode === 'player') {

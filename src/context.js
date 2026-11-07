@@ -8,9 +8,9 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { getTeamSchedule, getStandings } from './espn.js';
-import { playerHistory } from './gamelog.js';
+import { playerHistory, recentHistory } from './gamelog.js';
 import { v, withLamed, heTeam } from './teams.js';
-import { pair, nightHe } from './writer/he.js';
+import { pair, nightHe, shortLineHe } from './writer/he.js';
 
 const MAX_SEASONS_BACK = 6; // how far a head-to-head streak is followed before it counts as unknown
 
@@ -160,7 +160,44 @@ export async function fetchContext(summary, { cacheDir }) {
     if (!top || top.pts < 25) continue;
     try { ext.gamelogs[top.id] = await playerHistory(top.id, join(cacheDir, 'gamelog')); } catch (e) { ext.errors.push(`gamelog ${top.id}: ${e.message}`); }
   }
+  // returns to a former team: every player with real minutes, this season + last (a trade shows in the log);
+  // for the ones who face a former team, the full career (how many seasons he played there)
+  ext.recent = {};
+  const abbr = Object.fromEntries(cs.map((c) => [c.team.id, c.team.abbreviation]));
+  for (const tb of summary.boxscore?.players || []) {
+    const st = tb.statistics?.[0];
+    const ix = (st?.labels || st?.names || []).indexOf('MIN');
+    const opp = abbr[cs.find((c) => c.team.id !== tb.team.id)?.team.id];
+    // one team's players in parallel (a recap must not wait 20 requests in a row)
+    await Promise.all((st?.athletes || []).filter((x) => (Number(x.stats?.[ix]) || 0) >= 12).map(async (a) => {
+      try {
+        const rows = await recentHistory(a.athlete.id, join(cacheDir, 'gamelog'));
+        ext.recent[a.athlete.id] = rows;
+        if (rows.some((r) => r.team === opp && r.eventId !== summary.header.id) && !ext.gamelogs[a.athlete.id]) ext.gamelogs[a.athlete.id] = await playerHistory(a.athlete.id, join(cacheDir, 'gamelog'));
+      } catch (e) { ext.errors.push(`recent ${a.athlete.id}: ${e.message}`); }
+    }));
+  }
   return ext;
+}
+
+const SEASONS_HE = (n) => (n === 1 ? 'עונה אחת' : n === 2 ? 'שתי עונות' : `${n} עונות`);
+
+// RETURN TO A FORMER TEAM, from his game log: the opponent is a team he played for, and since he left he has
+// not played against it (FIRST_MEETING) or not played in its arena (FIRST_RETURN). "For the first time" is
+// claimed only when his whole time since leaving is in the log (left within this season or last).
+export function formerTeamFact(rows, p, myAbbr, oppAbbr, gameId, gameDate, home) {
+  const before = rows.filter((r) => r.eventId !== gameId && r.date && new Date(r.date) < new Date(gameDate) && ['regular', 'post', 'playin'].includes(r.type));
+  const there = before.filter((r) => r.team === oppAbbr);
+  if (!there.length || myAbbr === oppAbbr) return null;
+  const left = there.at(-1).date;
+  const since = before.filter((r) => new Date(r.date) > new Date(left));
+  if (!since.some((r) => r.team === myAbbr)) return null; // not with his current team since — unclear, say nothing
+  const met = since.filter((r) => r.opp === oppAbbr);
+  const visited = met.filter((r) => r.atVs === '@');
+  const kind = !home && !visited.length ? 'FIRST_RETURN' : !met.length ? 'FIRST_MEETING' : null;
+  if (!kind) return null;
+  const seasons = new Set(rows.filter((r) => r.team === oppAbbr && r.type === 'regular').map((r) => r.season)).size;
+  return { kind, seasons, left };
 }
 
 // ---------- context facts ----------
@@ -207,6 +244,23 @@ export function buildContext(f, ext = {}) {
   const h = ext.h2h?.[f.teams[W].id];
   if (h && h.exact && h.opp === f.teams[L].id && h.n >= 4) {
     add({ type: 'H2H_STREAK', side: W, value: h.n, source: 'ESPN team schedules (regular season + playoffs)', fact_he: `${tn(W)} ${vb(W, 'ניצחה', 'ניצחו')} את ${tn(L)} בפעם ה-${h.n} ברציפות`, tokens: [`ה-${h.n}`], weight: h.n >= 10 ? 78 : h.n >= 5 ? 65 : 55, flag: 'streak' });
+  }
+
+  for (const side of ['home', 'away']) {
+    const opp = side === 'home' ? 'away' : 'home';
+    for (const p of f.players[side].filter((x) => x.played)) {
+      const rows = ext.gamelogs?.[p.id] || ext.recent?.[p.id];
+      if (!rows) continue;
+      const r = formerTeamFact(rows, p, f.teams[side].abbr, f.teams[opp].abbr, f.gameId, f.date, side === 'home');
+      if (!r) continue;
+      const name = p.he || p.name;
+      const oppHe = heTeam(f.teams[opp].abbr) || tn(opp);
+      const where = r.seasons ? `, הקבוצה שבה שיחק ${SEASONS_HE(r.seasons)}` : ', קבוצתו לשעבר';
+      const how = `${p.pts ? `וסיים עם ${shortLineHe(p)} ` : ''}${side === W ? 'בניצחון' : 'בהפסד'}`;
+      const fact_he = r.kind === 'FIRST_RETURN' ? `${name} חזר לראשונה ל${oppHe.replace(/^ה/, '')}${where}, ${how}` : `${name} פגש לראשונה את ${oppHe}${where}, ${how}`;
+      const big = p.starter && p.min >= 20;
+      add({ type: 'RETURN_TO_FORMER_TEAM', side, player: p.name, value: r.seasons, source: 'ESPN player game log', fact_he, tokens: [(name.split(' ').slice(1).join(' ') || name)], weight: (r.kind === 'FIRST_RETURN' ? 80 : 70) - (big ? 0 : 20) + (r.seasons >= 3 ? 4 : 0), flag: 'former_team' });
+    }
   }
 
   for (const side of ['home', 'away']) {

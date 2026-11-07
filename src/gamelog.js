@@ -45,6 +45,7 @@ export function parseGamelog(d) {
           season,
           type,
           date: ev.gameDate || null,
+          team: ev.team?.abbreviation || null, // his team in that game (a trade shows here)
           opp: ev.opponent?.abbreviation || null,
           atVs: ev.atVs || null,
           result: ev.gameResult || null,
@@ -90,6 +91,28 @@ export async function playerHistory(athleteId, cacheDir) {
   const seen = new Set();
   return all.flatMap(parseGamelog).filter((r) => (seen.has(r.eventId + r.type) ? false : seen.add(r.eventId + r.type)))
     .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+}
+
+// this season and last season only (a former team he left within that window). The current season is
+// fetched once per run; last season is cached on disk like the full history.
+const recentMemo = new Map();
+export async function recentHistory(athleteId, cacheDir) {
+  if (recentMemo.has(athleteId)) return recentMemo.get(athleteId);
+  await mkdir(cacheDir, { recursive: true });
+  const current = await getJson(`${BASE}/${athleteId}/gamelog`);
+  const seasonFilter = (current.filters || []).find((f) => f.name === 'season');
+  const prev = (seasonFilter?.options || []).map((o) => o.value).filter((v) => v !== seasonFilter?.value).sort().at(-1);
+  const all = [current];
+  if (prev) {
+    const file = join(cacheDir, `${athleteId}-${prev}.json`);
+    let d;
+    try { d = JSON.parse(await readFile(file, 'utf8')); } catch { d = await getJson(`${BASE}/${athleteId}/gamelog?season=${prev}`); await writeFile(file, JSON.stringify(d)); }
+    all.push(d);
+  }
+  const seen = new Set();
+  const rows = all.flatMap(parseGamelog).filter((r) => (seen.has(r.eventId + r.type) ? false : seen.add(r.eventId + r.type))).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  recentMemo.set(athleteId, rows);
+  return rows;
 }
 
 // offline: build history from cached files only (tests / reruns)

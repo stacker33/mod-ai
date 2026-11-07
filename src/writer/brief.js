@@ -73,8 +73,28 @@ function momentHe(m, f, names, tn) {
     case 'POOR_SHOOTING_TD': { const who = byId(m.playerId); return who ? `${who} רשם טריפל-דאבל, אבל קלע רק ${m.fg[0]} מ-${m.fg[1]} מהשדה` : null; }
     case 'Q4_COLLAPSE': {
       const s = m.side;
-      return `${tn(s)} ${vb(s, 'הובילה', 'הובילו')} אחרי שלושה רבעים ${pair(m.after3[s], m.after3[other(s)])}, אבל ${vb(s, 'הפסידה', 'הפסידו')} ${pair(m.q4[s], m.q4[other(s)])} את הרבע האחרון`;
+      const by = m.by && byId(m.by.playerId) ? `, שבו ${byId(m.by.playerId)} קלע ${m.by.pts} נקודות` : '';
+      return `${tn(s)} ${vb(s, 'הובילה', 'הובילו')} אחרי שלושה רבעים ${pair(m.after3[s], m.after3[other(s)])}, אבל ${vb(s, 'הפסידה', 'הפסידו')} ${pair(m.q4[s], m.q4[other(s)])} את הרבע האחרון${by}`;
     }
+    case 'PERIOD_TAKEOVER': {
+      const who = byId(m.playerId);
+      const P = PERIOD_HE(m.period, f.clutch.finalPeriod);
+      return who ? `${who} קלע ${m.pts} נקודות ${pre('ב', P)}, כש${tn(m.side)} ${vb(m.side, 'ניצחה', 'ניצחו')} אותו ${pair(m.score.for, m.score.against)}` : null;
+    }
+    case 'PLAYER_FADE': {
+      const who = byId(m.playerId);
+      if (!who) return null;
+      if (m.period) {
+        const P = PERIOD_HE(m.period, f.clutch.finalPeriod);
+        const quiet = m.ptsInPeriod ? `קלע רק ${m.ptsInPeriod} ${pre('ב', P)}` : `לא קלע ${pre('ב', P)}`;
+        const lost = m.toInPeriod >= 2 ? ` ואיבד בו ${m.toInPeriod} כדורים` : '';
+        const total = m.toTotal >= 6 ? ` (${m.toTotal} איבודים במשחק כולו)` : '';
+        return `${who} קלע ${m.h1} נקודות במחצית הראשונה, אבל ${quiet}${lost}${total}, כש${tn(m.side)} ${vb(m.side, 'הפסידה', 'הפסידו')} אותו ${pair(m.score.for, m.score.against)}`;
+      }
+      return `${who} קלע ${m.h1} נקודות במחצית הראשונה, אבל ${m.h2 ? `רק ${m.h2}` : 'לא קלע'} אחרי ההפסקה`;
+    }
+    case 'PLAYER_SURGE': { const who = byId(m.playerId); return who ? `${who} קלע ${m.h2} מ-${m.h1 + m.h2} נקודותיו אחרי ההפסקה` : null; }
+    case 'TURNOVERS': { const who = byId(m.playerId); return who ? `${who} איבד ${m.to} כדורים` : null; }
     default: return null;
   }
 }
@@ -197,7 +217,7 @@ export function gameBrief(f) {
   });
 
   // the angle is chosen by the story stage (story.js), in code; the lead must open with it
-  b.main_angle = top ? { type: top.type, category: top.category || null, fact_he: angleHe(top, f, tn, names) || heText(names, top.why), tokens: angleTokens(top, names) } : null;
+  b.main_angle = top ? { type: top.type, category: top.category || null, player: top.player || null, fact_he: angleHe(top, f, tn, names) || heText(names, top.why), tokens: angleTokens(top, names) } : null;
   b.secondary_angles = story.secondary.map((k) => ({ type: k.type, category: k.category || null, fact_he: angleHe(k, f, tn, names) || heText(names, k.why) }));
   // CONTEXT FACTS (streaks, highs, head-to-head): the only season / history claims the text may make
   const ctxFacts = (f.contextFacts || []).filter((x) => x.verified);
@@ -341,6 +361,32 @@ export function playerBrief(f, t) {
   const others = israeliLines(f, t.player.id);
   if (others.length) b.other_israelis = others;
   delete g.israelis_featured;
+  // THE STORY, not only the line: his night (arcs from the play-by-play) and, when the game's main story is
+  // someone else's (53 points on the other side), that story with its protagonist. Written in code; the text
+  // must carry each one (verify.js "must-tell").
+  const tnHe = (side) => heTeam(f.teams[side].abbr) || f.teams[side].heShort || f.teams[side].he;
+  const surname = (he) => he.split(' ').slice(1).join(' ') || he;
+  const firstNum = (s) => s.match(/\d+/)?.[0] || null;
+  const toHigh = t.milestones.find((m) => m.type === 'CAREER_HIGH_TO');
+  b.his_story_he = (f.notable || []).filter((m) => m.playerId === t.player.id).slice(0, 2)
+    .map((m) => { const s = momentHe(m, f, names, tnHe); if (!s || !toHigh) return s; return m.type === 'TURNOVERS' ? `${s}, הכי הרבה בקריירה שלו` : s.replace('איבודים במשחק כולו)', 'איבודים במשחק כולו, הכי הרבה בקריירה שלו)'); }).filter(Boolean);
+  const mt = b.his_story_he.map((s) => ({ fact_he: s, who: [t.player.he, surname(t.player.he)], num: firstNum(s) }));
+  const ma = g.main_angle;
+  const mainIsHim = !ma || ma.type === 'ISRAELI_ANGLE' || ma.player === t.player.name;
+  if (!mainIsHim) {
+    const star = ma.player ? [...f.players.home, ...f.players.away].find((p) => p.name === ma.player) : null;
+    const starHe = star ? names.get(star.name) || star.he || star.name : null;
+    const takeover = star && (f.notable || []).find((m) => m.type === 'PERIOD_TAKEOVER' && m.playerId === star.id);
+    let s = ma.fact_he;
+    if (star && ma.type === 'BIG_SCORING') {
+      // "לוקה דונצ'יץ' קלע 53 נקודות, 20 מהן ברבע השלישי, לצד 8 ריבאונדים ו-7 אסיסטים"
+      const extras = shortLineHe(star).replace(/^\d+ נקודות(, | ו-)?/, '');
+      s = `${starHe} קלע ${star.pts} נקודות${takeover ? `, ${takeover.pts} מהן ${pre('ב', PERIOD_HE(takeover.period, f.clutch.finalPeriod))}` : ''}${star.fg ? ` (${star.fg[0]} מ-${star.fg[1]} מהשדה)` : ''}${extras ? `, לצד ${extras}` : ''}`;
+    } else if (takeover) s += `, ${takeover.pts} מהן ${pre('ב', PERIOD_HE(takeover.period, f.clutch.finalPeriod))}`;
+    b.game_story_he = s;
+    mt.push({ fact_he: s, who: starHe ? [starHe, surname(starHe)] : ma.tokens || [], num: firstNum(s) });
+  }
+  b.must_tell = mt.filter((x) => x.who.length);
   b.verified = {
     season_high: ms.includes('SEASON_HIGH'),
     career_high: ms.includes('CAREER_HIGH') || ms.includes('TIES_CAREER_HIGH'),

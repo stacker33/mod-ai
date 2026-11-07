@@ -81,7 +81,7 @@ function historyContext(history, eventId, gameDate, line, seasonYear) {
   const tpm = (r) => r.tp?.[0] || 0;
   const value = (r, k) => (k === 'tpm' ? tpm(r) : r[k]);
   const records = {};
-  for (const k of [...STATS, 'tpm']) {
+  for (const k of [...STATS, 'tpm', 'to']) {
     const cur = k === 'tpm' ? line.tp?.[0] || 0 : line[k];
     const best = (rows) => rows.reduce((b, r) => (value(r, k) > (b ? value(b, k) : -1) ? r : b), null);
     const cb = best(reg), sb = best(thisSeason);
@@ -273,6 +273,8 @@ function milestones(o) {
   const he = { pts: 'points', reb: 'rebounds', ast: 'assists', stl: 'steals', blk: 'blocks', tpm: 'threes' };
   if (h) {
     for (const [k, r] of Object.entries(h.records)) {
+      // turnovers: only the bad record counts (most in his career), never as a "high"
+      if (k === 'to') { if (r.isCareerHigh && r.value >= 5) m.push({ type: 'CAREER_HIGH_TO', stat: k, text: `most turnovers in his career: ${r.value} (previous ${r.careerHigh.value})` }); continue; }
       if (r.isCareerHigh) m.push({ type: 'CAREER_HIGH', stat: k, text: `career high ${he[k]}: ${r.value} (previous ${r.careerHigh.value}, ${r.careerHigh.season} vs ${r.careerHigh.opp})` });
       else if (r.tiesCareerHigh && r.value >= 5) m.push({ type: 'TIES_CAREER_HIGH', stat: k, text: `ties career high ${he[k]}: ${r.value}` });
       else if (r.isSeasonHigh && h.gamesBeforeThisSeason >= 3 && r.value >= SEASON_HIGH_MIN[k]) m.push({ type: 'SEASON_HIGH', stat: k, text: `season high ${he[k]}: ${r.value} (previous ${r.seasonHigh.value})` });
