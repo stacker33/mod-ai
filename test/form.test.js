@@ -69,3 +69,21 @@ test('team shooting, rookies, a first road loss and the deficit erased reach the
   assert.equal(lal.turn_he[0], 'הלייקרס חזרו מפיגור 16');
   assert.ok(lal.color_he.includes('פורטלנד ספגה הפסד חוץ ראשון העונה'));
 });
+
+test('our own archive: Kyrie 48 hours after missing the winner against San Antonio (DAL vs UTA)', async () => {
+  const { previousMoments } = await import('../src/context.js');
+  const { mkdtempSync, mkdirSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  // the archive as the runner keeps it: out/<night>/<game>.json with our facts of that game
+  const dir = mkdtempSync(join(tmpdir(), 'modai-arch-'));
+  mkdirSync(join(dir, '20261104'));
+  writeFileSync(join(dir, '20261104', '401909933.json'), JSON.stringify(analyzeGame(json(join(DIR, '401909933.json')), { names })));
+  const s = json(join(DIR, '401909290.json'));
+  const kyrie = json(join(DIR, 'extra', 'gamelog-6442-recent.json'));
+  const archive = previousMoments(s, { recent: { 6442: kyrie } }, dir);
+  assert.deepEqual(archive['6442'].items, [{ kind: 'missed_winner', shot: 'two', tying: false, lost: true }]);
+  const f = analyzeGame(s, { names, context: { recent: { 6442: kyrie }, archive } });
+  const x = f.contextFacts.find((c) => c.type === 'LAST_GAME_MOMENT');
+  assert.equal(x.fact_he, '48 שעות אחרי שקיירי אירווינג החטיא זריקה שהייתה יכולה להכריע את המשחק נגד סן אנטוניו, הוא סיים הפעם עם 14 נקודות');
+  assert.ok(gameBrief(f).story.color_he.includes(x.fact_he));
+});

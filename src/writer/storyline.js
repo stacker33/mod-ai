@@ -16,7 +16,7 @@ const HOOK = {
 };
 const DRAMA = new Set(['GAME_WINNER', 'BUZZER_BEATER', 'FORCED_OT', 'OVERTIME', 'CLOSE_FINISH']);
 const HERO = new Set(['BIG_SCORING', 'CAREER_HIGH', 'TIES_CAREER_HIGH', 'SEASON_HIGH', 'TIES_SEASON_HIGH', 'TRIPLE_DOUBLE', 'TOP_PERFORMER', 'UNUSUAL_STAT_LINE', 'SCORING_STREAK']);
-const FORM = new Set(['RETURN_TO_FORMER_TEAM', 'RECENT_FORM', 'STAR_HELD']);
+const FORM = new Set(['RETURN_TO_FORMER_TEAM', 'RECENT_FORM', 'STAR_HELD', 'LAST_GAME_MOMENT']);
 const CONTEXT = new Set(['STAR_ABSENT', 'FIRST_LOSS', 'FIRST_WIN', 'UNBEATEN', 'WINLESS', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED', 'LOSING_STREAK_ENDED', 'H2H_STREAK', 'LOST_FIRST_PLACE', 'TOOK_FIRST_PLACE', 'CONFERENCE_LEADER', 'RETURN_TO_FORMER_TEAM', 'SHORT_ROSTER']);
 
 // "קלע 7 מתוך 8 הנקודות האחרונות של בוסטון": the longest closing stretch of a team's scoring that one
@@ -132,7 +132,7 @@ export function storyline(f, b, names, tn, momentOf = () => null, angleOf = () =
   // color: a former team (even when it is not the first return), the previous meeting, who was out
   const color = [];
   const inStory = new Set([...(protagonist?.what_made_it_he || []), ...cast.map((c) => c.fact_he)]);
-  const COLOR = ['STAR_ABSENT', 'RETURN_TO_FORMER_TEAM', 'STAR_HELD', 'RECENT_FORM', 'FIRST_VENUE_LOSS', 'ROOKIE_GAME', 'DEBUT', 'H2H_STREAK', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED'];
+  const COLOR = ['STAR_ABSENT', 'RETURN_TO_FORMER_TEAM', 'STAR_HELD', 'RECENT_FORM', 'LAST_GAME_MOMENT', 'FIRST_VENUE_LOSS', 'ROOKIE_GAME', 'DEBUT', 'H2H_STREAK', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED'];
   const venue = main?.type !== 'FIRST_VENUE_LOSS' && (f.candidates || []).find((k) => k.type === 'FIRST_VENUE_LOSS');
   if (venue) { const s = angleOf(venue); if (s) color.push(s); }
   for (const x of (f.contextFacts || []).filter((c) => c.verified && c.type !== main?.type && COLOR.includes(c.type) && !inStory.has(c.fact_he)).sort((a, b) => COLOR.indexOf(a.type) - COLOR.indexOf(b.type))) color.push(x.fact_he);

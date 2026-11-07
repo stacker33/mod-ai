@@ -6,6 +6,7 @@
 // GAME FACTS (score, quarters, box score, play-by-play, runs) live in facts.js.
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { getTeamSchedule, getStandings } from './espn.js';
 import { playerHistory, recentHistory } from './gamelog.js';
@@ -128,7 +129,7 @@ async function cachedSchedule(abbr, season, seasonType, cacheDir) {
 }
 
 // Everything buildContext needs, from ESPN. Failures leave a piece out (that context is then unknown).
-export async function fetchContext(summary, { cacheDir }) {
+export async function fetchContext(summary, { cacheDir, archiveDir = null }) {
   const comp = summary.header?.competitions?.[0];
   const ext = { schedules: {}, h2h: {}, gamelogs: {}, errors: [] };
   if (!comp) return ext;
@@ -188,7 +189,46 @@ export async function fetchContext(summary, { cacheDir }) {
       } catch (e) { ext.errors.push(`recent ${a.athlete.id}: ${e.message}`); }
     }));
   }
+  // OUR OWN ARCHIVE: each player's previous game, as this system wrote it (out/<date>/<game>.json, 10 nights)
+  // — the moments a box score does not keep: a missed winner, the decisive basket
+  ext.archive = previousMoments(summary, ext, archiveDir ?? join(cacheDir, '..', 'out'));
   return ext;
+}
+
+// game id -> our facts file, over the nights kept in out/
+const archiveMemo = new Map();
+function archiveIndex(dir) {
+  if (archiveMemo.has(dir)) return archiveMemo.get(dir);
+  const idx = new Map();
+  if (existsSync(dir)) for (const night of readdirSync(dir).filter((d) => /^\d{8}$/.test(d))) {
+    for (const file of readdirSync(join(dir, night)).filter((x) => /^\d+\.json$/.test(x))) idx.set(file.slice(0, -5), join(dir, night, file));
+  }
+  archiveMemo.set(dir, idx);
+  return idx;
+}
+
+// for every player with a game log: his last game before this one, and what he did in its decisive moments
+export function previousMoments(summary, ext, dir) {
+  const out = {};
+  const idx = archiveIndex(dir);
+  const date = summary.header?.competitions?.[0]?.date;
+  const gameId = summary.header?.id;
+  const facts = new Map();
+  for (const [pid, rows] of Object.entries({ ...ext.recent, ...ext.gamelogs })) {
+    const prev = (rows || []).filter((r) => r.eventId !== gameId && r.min > 0 && r.date && new Date(r.date) < new Date(date)).at(-1);
+    if (!prev || !idx.has(prev.eventId)) continue;
+    if (!facts.has(prev.eventId)) { try { facts.set(prev.eventId, JSON.parse(readFileSync(idx.get(prev.eventId), 'utf8'))); } catch { facts.set(prev.eventId, null); } }
+    const f = facts.get(prev.eventId);
+    if (!f?.players) continue;
+    const me = [...(f.players.home || []), ...(f.players.away || [])].find((p) => p.id === pid);
+    if (!me) continue;
+    const items = [];
+    for (const m of (f.notable || []).filter((x) => x.type === 'MISSED_WINNER' && x.player === pid)) items.push({ kind: 'missed_winner', shot: m.shot, tying: m.kind === 'tying', lost: f.result?.loser === m.side });
+    const wb = f.clutch?.winningBasket;
+    if (wb?.late && wb.player === me.name) items.push({ kind: 'winner', buzzer: !!wb.buzzer, freeThrows: /free-throw/.test(wb.shot || '') });
+    if (items.length) out[pid] = { eventId: prev.eventId, date: prev.date, opp: prev.opp, items };
+  }
+  return out;
 }
 
 // his points per game this season before this game (from 3 games on), else last season's
@@ -275,6 +315,19 @@ export function formFacts(f, ext = {}) {
       if (!before.some((r) => r.team === f.teams[side].abbr)) {
         const mine = heTeam(f.teams[side].abbr) || tn(side);
         add({ type: 'DEBUT', side, player: p.name, value: p.pts, fact_he: before.length ? `${p.he} ערך הופעת בכורה במדי ${mine.replace(/^ה/, '')} וסיים עם ${p.pts} נקודות` : `${p.he} ערך את הופעת הבכורה שלו ב-NBA וסיים עם ${p.pts} נקודות`, tokens: [sur(p.he)], weight: 40, flag: 'form' });
+      }
+      // his decisive moment in the previous game, from our own archive ("after missing the winner against SA")
+      const arc = ext.archive?.[p.id];
+      if (arc) {
+        const hours = Math.round((new Date(f.date) - new Date(arc.date)) / 3600e3 / 24) * 24;
+        const when = hours <= 72 ? `${hours} שעות אחרי ש` : 'משחק אחרי ש';
+        const opp = heTeam(arc.opp) || arc.opp;
+        for (const it of arc.items.slice(0, 1)) {
+          const what = it.kind === 'missed_winner'
+            ? `${p.he} החטיא ${it.shot === 'three' ? 'שלשה' : 'זריקה'} שהייתה יכולה ${it.tying ? 'לשלוח להארכה' : 'להכריע'} את המשחק נגד ${opp}`
+            : `${p.he} הכריע ${it.freeThrows ? 'מהקו ' : it.buzzer ? 'עם הבאזר ' : ''}את המשחק נגד ${opp}`;
+          add({ type: 'LAST_GAME_MOMENT', side, player: p.name, value: p.pts, fact_he: `${when}${what}, הוא סיים הפעם עם ${p.pts} נקודות`, tokens: [sur(p.he)], weight: it.kind === 'missed_winner' ? 46 : 44, flag: 'form' });
+        }
       }
       const prev = before.at(-1);
       let run40 = 0;
