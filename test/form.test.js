@@ -57,3 +57,15 @@ test('every game of the set still writes a clean template recap', () => {
     assert.equal(verifyDraft(templateDraft('game', b), b, [], null).blocking, 0, id);
   }
 });
+
+test('team shooting, rookies, a first road loss and the deficit erased reach the story', () => {
+  const phi = gameBrief(game('401909289')).story;
+  assert.ok(phi.turn_he.includes('פילדלפיה קלעה רק 10 מ-40 משלוש'));
+  assert.ok(phi.color_he.includes('פילדלפיה ספגה הפסד חוץ ראשון העונה'));
+  assert.ok(phi.color_he.some((x) => /^הרוקי מריו הזוניה/.test(x)));
+  const tor = gameBrief(game('401909292')).story;
+  assert.ok(tor.color_he.some((x) => /^הרוקי בריידן בריס רשם 21 נקודות, 11 ריבאונדים ו-6 אסיסטים/.test(x)));
+  const lal = gameBrief(analyzeGame(json(join(DIR, '401909294.json')), { names, context: json(join(DIR, 'extra', 'ctx-401909294.json')) })).story;
+  assert.equal(lal.turn_he[0], 'הלייקרס חזרו מפיגור 16');
+  assert.ok(lal.color_he.includes('פורטלנד ספגה הפסד חוץ ראשון העונה'));
+});

@@ -260,6 +260,22 @@ export function formFacts(f, ext = {}) {
         const avgHe = avg ? `, הרחק מממוצע של ${avg} העונה` : '';
         add({ type: 'STAR_HELD', side, player: p.name, value: p.pts, fact_he: `${p.he} נעצר על ${p.pts} נקודות${fg}${avgHe}${rare}`, tokens: [sur(p.he)], weight: rare ? 66 : 50, flag: 'form' });
       }
+      // a rookie's big night / a debut (only with his log fetched: rows exist)
+      const season = seasonLabel(f.date);
+      const regBefore = before.filter((r) => r.type === 'regular');
+      const rookie = !regBefore.some((r) => r.season < season);
+      const dd = [p.pts, p.reb, p.ast].filter((x) => x >= 10).length >= 2;
+      if (rookie && (p.pts >= 20 || dd)) {
+        const hiPts = regBefore.length >= 2 && p.pts > Math.max(...regBefore.map((r) => r.pts));
+        const hiReb = regBefore.length >= 2 && p.reb >= 10 && p.reb > Math.max(...regBefore.map((r) => r.reb));
+        const hi = hiPts ? ', שיא הקריירה שלו ב-NBA' : hiReb ? ', שיא הריבאונדים שלו ב-NBA' : '';
+        const line = [`${p.pts} נקודות`, p.reb >= 8 ? `${p.reb} ריבאונדים` : null, p.ast >= 6 ? `${p.ast} אסיסטים` : null].filter(Boolean);
+        add({ type: 'ROOKIE_GAME', side, player: p.name, value: p.pts, fact_he: `הרוקי ${p.he} רשם ${line.length > 1 ? `${line.slice(0, -1).join(', ')} ו-${line.at(-1)}` : line[0]}${hi}`, tokens: [sur(p.he)], weight: hi ? 46 : 38, flag: hi ? 'career_high' : 'form' });
+      }
+      if (!before.some((r) => r.team === f.teams[side].abbr)) {
+        const mine = heTeam(f.teams[side].abbr) || tn(side);
+        add({ type: 'DEBUT', side, player: p.name, value: p.pts, fact_he: before.length ? `${p.he} ערך הופעת בכורה במדי ${mine.replace(/^ה/, '')} וסיים עם ${p.pts} נקודות` : `${p.he} ערך את הופעת הבכורה שלו ב-NBA וסיים עם ${p.pts} נקודות`, tokens: [sur(p.he)], weight: 40, flag: 'form' });
+      }
       const prev = before.at(-1);
       let run40 = 0;
       for (let i = before.length - 1; i >= 0 && before[i].pts >= 40; i--) run40++;

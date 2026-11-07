@@ -96,6 +96,11 @@ function momentHe(m, f, names, tn) {
     }
     case 'PLAYER_SURGE': { const who = byId(m.playerId); return who ? `${who} קלע ${m.h2} מ-${m.h1 + m.h2} נקודותיו אחרי ההפסקה` : null; }
     case 'TURNOVERS': { const who = byId(m.playerId); return who ? `${who} איבד ${m.to} כדורים` : null; }
+    case 'HOT_THREES': return m.half
+      ? `${tn(m.side)} ${vb(m.side, 'קלעה', 'קלעו')} ${m.half[0]} מ-${m.half[1]} משלוש כבר במחצית הראשונה${m.tp ? ` (${m.tp[0]} מ-${m.tp[1]} במשחק כולו)` : ''}`
+      : `${tn(m.side)} ${vb(m.side, 'קלעה', 'קלעו')} ${m.tp[0]} מ-${m.tp[1]} משלוש`;
+    case 'COLD_THREES': return `${tn(m.side)} ${vb(m.side, 'קלעה', 'קלעו')} רק ${m.tp[0]} מ-${m.tp[1]} משלוש`;
+    case 'COLD_SHOOTING': return `${tn(m.side)} ${vb(m.side, 'נעצרה', 'נעצרו')} על ${m.pct}% מהשדה`;
     default: return null;
   }
 }
@@ -119,6 +124,7 @@ function angleHe(k, f, tn, names = new Map()) {
   if (k.context) return k.fact_he; // verified context facts arrive already written
   switch (k.type) {
     case 'COMEBACK': return `${t(k.side)} ${vb(k.side, 'חזרה', 'חזרו')} מפיגור ${k.pts}`;
+    case 'FIRST_VENUE_LOSS': return `${t(k.side)} ${vb(k.side, 'ספגה', 'ספגו')} הפסד ${k.home ? 'בית' : 'חוץ'} ראשון העונה`;
     case 'GAME_WINNER': {
       const wb = f.clutch.winningBasket;
       if (!who) return null;
@@ -278,7 +284,7 @@ export function gameBrief(f) {
   b.color = (f.color?.events || []).filter((e) => e.relevant).map((e) => ({ what_he: KIND_HE[e.kind] || e.kind, players_he: (e.players || []).map((n) => names.get(n) || n), team_he: e.team ? tn(e.team === f.teams.home.abbr ? 'home' : 'away') : null, when_he: at(e) }));
 
   // what the data verifies — milestone language is allowed only where true
-  const streakTypes = ['FIRST_LOSS', 'FIRST_WIN', 'UNBEATEN', 'WINLESS'];
+  const streakTypes = ['FIRST_LOSS', 'FIRST_WIN', 'UNBEATEN', 'WINLESS', 'FIRST_VENUE_LOSS'];
   const recordAngles = (f.candidates || []).filter((k) => streakTypes.includes(k.type));
   b.verified = {
     season_high: ctxFacts.some((x) => x.flag === 'season_high'),
@@ -296,7 +302,7 @@ export function gameBrief(f) {
   b.final_score_in = 'heading';
   b.featured = featured;
   // THE STORY, decided in code: theme -> hook, protagonist, the turn, the cast with roles, color
-  b.story = storyline(f, b, names, tn, (m) => momentHe(m, f, names, tn));
+  b.story = storyline(f, b, names, tn, (m) => momentHe(m, f, names, tn), (k) => angleHe(k, f, tn, names));
   // the hero of the story is in the block even when the sentence about him had to go (wrong number -> dropped)
   const hero = b.story.protagonist;
   if (hero && !(b.main_angle?.fact_he || '').includes(hero.name_he)) b.must_tell = [{ fact_he: `${hero.name_he} סיים עם ${hero.line_he}`, who: [hero.name_he, hero.name_he.split(' ').slice(1).join(' ')], num: hero.line_he.match(/\d+/)?.[0] || null, para: 0, full_only: true }];
@@ -435,7 +441,7 @@ function angleTokens(k, names) {
   const sur = (n) => { const he = names.get(n) || n || ''; return he.split(' ').slice(1).join(' ') || he; };
   if (k.context) return k.tokens || [];
   switch (k.type) {
-    case 'FIRST_LOSS': case 'FIRST_WIN': return ['ראשון', 'ראשונה'];
+    case 'FIRST_LOSS': case 'FIRST_WIN': case 'FIRST_VENUE_LOSS': return ['ראשון', 'ראשונה'];
     case 'UNBEATEN': return ['בלי הפסד', 'ללא הפסד', 'מושלמת'];
     case 'WINLESS': return ['בלי ניצחון', 'ללא ניצחון'];
     case 'SHORT_ROSTER': return ['שחקנים'];

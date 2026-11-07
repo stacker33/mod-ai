@@ -293,6 +293,7 @@ function notableMoments(plays, f) {
   const q4 = { home: f.teams.home.periods[3], away: f.teams.away.periods[3] };
   if (a3[L] > a3[other(L)] && q4[other(L)] - q4[L] >= 10) out.push({ type: 'Q4_COLLAPSE', side: L, after3: a3, q4, wow: 60 });
   out.push(...playerArcs(plays, f, fp));
+  out.push(...shootingNights(plays, f));
   // one story per quarter: the player who carried the last quarter goes inside the collapse sentence
   const col = out.find((x) => x.type === 'Q4_COLLAPSE');
   const tk4 = out.find((x) => x.type === 'PERIOD_TAKEOVER' && x.period === 4);
@@ -303,6 +304,21 @@ function notableMoments(plays, f) {
     if (i >= 0) out.splice(i, 1);
   }
   return out.sort((x, y) => y.wow - x.wow);
+}
+
+// TEAM SHOOTING that tells the story: a three-point barrage (and a first half of it), a cold night
+function shootingNights(plays, f) {
+  const out = [];
+  for (const side of ['home', 'away']) {
+    const tp = f.teamStats?.[side]?.tp, fg = f.teamStats?.[side]?.fg;
+    const half = plays.filter((p) => p.side === side && p.period <= 2 && p.shooting && p.shot === 'three');
+    const hm = half.filter((p) => p.scoring).length, ha = half.length;
+    if (tp && tp[0] >= 20 && tp[0] / tp[1] >= 0.45) out.push({ type: 'HOT_THREES', side, tp, half: hm >= 12 ? [hm, ha] : null, wow: 50 + Math.min(10, tp[0] - 20) + (hm >= 12 ? 4 : 0) });
+    else if (hm >= 13 && ha && hm / ha >= 0.45) out.push({ type: 'HOT_THREES', side, tp, half: [hm, ha], wow: 52 });
+    if (tp && tp[1] >= 30 && tp[0] / tp[1] <= 0.27) out.push({ type: 'COLD_THREES', side, tp, wow: side === f.result.loser ? 46 : 36 });
+    if (fg && fg[1] >= 70 && fg[0] / fg[1] <= 0.36) out.push({ type: 'COLD_SHOOTING', side, pct: Math.round((fg[0] / fg[1]) * 100), wow: side === f.result.loser ? 46 : 36 });
+  }
+  return out;
 }
 
 // ARCS: the story of a key player's night, not only his line — who carried the quarter that decided the
@@ -443,6 +459,11 @@ function candidates(f) {
   const deficit = f.flow.largestLead[f.result.loser];
   const late = (deficit.at?.period || 1) >= 2;
   const cb = { side: f.result.winner, pts: deficit.pts };
+  // the first loss at home / on the road this season (ESPN's venue record includes this game)
+  for (const side of ['home', 'away'].filter((s) => s === f.result.loser)) {
+    const vr = String(f.teams[side].venueRecord || '').match(/^(\d+)-(\d+)$/);
+    if (vr && Number(vr[2]) === 1 && Number(vr[1]) >= 3) add('FIRST_VENUE_LOSS', 58, `${f.teams[side].abbr}'s first ${side === 'home' ? 'home' : 'road'} loss of the season`, 'box', { side, home: side === 'home' });
+  }
   if (deficit.pts >= 15) add('COMEBACK', 70 + Math.min(20, deficit.pts - 15) + (late ? 5 : 0), `${W.abbr} came back from ${deficit.pts} down (${deficit.at?.periodName})`, 'pbp', cb);
   else if (deficit.pts >= 10 && late) add('COMEBACK', 55, `${W.abbr} came back from ${deficit.pts} down (${deficit.at?.periodName})`, 'pbp', cb);
   if (f.clutch.loserLedInLast3min && !wb?.late) add('LATE_COLLAPSE', 60, `${L.abbr} led inside the last three minutes and lost`, 'pbp', { side: f.result.loser });

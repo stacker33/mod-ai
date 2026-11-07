@@ -40,7 +40,7 @@ export function closingShare(f, side) {
   return best;
 }
 
-export function storyline(f, b, names, tn, momentOf = () => null) {
+export function storyline(f, b, names, tn, momentOf = () => null, angleOf = () => null) {
   const W = f.result.winner, L = f.result.loser;
   const other = (s) => (s === 'home' ? 'away' : 'home');
   const all = ['home', 'away'].flatMap((s) => f.players[s].filter((p) => p.played).map((p) => ({ ...p, side: s })));
@@ -121,6 +121,10 @@ export function storyline(f, b, names, tn, momentOf = () => null) {
   const turn = [];
   if (shareHe && share.player !== hero?.name) turn.push(shareHe);
   for (const m of notable.filter((x) => ['MISSED_WINNER', 'Q4_COLLAPSE'].includes(x.type))) { const s = momentHe(m); if (s) turn.push(s); }
+  // the deficit the winner erased, when the story is someone's big night ("Doncic erased a 16-point deficit")
+  const cb = main?.type !== 'COMEBACK' && (f.candidates || []).find((k) => k.type === 'COMEBACK');
+  if (cb) { const s = angleOf(cb); if (s) turn.unshift(s); }
+  for (const m of notable.filter((x) => ['HOT_THREES', 'COLD_THREES', 'COLD_SHOOTING'].includes(x.type)).slice(0, 1)) { const s = momentHe(m); if (s) turn.push(s); }
   const told = notable.some((m) => m.type === 'Q4_COLLAPSE');
   if (b.after_three_clause && !told) turn.push(b.after_three_clause);
   else if (b.halftime_clause) turn.push(b.halftime_clause);
@@ -128,7 +132,9 @@ export function storyline(f, b, names, tn, momentOf = () => null) {
   // color: a former team (even when it is not the first return), the previous meeting, who was out
   const color = [];
   const inStory = new Set([...(protagonist?.what_made_it_he || []), ...cast.map((c) => c.fact_he)]);
-  const COLOR = ['STAR_ABSENT', 'RETURN_TO_FORMER_TEAM', 'STAR_HELD', 'RECENT_FORM', 'H2H_STREAK', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED'];
+  const COLOR = ['STAR_ABSENT', 'RETURN_TO_FORMER_TEAM', 'STAR_HELD', 'RECENT_FORM', 'FIRST_VENUE_LOSS', 'ROOKIE_GAME', 'DEBUT', 'H2H_STREAK', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED'];
+  const venue = main?.type !== 'FIRST_VENUE_LOSS' && (f.candidates || []).find((k) => k.type === 'FIRST_VENUE_LOSS');
+  if (venue) { const s = angleOf(venue); if (s) color.push(s); }
   for (const x of (f.contextFacts || []).filter((c) => c.verified && c.type !== main?.type && COLOR.includes(c.type) && !inStory.has(c.fact_he)).sort((a, b) => COLOR.indexOf(a.type) - COLOR.indexOf(b.type))) color.push(x.fact_he);
   return {
     theme,
