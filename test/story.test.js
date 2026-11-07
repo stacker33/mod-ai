@@ -95,10 +95,10 @@ test('storyline: theme, protagonist and cast roles come from the data (a story, 
   assert.ok(lalpor.cast.some((c) => c.role === 'faded' && /לילארד/.test(c.name_he)));
 });
 
-test('a sentence with three players and their numbers is flagged as a list (style, sent back to the writer)', async () => {
+test('a sentence with four players and their numbers is flagged as a list (style, sent back to the writer)', async () => {
   const { gameBrief: gb } = await import('../src/writer/brief.js');
   const b = gb(analyzeGame(json(join(DIR, '401909287.json')), { names }));
-  const list = { paragraphs: ['ניקיל אלכסנדר-ווקר הוביל את המנצחת עם 28 נקודות, לוגנץ דורט תרם 25 נקודות ו-7 ריבאונדים, ואוניקה אוקונגוו הוסיף 22 נקודות, 10 ריבאונדים ו-4 חטיפות.'] };
+  const list = { paragraphs: ['ניקיל אלכסנדר-ווקר הוביל את המנצחת עם 28 נקודות, לוגנץ דורט תרם 25 נקודות ו-7 ריבאונדים, אוניקה אוקונגוו הוסיף 22 נקודות, 10 ריבאונדים ו-4 חטיפות, ודייסון דניאלס 13 נקודות ו-12 אסיסטים.'] };
   const story = { paragraphs: ['ניקיל אלכסנדר-ווקר הוביל עם 28 נקודות, ולוגנץ דורט הוסיף 25.'] };
   assert.equal(verifyDraft(list, b, [], null).issues.filter((i) => i.code === 'stat-list').length, 1);
   assert.equal(verifyDraft(story, b, [], null).issues.filter((i) => i.code === 'stat-list').length, 0);

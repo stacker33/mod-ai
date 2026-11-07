@@ -5,7 +5,7 @@
 import { heTeam, v } from '../teams.js';
 import { classifyPlay } from '../pbp.js';
 import { storyline } from './storyline.js';
-import { pair, partialPair, formatScore, shotActionHe, PLAY_LABEL_HE, recordForms, whenHe, periodNumber, nightHe, fullLineHe, shortLineHe, KIND_HE, PERIOD_HE } from './he.js';
+import { formatRecord, pair, partialPair, formatScore, shotActionHe, PLAY_LABEL_HE, recordForms, whenHe, periodNumber, nightHe, fullLineHe, shortLineHe, KIND_HE, PERIOD_HE } from './he.js';
 
 export const FEATURED = 90; // story weight from which a game gets a stand-alone article
 
@@ -150,6 +150,9 @@ function angleHe(k, f, tn, names = new Map()) {
   }
 }
 
+// Sport5's score line in a Cup game: "קליבלנד (4:5, 0:1)" — the season record, then the Cup record
+const withCup = (paren, cup) => (!paren ? '' : cup ? paren.replace(/\)$/, `, ${formatRecord(cup.w, cup.l, 'standalone')})`) : paren);
+
 export function gameBrief(f) {
   const names = heOf(f);
   const W = f.result.winner, L = f.result.loser, fp = f.clutch.finalPeriod;
@@ -174,7 +177,7 @@ export function gameBrief(f) {
   const b = {
     kind: 'game',
     night_he: `הלילה (${nightHe(f.date)})`,
-    heading: `${f.teams.home.he} ${recs.home?.in_parentheses || ''} - ${f.teams.away.he} ${recs.away?.in_parentheses || ''} ${f.teams.away.score}:${f.teams.home.score}${otHe(f.clutch.overtimes)}`.replace(/\s+/g, ' '),
+    heading: `${f.teams.home.he} ${withCup(recs.home?.in_parentheses, f.cup?.records?.home)} - ${f.teams.away.he} ${withCup(recs.away?.in_parentheses, f.cup?.records?.away)} ${f.teams.away.score}:${f.teams.home.score}${otHe(f.clutch.overtimes)}`.replace(/\s+/g, ' '),
     home_is: tn('home'),
     away_is: tn('away'),
     winner_he: tn(W),
@@ -185,7 +188,9 @@ export function gameBrief(f) {
     result_for_loser: `הפסד ${pair(f.teams[L].score, f.teams[W].score)}`,
     // records: copy the form that fits the sentence — never reorder. The record belongs to the TEAM:
     // sentence_he names it as the subject ("אטלנטה עלתה למאזן 4:4"), never a player.
-    records: Object.fromEntries(['home', 'away'].filter((s) => recs[s]).map((s) => [tn(s), { after_team_name: recs[s].in_parentheses, after_verb: recs[s].phrase, sentence_he: `${tn(s)} ${recs[s].phrase}` }])),
+    records: Object.fromEntries(['home', 'away'].filter((s) => recs[s]).map((s) => [tn(s), { after_team_name: recs[s].in_parentheses, after_verb: recs[s].phrase, sentence_he: `${tn(s)} ${recs[s].phrase}`, ...(f.cup?.records?.[s] ? { cup_he: `(${formatRecord(f.cup.records[s].w, f.cup.records[s].l, 'standalone')} בגביע)` } : {}) }])),
+    // an NBA Cup game: "במסגרת הגביע"; each team's Cup record is in records[].cup_he
+    cup_game: !!f.cupGame,
     quarters: f.teams.home.periods.map((h, i) => {
       const a = f.teams.away.periods[i];
       const win = h === a ? null : h > a ? 'home' : 'away';
@@ -340,7 +345,8 @@ export function playerBrief(f, t) {
     home: t.home,
     won: t.won,
     result_he: `${t.won ? 'ניצחון' : 'הפסד'} ${pair(t.team.score, t.opp.score)}`,
-    team_record: rec ? { after_team_name: rec.in_parentheses, after_verb: rec.phrase } : null,
+    team_record: rec ? { after_team_name: rec.in_parentheses, after_verb: rec.phrase, ...(f.cup?.records?.[t.side] ? { cup_he: `(${formatRecord(f.cup.records[t.side].w, f.cup.records[t.side].l, 'standalone')} בגביע)` } : {}) } : null,
+    cup_game: !!f.cupGame,
     // written in full so the model never builds "N wins in a row in a row"
     team_streak_he: streak && streak.length >= 2 ? (streak.kind === 'W' ? `ניצחון ${ordinal(streak.length)} ברציפות` : `הפסד ${ordinal(streak.length)} ברציפות`) : null,
     night_he: g.night_he,

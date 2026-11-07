@@ -230,7 +230,8 @@ export function verifyDraft(input, brief, names, ctx = null) {
     for (const [re, better] of BANNED) if (re.test(s)) push('banned', 'style', `ניסוח מתורגם: "${s.match(re)[0]}" — עדיף: ${better}`);
     // a stat list, not a story: three players with their numbers in one sentence
     const who = Object.keys(brief._check?.lines || brief.game?._check?.lines || {}).filter((n) => { const sur = n.split(' ').slice(1).join(' '); return s.includes(n) || (sur.length >= 3 && s.includes(sur)); });
-    if (who.length >= 3 && (s.match(/\d+/g) || []).length >= 5) push('stat-list', 'style', `"${s.slice(0, 60)}…": רשימת מספרים של ${who.length} שחקנים במשפט אחד — ספר את הסיפור: מי עשה מה ולמה זה חשוב, מספר אחד-שניים לכל שחקן משני`);
+    // (the Sport5 editor writes three-player lists himself; four or more with numbers is a box score)
+    if (who.length >= 4 && (s.match(/\d+/g) || []).length >= 7) push('stat-list', 'style', `"${s.slice(0, 60)}…": רשימת מספרים של ${who.length} שחקנים במשפט אחד — ספר את הסיפור: מי עשה מה ולמה זה חשוב, מספר אחד-שניים לכל שחקן משני`);
   }
   // momentum by numbers: three in-game scores (half-time, a quarter, a run) in one paragraph is a scoreboard,
   // not a story — keep the one that explains the turn (records in parentheses do not count)

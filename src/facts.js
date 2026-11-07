@@ -592,6 +592,8 @@ export function buildFacts(summary, { israelis = [], fetchedAt = new Date().toIS
     date: comp.date,
     seasonType: summary.header?.season?.type ?? null,
     note: (comp.notes || []).map((n) => n.headline).filter(Boolean).join('; ') || null,
+    // an NBA Cup game (group play / knockout): Sport5 adds the Cup record to the score line
+    cupGame: /NBA Cup/i.test([summary.header?.gameNote, ...(comp.notes || []).map((n) => n.headline)].filter(Boolean).join(' ')),
     venue: summary.gameInfo?.venue?.fullName || null,
     status: { final: statusType.state === 'post' && !!statusType.completed, state: statusType.state, detail: statusType.detail || '' },
     teams: { home: team(H), away: team(A) },
@@ -628,7 +630,7 @@ export function buildFacts(summary, { israelis = [], fetchedAt = new Date().toIS
   // context from ESPN structured data (not box score) — labelled as such
   f.context = {
     seasonSeries: (summary.seasonseries || []).map((s) => s.summary).filter(Boolean),
-    injuryReport: (summary.injuries || []).flatMap((t) => (t.injuries || []).map((i) => ({ team: t.team?.abbreviation, name: i.athlete?.displayName, status: i.status, detail: i.details?.detail || i.details?.type || '' }))),
+    injuryReport: (summary.injuries || []).flatMap((t) => (t.injuries || []).map((i) => ({ team: t.team?.abbreviation, id: i.athlete?.id || null, name: i.athlete?.displayName, status: i.status, detail: i.details?.detail || i.details?.type || '' }))),
     source: 'ESPN structured data (pre-game injury report, season series)',
   };
 

@@ -24,6 +24,7 @@ export function trimSchedule(j) {
         id: e.id,
         date: e.date,
         state: c.status?.type?.state || null,
+        cup: (c.notes || []).some((n) => /NBA Cup/i.test(n.headline || '')),
         teams: (c.competitors || []).map((x) => ({ id: x.team?.id || x.id, abbr: x.team?.abbreviation, winner: !!x.winner, home: x.homeAway === 'home', score: Number(x.score?.value ?? x.score?.displayValue ?? NaN) })),
       };
     }),
@@ -163,6 +164,9 @@ export async function fetchContext(summary, { cacheDir }) {
   // returns to a former team: every player with real minutes, this season + last (a trade shows in the log);
   // for the ones who face a former team, the full career (how many seasons he played there)
   ext.recent = {};
+  // players OUT before the game: their season average says whether a star was missing
+  const outIds = (summary.injuries || []).flatMap((t) => (t.injuries || []).filter((i) => /^out$/i.test(i.status || '')).map((i) => i.athlete?.id)).filter(Boolean);
+  await Promise.all(outIds.map(async (id) => { try { ext.recent[id] = await recentHistory(id, join(cacheDir, 'gamelog')); } catch (e) { ext.errors.push(`recent ${id}: ${e.message}`); } }));
   const abbr = Object.fromEntries(cs.map((c) => [c.team.id, c.team.abbreviation]));
   for (const tb of summary.boxscore?.players || []) {
     const st = tb.statistics?.[0];
@@ -171,13 +175,107 @@ export async function fetchContext(summary, { cacheDir }) {
     // one team's players in parallel (a recap must not wait 20 requests in a row)
     await Promise.all((st?.athletes || []).filter((x) => (Number(x.stats?.[ix]) || 0) >= 12).map(async (a) => {
       try {
-        const rows = await recentHistory(a.athlete.id, join(cacheDir, 'gamelog'));
+        // starters with real minutes: the whole career (past seasons are cached, so only the first time costs);
+        // the rest: this season and last
+        const starter = a.starter && (Number(a.stats?.[ix]) || 0) >= 20;
+        const rows = starter ? await playerHistory(a.athlete.id, join(cacheDir, 'gamelog')) : await recentHistory(a.athlete.id, join(cacheDir, 'gamelog'));
         ext.recent[a.athlete.id] = rows;
+        if (starter) ext.gamelogs[a.athlete.id] = rows;
         if (rows.some((r) => r.team === opp && r.eventId !== summary.header.id) && !ext.gamelogs[a.athlete.id]) ext.gamelogs[a.athlete.id] = await playerHistory(a.athlete.id, join(cacheDir, 'gamelog'));
+        // a star with a poor night: his whole career, to say how rare it is ("פעם עשירית בקריירה")
+        const pts = Number(a.stats?.[(st?.labels || st?.names || []).indexOf('PTS')]) || 0;
+        if (pts <= 10 && seasonAvg(rows, summary.header?.competitions?.[0]?.date, summary.header.id) >= 18 && !ext.gamelogs[a.athlete.id]) ext.gamelogs[a.athlete.id] = await playerHistory(a.athlete.id, join(cacheDir, 'gamelog'));
       } catch (e) { ext.errors.push(`recent ${a.athlete.id}: ${e.message}`); }
     }));
   }
   return ext;
+}
+
+// his points per game this season before this game (from 3 games on), else last season's
+export function seasonAvg(rows, gameDate, gameId) {
+  const t = new Date(gameDate);
+  const reg = (rows || []).filter((r) => r.type === 'regular' && r.min > 0 && r.eventId !== gameId && r.date && new Date(r.date) < t);
+  const season = seasonLabel(gameDate);
+  const cur = reg.filter((r) => r.season === season);
+  const lastSeason = reg.filter((x) => x.season < season).at(-1)?.season;
+  const use = cur.length >= 3 ? cur : reg.filter((r) => r.season === lastSeason);
+  return use.length >= 3 ? Math.round((use.reduce((a, r) => a + r.pts, 0) / use.length) * 10) / 10 : 0;
+}
+
+// a star: 18+ a game this season, or 20+ over a long career (LeBron at 15.7 this season is still LeBron)
+export function isStar(rows, gameDate, gameId) {
+  if (seasonAvg(rows, gameDate, gameId) >= 18) return true;
+  const reg = (rows || []).filter((r) => r.type === 'regular' && r.min > 0 && r.eventId !== gameId && r.date && new Date(r.date) < new Date(gameDate));
+  return reg.length >= 200 && reg.reduce((a, r) => a + r.pts, 0) / reg.length >= 20;
+}
+
+const ORD_F = ['', 'ראשונה', 'שנייה', 'שלישית', 'רביעית', 'חמישית', 'שישית', 'שביעית', 'שמינית', 'תשיעית', 'עשירית'];
+
+// FORM FACTS — what a reader knows coming in, from ESPN game logs: a star missing (injury list + his average),
+// a star held down (and how rare that is in his career), and a player's notable previous game
+// ("48 hours after his 52"). Each one carries its numbers; nothing is inferred.
+export function formFacts(f, ext = {}) {
+  const out = [];
+  const enToHe = ext.enToHe || new Map();
+  const tn = (s) => f.teams[s].heShort || f.teams[s].he;
+  const W = f.result.winner;
+  const rowsOf = (id) => ext.gamelogs?.[id] || ext.recent?.[id] || null;
+  const sur = (he) => he.split(' ').slice(1).join(' ') || he;
+  const add = (x) => out.push({ verified: true, source: 'ESPN game log / injury report', ...x });
+  // 1. stars who did not play
+  const playedIds = new Set(['home', 'away'].flatMap((s) => f.players[s].filter((p) => p.played).map((p) => p.id)));
+  const injured = (f.context?.injuryReport || []).filter((i) => /^out$/i.test(i.status || ''));
+  for (const side of ['home', 'away']) {
+    const stars = [];
+    for (const i of injured.filter((x) => x.team === f.teams[side].abbr)) {
+      const inBox = f.players[side].find((p) => p.name === i.name);
+      const id = i.id || inBox?.id;
+      const he = inBox?.he || enToHe.get(i.name);
+      if (!id || !he || playedIds.has(id)) continue;
+      const avg = seasonAvg(rowsOf(id), f.date, f.gameId);
+      if (avg >= 18) stars.push({ he, avg });
+    }
+    if (!stars.length) continue;
+    stars.sort((a, b) => b.avg - a.avg);
+    const two = stars.slice(0, 2);
+    const who = two.length === 2 ? `${two[0].he} (${two[0].avg} נקודות בממוצע) ו${two[1].he} (${two[1].avg})` : `${two[0].he} (${two[0].avg} נקודות בממוצע העונה)`;
+    const won = side === W;
+    add({ type: 'STAR_ABSENT', side, value: two.length, fact_he: `${tn(side)} ${v(f.teams[side].abbr, 'שיחקה', 'שיחקו')} בלי ${who}${won ? ` ${v(f.teams[side].abbr, 'וניצחה', 'וניצחו')}` : ''}`, tokens: [sur(two[0].he)], weight: won ? (two.length === 2 ? 74 : 64) : 48, flag: 'absent' });
+  }
+  // 2. a star held down, and 3. a notable previous game
+  for (const side of ['home', 'away']) {
+    for (const p of f.players[side].filter((x) => x.played)) {
+      const rows = rowsOf(p.id);
+      if (!rows || !p.he) continue;
+      const avg = seasonAvg(rows, f.date, f.gameId);
+      const before = rows.filter((r) => ['regular', 'post', 'playin'].includes(r.type) && r.min > 0 && r.eventId !== f.gameId && r.date && new Date(r.date) < new Date(f.date));
+      if (isStar(rows, f.date, f.gameId) && p.min >= 20 && (p.pts <= 10 || (avg >= 18 && p.pts <= avg * 0.45))) {
+        const fg = p.fg ? ` (${p.fg[0]} מ-${p.fg[1]} מהשדה)` : '';
+        let rare = '';
+        // single digits: how many times in his career (only with the whole career in the log)
+        if (p.pts <= 9 && ext.gamelogs?.[p.id]) {
+          const n = before.filter((r) => r.type === 'regular' && r.min >= 15 && r.pts <= 9).length + 1;
+          if (n <= 20) rare = `, פעם ${n <= 10 ? ORD_F[n] : `ה-${n}`} בקריירה שלו בחד ספרתי`;
+        }
+        const avgHe = avg ? `, הרחק מממוצע של ${avg} העונה` : '';
+        add({ type: 'STAR_HELD', side, player: p.name, value: p.pts, fact_he: `${p.he} נעצר על ${p.pts} נקודות${fg}${avgHe}${rare}`, tokens: [sur(p.he)], weight: rare ? 66 : 50, flag: 'form' });
+      }
+      const prev = before.at(-1);
+      let run40 = 0;
+      for (let i = before.length - 1; i >= 0 && before[i].pts >= 40; i--) run40++;
+      if (prev && run40 >= 2) {
+        add({ type: 'RECENT_FORM', side, player: p.name, value: run40, fact_he: `${p.he} הגיע אחרי ${run40 === 2 ? 'שני' : run40} משחקים רצופים עם 40 נקודות ומעלה, וסיים הפעם עם ${p.pts}`, tokens: [sur(p.he)], weight: 44, flag: 'form' });
+      } else if (prev && prev.pts >= 40) {
+        const hours = Math.round((new Date(f.date) - new Date(prev.date)) / 3600e3 / 24) * 24;
+        const when = hours <= 72 ? `${hours} שעות אחרי` : 'במשחק שאחרי';
+        const career = before.slice(0, -1).filter((r) => r.type === 'regular');
+        const wasCareerHigh = !!ext.gamelogs?.[p.id] && career.length >= 40 && prev.pts > Math.max(...career.map((r) => r.pts));
+        const opp = heTeam(prev.opp) || prev.opp;
+        add({ type: 'RECENT_FORM', side, player: p.name, value: prev.pts, fact_he: `${when} ש${p.he} קלע ${prev.pts} נקודות נגד ${opp}${wasCareerHigh ? ', שיא הקריירה שלו' : ''}, הוא סיים הפעם עם ${p.pts}`, tokens: [sur(p.he)], weight: 42, flag: wasCareerHigh ? 'career_high' : 'form' });
+      }
+    }
+  }
+  return out;
 }
 
 const SEASONS_HE = (n) => (n === 1 ? 'עונה אחת' : n === 2 ? 'שתי עונות' : `${n} עונות`);
@@ -194,9 +292,12 @@ export function formerTeamFact(rows, p, myAbbr, oppAbbr, gameId, gameDate, home)
   if (!since.some((r) => r.team === myAbbr)) return null; // not with his current team since — unclear, say nothing
   const met = since.filter((r) => r.opp === oppAbbr);
   const visited = met.filter((r) => r.atVs === '@');
-  const kind = !home && !visited.length ? 'FIRST_RETURN' : !met.length ? 'FIRST_MEETING' : null;
-  if (!kind) return null;
   const seasons = new Set(rows.filter((r) => r.team === oppAbbr && r.type === 'regular').map((r) => r.season)).size;
+  // he has been back with another team before, but not in these colors (LeBron in Cleveland as a 76er)
+  const sinceJoined = since.filter((r) => r.team === myAbbr);
+  const newColors = !home && visited.length && !sinceJoined.some((r) => r.opp === oppAbbr && r.atVs === '@') && seasons >= 4;
+  const kind = !home && !visited.length ? 'FIRST_RETURN' : !met.length ? 'FIRST_MEETING' : newColors ? 'RETURN_NEW_COLORS' : null;
+  if (!kind) return null;
   return { kind, seasons, left };
 }
 
@@ -257,9 +358,12 @@ export function buildContext(f, ext = {}) {
       const oppHe = heTeam(f.teams[opp].abbr) || tn(opp);
       const where = r.seasons ? `, הקבוצה שבה שיחק ${SEASONS_HE(r.seasons)}` : ', קבוצתו לשעבר';
       const how = `${p.pts ? `וסיים עם ${shortLineHe(p)} ` : ''}${side === W ? 'בניצחון' : 'בהפסד'}`;
-      const fact_he = r.kind === 'FIRST_RETURN' ? `${name} חזר לראשונה ל${oppHe.replace(/^ה/, '')}${where}, ${how}` : `${name} פגש לראשונה את ${oppHe}${where}, ${how}`;
+      const mine = heTeam(f.teams[side].abbr) || tn(side);
+      const fact_he = r.kind === 'FIRST_RETURN' ? `${name} חזר לראשונה ל${oppHe.replace(/^ה/, '')}${where}, ${how}`
+        : r.kind === 'RETURN_NEW_COLORS' ? `${name} חזר ל${oppHe.replace(/^ה/, '')}${where}, לראשונה במדי ${mine.replace(/^ה/, '')}, ${how}`
+        : `${name} פגש לראשונה את ${oppHe}${where}, ${how}`;
       const big = p.starter && p.min >= 20;
-      add({ type: 'RETURN_TO_FORMER_TEAM', side, player: p.name, value: r.seasons, source: 'ESPN player game log', fact_he, tokens: [(name.split(' ').slice(1).join(' ') || name)], weight: (r.kind === 'FIRST_RETURN' ? 80 : 70) - (big ? 0 : 20) + (r.seasons >= 3 ? 4 : 0), flag: 'former_team' });
+      add({ type: 'RETURN_TO_FORMER_TEAM', side, player: p.name, value: r.seasons, source: 'ESPN player game log', fact_he, tokens: [(name.split(' ').slice(1).join(' ') || name)], weight: (r.kind === 'FIRST_RETURN' ? 80 : r.kind === 'RETURN_NEW_COLORS' ? 66 : 70) - (big ? 0 : 20) + (r.seasons >= 3 ? 4 : 0) + (r.seasons >= 8 ? 12 : 0), flag: 'former_team' });
     }
   }
 
@@ -279,8 +383,8 @@ export function buildContext(f, ext = {}) {
         const prevHe = (m2) => (m2.previous != null ? ` (שיאו הקודם: ${m2.previous}${m2.previousOpp ? ` נגד ${heTeam(m2.previousOpp) || m2.previousOpp}` : ''})` : '');
         if (m.type === 'SEASON_HIGH' && p.pts >= 25) add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} קלע ${m.value} נקודות, שיא העונה שלו${prevHe(m)}`, tokens: ['שיא העונה'], weight: hiW(58, 10), flag: 'season_high' });
         if (m.type === 'TIES_SEASON_HIGH' && p.pts >= 25) add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} השווה את שיא העונה שלו עם ${m.value} נקודות`, tokens: ['שיא העונה'], weight: hiW(50, 8), flag: 'season_high' });
-        if (m.type === 'CAREER_HIGH') add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} קלע ${m.value} נקודות, שיא הקריירה שלו${prevHe(m)}`, tokens: ['שיא הקריירה'], weight: hiW(72, 15), flag: 'career_high' });
-        if (m.type === 'TIES_CAREER_HIGH') add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} השווה את שיא הקריירה שלו עם ${m.value} נקודות`, tokens: ['שיא הקריירה'], weight: hiW(62, 10), flag: 'career_high' });
+        if (m.type === 'CAREER_HIGH' && p.pts >= 20) add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} קלע ${m.value} נקודות, שיא הקריירה שלו${prevHe(m)}`, tokens: ['שיא הקריירה'], weight: hiW(72, 15), flag: 'career_high' });
+        if (m.type === 'TIES_CAREER_HIGH' && p.pts >= 20) add({ type: m.type, side, player: p.name, value: m.value, source, fact_he: `${name} השווה את שיא הקריירה שלו עם ${m.value} נקודות`, tokens: ['שיא הקריירה'], weight: hiW(62, 10), flag: 'career_high' });
         if (m.type === 'SCORING_STREAK') add({ type: m.type, side, player: p.name, value: m.games, min: m.min, source, fact_he: `זה המשחק ה-${m.games} ברציפות שבו ${name} קולע ${m.min} נקודות ומעלה`, tokens: [`ה-${m.games}`], weight: m.games >= 5 ? 80 : 65, flag: 'streak' });
       }
     }
@@ -327,6 +431,22 @@ export function standingsFacts(f, ext = {}) {
 }
 
 // what the recap may add around the game, all from ESPN structured data, already in Hebrew
+// NBA Cup records after this game (group play counts the Cup games only), from each team's schedule
+export function cupRecords(f, ext = {}) {
+  if (!f.cupGame) return null;
+  const out = {};
+  for (const side of ['home', 'away']) {
+    const sched = ext.schedules?.[f.teams[side].id];
+    if (!sched) return null;
+    const id = f.teams[side].id;
+    const rows = sched.events.filter((e) => e.cup && e.state === 'post' && e.id !== f.gameId && new Date(e.date) < new Date(f.date));
+    const w = rows.filter((e) => e.teams.find((x) => x.id === id)?.winner).length + (f.result.winner === side ? 1 : 0);
+    const l = rows.length + 1 - w;
+    out[side] = { w, l };
+  }
+  return out;
+}
+
 export function gameContext(f, ext = {}, enToHe = new Map()) {
   const tn = (s) => f.teams[s].heShort || f.teams[s].he;
   const other = (s) => (s === 'home' ? 'away' : 'home');

@@ -351,7 +351,10 @@ export async function writeIntro(date, cfg) {
   if (!facts.length) return null;
   const first = readJson(join(dir, `${games[0].gameId}.json`));
   // the stories are verified angles already: their streak / high / table wording is allowed
-  const brief = { kind: 'intro', verified: { season_high: true, career_high: true, streak: true, standings: true, historical: false }, night_he: `הלילה (${nightHe(first.date)})`, games_count: readdirSync(dir).filter((x) => /^\d+\.json$/.test(x)).length, top_stories: facts };
+  // Cup nights: "במסגרת הגביע" (how many of the night's games were NBA Cup games)
+  const nightFacts = readdirSync(dir).filter((x) => /^\d+\.json$/.test(x)).map((x) => readJson(join(dir, x)));
+  const cupGames = nightFacts.filter((x) => x?.cupGame).length;
+  const brief = { kind: 'intro', cup_games: cupGames, verified: { season_high: true, career_high: true, streak: true, standings: true, historical: false }, night_he: `הלילה (${nightHe(first.date)})`, games_count: readdirSync(dir).filter((x) => /^\d+\.json$/.test(x)).length, top_stories: facts };
   const { system, user } = introPrompt(ROOT, brief);
   let text = null;
   try {

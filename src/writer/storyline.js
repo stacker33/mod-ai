@@ -16,7 +16,8 @@ const HOOK = {
 };
 const DRAMA = new Set(['GAME_WINNER', 'BUZZER_BEATER', 'FORCED_OT', 'OVERTIME', 'CLOSE_FINISH']);
 const HERO = new Set(['BIG_SCORING', 'CAREER_HIGH', 'TIES_CAREER_HIGH', 'SEASON_HIGH', 'TIES_SEASON_HIGH', 'TRIPLE_DOUBLE', 'TOP_PERFORMER', 'UNUSUAL_STAT_LINE', 'SCORING_STREAK']);
-const CONTEXT = new Set(['FIRST_LOSS', 'FIRST_WIN', 'UNBEATEN', 'WINLESS', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED', 'LOSING_STREAK_ENDED', 'H2H_STREAK', 'LOST_FIRST_PLACE', 'TOOK_FIRST_PLACE', 'CONFERENCE_LEADER', 'RETURN_TO_FORMER_TEAM', 'SHORT_ROSTER']);
+const FORM = new Set(['RETURN_TO_FORMER_TEAM', 'RECENT_FORM', 'STAR_HELD']);
+const CONTEXT = new Set(['STAR_ABSENT', 'FIRST_LOSS', 'FIRST_WIN', 'UNBEATEN', 'WINLESS', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED', 'LOSING_STREAK_ENDED', 'H2H_STREAK', 'LOST_FIRST_PLACE', 'TOOK_FIRST_PLACE', 'CONFERENCE_LEADER', 'RETURN_TO_FORMER_TEAM', 'SHORT_ROSTER']);
 
 // "קלע 7 מתוך 8 הנקודות האחרונות של בוסטון": the longest closing stretch of a team's scoring that one
 // player owned (70%+), late in a game that was still open
@@ -85,9 +86,11 @@ export function storyline(f, b, names, tn, momentOf = () => null) {
     team_he: tn(hero.side),
     line_he: lineHe(hero),
     what_made_it_he: [
+      // what he came in with / against (a return, his last game, a run of 40s) — verified context
+      ...(f.contextFacts || []).filter((c) => c.verified && c.player === hero.name && c.type !== main?.type && FORM.has(c.type)).map((c) => c.fact_he),
       ...arcFor(hero).map((m) => momentHe(m)).filter(Boolean),
       ...(shareHe && share.player === hero.name ? [shareHe] : []),
-    ].slice(0, 2),
+    ].slice(0, 3),
   } : null;
 
   // the cast: everyone else who belongs in the story, each with a role the data supports
@@ -104,7 +107,9 @@ export function storyline(f, b, names, tn, momentOf = () => null) {
   for (const p of all.filter((x) => x.starter && x.min >= 28)) {
     const cold = p.fg && p.fg[1] >= 10 && p.fg[0] / p.fg[1] <= 0.3;
     const missed = p.fg && p.fg[1] >= 8 && p.pts <= 6; // he shot and it did not go in — not a role player's quiet night
-    if (cold || missed) add(p, 'held_down', `${heName(p)} נעצר על ${p.pts} נקודות${p.fg ? ` (${p.fg[0]} מ-${p.fg[1]} מהשדה)` : ''}`);
+    const star = (f.contextFacts || []).find((c) => c.type === 'STAR_HELD' && c.player === p.name);
+    if (star) add(p, 'held_down', star.fact_he);
+    else if (cold || missed) add(p, 'held_down', `${heName(p)} נעצר על ${p.pts} נקודות${p.fg ? ` (${p.fg[0]} מ-${p.fg[1]} מהשדה)` : ''}`);
   }
   // the other arcs of the night (a fade on the losing side, a takeover by someone else)
   for (const m of notable.filter((x) => x.playerId && byId(x.playerId) && !used.has(x.playerId)).slice(0, 2)) {
@@ -122,7 +127,9 @@ export function storyline(f, b, names, tn, momentOf = () => null) {
 
   // color: a former team (even when it is not the first return), the previous meeting, who was out
   const color = [];
-  for (const x of (f.contextFacts || []).filter((c) => c.verified && c.type !== main?.type)) if (['RETURN_TO_FORMER_TEAM', 'H2H_STREAK', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED'].includes(x.type)) color.push(x.fact_he);
+  const inStory = new Set([...(protagonist?.what_made_it_he || []), ...cast.map((c) => c.fact_he)]);
+  const COLOR = ['STAR_ABSENT', 'RETURN_TO_FORMER_TEAM', 'STAR_HELD', 'RECENT_FORM', 'H2H_STREAK', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED'];
+  for (const x of (f.contextFacts || []).filter((c) => c.verified && c.type !== main?.type && COLOR.includes(c.type) && !inStory.has(c.fact_he)).sort((a, b) => COLOR.indexOf(a.type) - COLOR.indexOf(b.type))) color.push(x.fact_he);
   return {
     theme,
     hook: HOOK[theme],
@@ -130,7 +137,7 @@ export function storyline(f, b, names, tn, momentOf = () => null) {
     protagonist,
     turn_he: [...new Set(turn)].slice(0, 3),
     cast: cast.slice(0, 5),
-    color_he: color.slice(0, 2),
+    color_he: color.slice(0, 3),
     duel: duel ? { a: heName(hero), a_pts: hero.pts, b: heName(loserTop), b_pts: loserTop.pts } : null,
   };
 }

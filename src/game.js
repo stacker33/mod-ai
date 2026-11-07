@@ -3,7 +3,7 @@
 import { buildFacts } from './facts.js';
 import { gameColor, colorCandidates } from './color.js';
 import { buildPlayerFacts } from './player.js';
-import { buildContext, standingsFacts, gameContext } from './context.js';
+import { buildContext, standingsFacts, gameContext, cupRecords, formFacts } from './context.js';
 import { rankStory } from './story.js';
 
 // names: Map espnId -> {he, status, approved} from config/names.he.json
@@ -23,7 +23,9 @@ export function analyzeGame(summary, { israelis = [], histories = new Map(), sch
   f.namesMissing = missing;
   f.color = gameColor(summary, f);
   // GAME FACTS (facts.js, color.js) and CONTEXT FACTS (context.js) stay separate until story selection
-  f.contextFacts = [...buildContext(f, context), ...standingsFacts(f, context)];
+  const enToHeAll = new Map([...names.values()].filter((n) => n.en && n.he).map((n) => [n.en, n.he]));
+  f.contextFacts = [...buildContext(f, context), ...standingsFacts(f, context), ...formFacts(f, { ...context, enToHe: enToHeAll })];
+  f.cup = f.cupGame ? { records: cupRecords(f, context) } : null;
   // next game, previous meeting, absences: background for the recap (not story angles)
   const enToHe = new Map([...names.values()].filter((n) => n.en && n.he).map((n) => [n.en, n.he]));
   f.gameContext = gameContext(f, context, enToHe);
