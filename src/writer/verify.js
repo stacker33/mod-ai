@@ -228,7 +228,16 @@ export function verifyDraft(input, brief, names, ctx = null) {
     if (LEAK.test(s)) push('leak', 'block', `טקסט פנימי דלף לטיוטה: "${s.slice(0, 60)}"`, { type: 'drop', sentence: s });
     for (const re of REDUNDANT) if (re.test(s)) push('redundant', 'style', `ניסוח כפול: "${s.match(re)[0]}" — כתוב פעם אחת ("ניצחון שני ברציפות")`);
     for (const [re, better] of BANNED) if (re.test(s)) push('banned', 'style', `ניסוח מתורגם: "${s.match(re)[0]}" — עדיף: ${better}`);
+    // a stat list, not a story: three players with their numbers in one sentence
+    const who = Object.keys(brief._check?.lines || brief.game?._check?.lines || {}).filter((n) => { const sur = n.split(' ').slice(1).join(' '); return s.includes(n) || (sur.length >= 3 && s.includes(sur)); });
+    if (who.length >= 3 && (s.match(/\d+/g) || []).length >= 5) push('stat-list', 'style', `"${s.slice(0, 60)}…": רשימת מספרים של ${who.length} שחקנים במשפט אחד — ספר את הסיפור: מי עשה מה ולמה זה חשוב, מספר אחד-שניים לכל שחקן משני`);
   }
+  // momentum by numbers: three in-game scores (half-time, a quarter, a run) in one paragraph is a scoreboard,
+  // not a story — keep the one that explains the turn (records in parentheses do not count)
+  (draft.paragraphs || []).forEach((p) => {
+    const scores = (p.replace(/\(\d+:\d+\)/g, '').replace(/מאזן \d+:\d+/g, '').replace(/\d+:\d+ (דקות|שניות|לסיום)/g, '').replace(/\d\d:\d\d(?= שעון)/g, '').replace(/ב-\d\d:\d\d/g, '').match(/\d+:\d+/g) || []);
+    if (scores.length >= 3) push('score-list', 'style', `${scores.length} תוצאות ביניים באותה פסקה (${scores.join(', ')}) — השאר רק את זו שמסבירה איך המשחק התהפך, ואת השאר ספר במילים`);
+  });
   for (const bad of ['משחק מרתק', 'דרמה גדולה']) if (text.includes(bad) && !(brief.margin <= 3 || brief.overtimes)) push('hype', 'style', `ביטוי מוגזם למשחק לא צמוד: ${bad}`);
 
   // a paragraph cut in the middle (an ASCII " inside כ"א splits the model's JSON string)
@@ -246,8 +255,14 @@ export function verifyDraft(input, brief, names, ctx = null) {
   // mention is not the story. Missing -> the code-written sentence goes into the second paragraph.
   const body = (draft.paragraphs || []).flatMap((p) => sentences(p));
   for (const x of brief.must_tell || []) {
+    if (x.full_only && (draft.paragraphs || []).length < 2) continue; // a fragment, not a whole block
     const told = body.some((s) => x.who.some((w) => w && w.length >= 3 && s.includes(w)) && (!x.num || new RegExp(`(^|[^\\d])${x.num}([^\\d]|$)`).test(s)));
-    if (!told) push('must-tell', 'block', `סיפור המשחק חסר בגוף הכתבה: ${x.fact_he}`, { type: 'insert', para: 1, text: `${x.fact_he}.` });
+    if (!told) push('must-tell', 'block', `סיפור המשחק חסר בגוף הכתבה: ${x.fact_he}`, { type: 'insert', para: x.para ?? 1, text: `${x.fact_he}.` });
+  }
+  // an Israeli article's headline is about him (never the bare score line)
+  if (brief.kind === 'player' && draft.headline && brief.player_he) {
+    const sur = brief.player_he.split(' ').slice(1).join(' ');
+    if (!draft.headline.includes(brief.player_he) && !(sur.length >= 3 && draft.headline.includes(sur))) push('headline-player', 'block', `הכותרת לא מזכירה את ${brief.player_he}`, { type: 'headline', to: `${brief.player_he} ב${brief.result_he} ${brief.won ? 'על' : 'ל'}${brief.opp_he}` });
   }
 
   // the final score appears once: in the score line above a block, or in an article's headline

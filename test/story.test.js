@@ -77,3 +77,51 @@ test('former team: "for the first time" only when it is true', () => {
   // never played for them -> nothing
   assert.equal(formerTeamFact(trae, p, 'WSH', 'BOS', 'x2', later, false), null);
 });
+
+test('storyline: theme, protagonist and cast roles come from the data (a story, not a stat list)', async () => {
+  const { gameBrief: gb } = await import('../src/writer/brief.js');
+  const dalsa = gb(analyzeGame(json(join(DIR, '401909933.json')), { names })).story;
+  assert.equal(dalsa.protagonist.name_he, 'ויקטור וומבניאמה');
+  assert.ok(dalsa.protagonist.what_made_it_he.some((x) => /29 נקודות כבר במחצית הראשונה/.test(x)));
+  assert.ok(dalsa.protagonist.what_made_it_he.some((x) => /קלע 10 מתוך 14 הנקודות האחרונות של סן אנטוניו/.test(x)));
+  assert.ok(dalsa.cast.some((c) => c.role === 'not_enough' && /קיירי אירווינג לא הספיקו/.test(c.fact_he)));
+  const mia = gb(analyzeGame(json(join(DIR, '401909935.json')), { names })).story;
+  assert.equal(mia.theme, 'DRAMA');
+  assert.ok(!mia.cast.some((c) => c.role === 'held_down' && /דאן/.test(c.name_he))); // 2 of 4: a role player's quiet night, not "held down"
+  const minhou = gb(analyzeGame(json(join(DIR, '401909930.json')), { names })).story;
+  assert.equal(minhou.theme, 'COMEBACK');
+  assert.equal(minhou.turn_he.filter((x) => /אחרי שלושה רבעים/.test(x)).length, 1); // told once
+  const lalpor = gb(analyzeGame(json(join(DIR, '401909294.json')), { names })).story;
+  assert.ok(lalpor.cast.some((c) => c.role === 'faded' && /לילארד/.test(c.name_he)));
+});
+
+test('a sentence with three players and their numbers is flagged as a list (style, sent back to the writer)', async () => {
+  const { gameBrief: gb } = await import('../src/writer/brief.js');
+  const b = gb(analyzeGame(json(join(DIR, '401909287.json')), { names }));
+  const list = { paragraphs: ['ניקיל אלכסנדר-ווקר הוביל את המנצחת עם 28 נקודות, לוגנץ דורט תרם 25 נקודות ו-7 ריבאונדים, ואוניקה אוקונגוו הוסיף 22 נקודות, 10 ריבאונדים ו-4 חטיפות.'] };
+  const story = { paragraphs: ['ניקיל אלכסנדר-ווקר הוביל עם 28 נקודות, ולוגנץ דורט הוסיף 25.'] };
+  assert.equal(verifyDraft(list, b, [], null).issues.filter((i) => i.code === 'stat-list').length, 1);
+  assert.equal(verifyDraft(story, b, [], null).issues.filter((i) => i.code === 'stat-list').length, 0);
+});
+
+test('three in-game scores in one paragraph = a scoreboard (clock times, kick-off times and records do not count)', async () => {
+  const { gameBrief: gb } = await import('../src/writer/brief.js');
+  const b = gb(analyzeGame(json(join(DIR, '401909287.json')), { names }));
+  const n = (p) => verifyDraft({ paragraphs: [p] }, b, [], null).issues.filter((i) => i.code === 'score-list').length;
+  assert.equal(n('מילווקי הובילה במחצית 51:60, אך טורונטו ניצחה 20:32 את הרבע האחרון, בזכות ריצת 7:21.'), 1);
+  assert.equal(n('2:30 דקות לסיום הוא בישל, ו-1:59 דקות לסיום צימק ל-110:105. מילווקי ירדה למאזן 8:1, ותארח ב-05:00 שעון ישראל.'), 0);
+});
+
+test('code guards: the hero stays in a full block; an Israeli article\'s headline names him', async () => {
+  const { gameBrief: gb } = await import('../src/writer/brief.js');
+  const b = gb(analyzeGame(json(join(DIR, '401909933.json')), { names }));
+  // a full block that lost the hero's sentence gets it back in paragraph 1
+  const noHero = { paragraphs: ['דרמה בסן אנטוניו. קיירי אירווינג החטיא בהתקפה האחרונה.', 'דילן הארפר הוסיף 21 נקודות.'] };
+  const r = verifyDraft(noHero, b, [], null);
+  if (!b.main_angle.fact_he.includes(b.story.protagonist.name_he)) assert.ok(r.issues.some((i) => i.code === 'must-tell' && i.fix.para === 0));
+  const f = analyzeGame(json(join(DIR, '401909294.json')), { names, israelis: [avdija] });
+  const pb = playerBrief(f, f.tracks[0]);
+  const d = { headline: 'לוס אנג\'לס לייקרס (2:8) - פורטלנד (2:6) 118:124', subheadline: 'x', paragraphs: [`דני אבדיה סיים עם ${pb.line_full_he}.`] };
+  const fixed = autoFix(d, verifyDraft(d, pb, [], null).issues, pb);
+  assert.match(fixed.headline, /^דני אבדיה בהפסד/);
+});

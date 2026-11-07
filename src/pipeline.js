@@ -43,7 +43,7 @@ export function loadConfig() {
   return {
     env,
     pageUrl: env.PAGE_URL || null,
-    ai: { key: env.GEMINI_API_KEY, model: env.AI_MODEL || 'gemini-flash-latest', fallback: env.AI_MODEL_FALLBACK },
+    ai: { key: env.GEMINI_API_KEY, model: env.AI_MODEL || 'gemini-flash-latest', fallback: env.AI_MODEL_FALLBACK, healthFile: join(ROOT, 'out', 'model-health.json') },
     proofread: env.AI_PROOFREAD !== '0', // the language-only pass (one more model call per item)
     israelis: readJson(join(ROOT, 'config', 'israelis.json')).players,
     dict: readJson(join(ROOT, 'config', 'names.he.json')).players,
@@ -137,6 +137,17 @@ export function templateDraft(mode, b) {
   const lines = (list) => list.map((p, i) => `${p.name_he} ${i ? 'הוסיף' : 'סיים עם'} ${p.line_he}`).join(', ו');
   if (mode === 'game') {
     const [W, L] = [b.winner_he, b.loser_he];
+    // the story from storyline.js in plain sentences: angle + what made it his game, then the turn and the cast
+    const st = b.story;
+    if (st?.protagonist) {
+      const angle = b.main_angle?.fact_he || `${W} ניצחה את ${L}`;
+      const hero = st.protagonist;
+      const heroLine = angle.includes(hero.name_he) ? '' : `${hero.name_he} סיים עם ${hero.line_he}.`;
+      const made = hero.what_made_it_he.filter((x) => x !== angle).map((x) => `${x}.`).join(' ');
+      const p1 = [`${angle}.`, heroLine, made].filter(Boolean).join(' ');
+      const p2 = [...st.turn_he.slice(0, 2), ...st.cast.slice(0, 3).map((c) => c.fact_he)].map((x) => `${x}.`).join(' ');
+      return { paragraphs: [p1, p2].filter(Boolean) };
+    }
     const p1 = [`${b.main_angle?.fact_he || `${W} ניצחה את ${L}`}.`, b.stars?.[W]?.length ? `${lines(b.stars[W].slice(0, 2))}.` : ''].filter(Boolean).join(' ');
     const p2 = [b.details?.[0] ? `${b.details[0]}.` : '', b.records?.[L]?.sentence_he ? `${b.records[L].sentence_he}${b.stars?.[L]?.length ? `, ו${lines(b.stars[L].slice(0, 1))}` : ''}.` : ''].filter(Boolean).join(' ');
     return { paragraphs: [p1, p2].filter(Boolean) };

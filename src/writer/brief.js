@@ -4,6 +4,7 @@
 
 import { heTeam, v } from '../teams.js';
 import { classifyPlay } from '../pbp.js';
+import { storyline } from './storyline.js';
 import { pair, partialPair, formatScore, shotActionHe, PLAY_LABEL_HE, recordForms, whenHe, periodNumber, nightHe, fullLineHe, shortLineHe, KIND_HE, PERIOD_HE } from './he.js';
 
 export const FEATURED = 90; // story weight from which a game gets a stand-alone article
@@ -289,6 +290,11 @@ export function gameBrief(f) {
   // the score line above the block already shows the final score: the text does not repeat it
   b.final_score_in = 'heading';
   b.featured = featured;
+  // THE STORY, decided in code: theme -> hook, protagonist, the turn, the cast with roles, color
+  b.story = storyline(f, b, names, tn, (m) => momentHe(m, f, names, tn));
+  // the hero of the story is in the block even when the sentence about him had to go (wrong number -> dropped)
+  const hero = b.story.protagonist;
+  if (hero && !(b.main_angle?.fact_he || '').includes(hero.name_he)) b.must_tell = [{ fact_he: `${hero.name_he} סיים עם ${hero.line_he}`, who: [hero.name_he, hero.name_he.split(' ').slice(1).join(' ')], num: hero.line_he.match(/\d+/)?.[0] || null, para: 0, full_only: true }];
   b.states = states; // for the verifier (stripped from the prompt)
   b._check = checkData(f, names, tn, recordAngles, ctxFacts);
   return b;
@@ -370,7 +376,9 @@ export function playerBrief(f, t) {
   const toHigh = t.milestones.find((m) => m.type === 'CAREER_HIGH_TO');
   b.his_story_he = (f.notable || []).filter((m) => m.playerId === t.player.id).slice(0, 2)
     .map((m) => { const s = momentHe(m, f, names, tnHe); if (!s || !toHigh) return s; return m.type === 'TURNOVERS' ? `${s}, הכי הרבה בקריירה שלו` : s.replace('איבודים במשחק כולו)', 'איבודים במשחק כולו, הכי הרבה בקריירה שלו)'); }).filter(Boolean);
-  const mt = b.his_story_he.map((s) => ({ fact_he: s, who: [t.player.he, surname(t.player.he)], num: firstNum(s) }));
+  // his full line is part of every Israeli article (Sport5's fixed form), in the body
+  const mt = [{ fact_he: `${t.player.he} סיים עם ${b.line_full_he}`, who: [t.player.he, surname(t.player.he)], num: String(t.line.pts) },
+    ...b.his_story_he.map((s) => ({ fact_he: s, who: [t.player.he, surname(t.player.he)], num: firstNum(s) }))];
   const ma = g.main_angle;
   const mainIsHim = !ma || ma.type === 'ISRAELI_ANGLE' || ma.player === t.player.name;
   if (!mainIsHim) {
