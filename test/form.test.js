@@ -85,5 +85,7 @@ test('our own archive: Kyrie 48 hours after missing the winner against San Anton
   const f = analyzeGame(s, { names, context: { recent: { 6442: kyrie }, archive } });
   const x = f.contextFacts.find((c) => c.type === 'LAST_GAME_MOMENT');
   assert.equal(x.fact_he, '48 שעות אחרי שקיירי אירווינג החטיא זריקה שהייתה יכולה להכריע את המשחק נגד סן אנטוניו, הוא סיים הפעם עם 14 נקודות');
-  assert.ok(gameBrief(f).story.color_he.includes(x.fact_he));
+  // in the story: as the angle (nothing bigger in this test's context) or as color (the live run)
+  const st = gameBrief(f).story;
+  assert.ok(st.angle_he === x.fact_he || st.color_he.includes(x.fact_he));
 });
