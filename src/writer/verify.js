@@ -239,6 +239,19 @@ export function verifyDraft(input, brief, names, ctx = null) {
     const scores = (p.replace(/\(\d+:\d+\)/g, '').replace(/מאזן \d+:\d+/g, '').replace(/\d+:\d+ (דקות|שניות|לסיום)/g, '').replace(/\d\d:\d\d(?= שעון)/g, '').replace(/ב-\d\d:\d\d/g, '').match(/\d+:\d+/g) || []);
     if (scores.length >= 3) push('score-list', 'style', `${scores.length} תוצאות ביניים באותה פסקה (${scores.join(', ')}) — השאר רק את זו שמסבירה איך המשחק התהפך, ואת השאר ספר במילים`);
   });
+  // REVIEW (style, back to the writer): a team named twice in one sentence; the length of the format
+  for (const s of (draft.paragraphs || []).flatMap((p) => sentences(p))) {
+    for (const t of Object.keys(brief._check?.team_side || brief.game?._check?.team_side || {})) {
+      const first = s.indexOf(t);
+      if (first >= 0 && s.indexOf(`ו${t}`, first + t.length) > first) push('team-twice', 'style', `"${s.slice(0, 60)}…": ${t} פעמיים באותו משפט — פעם אחת מספיקה`);
+    }
+  }
+  const words = draftText({ paragraphs: draft.paragraphs || [] }).split(/\s+/).filter(Boolean).length;
+  if (brief.target_words && (draft.paragraphs || []).length >= 2) { // a whole piece, not a fragment
+    const [lo, hi] = brief.target_words;
+    if (words < lo * 0.7) push('too-short', 'style', `${words} מילים — הפורמט הזה הוא בערך ${lo}–${hi}: חסר סיפור (מה הכריע, מי עוד היה חשוב, הקשר)`);
+    if (words > hi * 1.35) push('too-long', 'style', `${words} מילים — הפורמט הזה הוא בערך ${lo}–${hi}: לקצר את מה שלא משרת את הסיפור`);
+  }
   for (const bad of ['משחק מרתק', 'דרמה גדולה']) if (text.includes(bad) && !(brief.margin <= 3 || brief.overtimes)) push('hype', 'style', `ביטוי מוגזם למשחק לא צמוד: ${bad}`);
 
   // a paragraph cut in the middle (an ASCII " inside כ"א splits the model's JSON string)
@@ -300,6 +313,15 @@ export function verifyDraft(input, brief, names, ctx = null) {
 // last resort after the model's rounds: apply code fixes, never invent text. Only the claim that failed
 // goes (a swapped pair, a dropped sentence); the rest of the recap stays. A dropped headline is replaced
 // by the code-written main angle, never by new prose.
+// TIDY before any check: what the score line above a nightly block already shows is not repeated in it —
+// the records in parentheses after a team name ("פיניקס (5:3) ניצחה") go, in code, without a model round
+export function tidy(draft, brief) {
+  if (!brief || brief.kind !== 'game' || brief.final_score_in !== 'heading' || !draft?.paragraphs) return draft;
+  const recs = Object.values(brief.records || {}).map((r) => r.after_team_name).filter(Boolean);
+  const d = { ...draft, paragraphs: draft.paragraphs.map((p) => recs.reduce((t, r) => t.split(` ${r}`).join(''), p).replace(/\s{2,}/g, ' ').replace(/\s+([.,])/g, '$1')) };
+  return d;
+}
+
 export function autoFix(draft, issues, brief = null) {
   const d = JSON.parse(JSON.stringify(draft));
   const join = issues.find((x) => x.severity === 'block' && x.fix?.type === 'join' && x.fix.index >= 0);

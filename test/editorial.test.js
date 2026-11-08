@@ -81,3 +81,32 @@ test('every game of the night: a story-type main angle, and a clean template rec
   }
   void avdija;
 });
+
+test('6. Avdija vs SA: top scorer is not a good game; last season\'s playoff series is verified context', async () => {
+  const { playerBrief } = await import('../src/writer/brief.js');
+  const f = game('401909944', [avdija]);
+  const pb = playerBrief(f, f.tracks[0]);
+  assert.equal(pb.performance.verdict, 'quiet_in_rout');
+  assert.deepEqual(pb.performance.reasons_he, ['הקלע המוביל של קבוצתו', '5 מ-13 מהשדה', 'מדד פלוס מינוס 19-', '24 דקות בלבד במשחק שהוכרע מוקדם']);
+  const rematch = f.contextFacts.find((x) => x.type === 'PLAYOFF_REMATCH');
+  assert.equal(rematch.fact_he, 'זה היה המפגש הראשון בין הקבוצות מאז שסן אנטוניו הדיחה את פורטלנד בסיבוב הראשון של הפלייאוף בעונה שעברה (1:4 בסדרה)');
+  assert.equal(pb.target_words, undefined); // set by the pipeline for the Israeli format (250-350)
+});
+
+test('review in code: records already in the score line are removed; a team named twice / a wrong length go back to the writer', async () => {
+  const { tidy } = await import('../src/writer/verify.js');
+  const b = gameBrief(game('401909942'));
+  const d = tidy({ paragraphs: ['גולדן סטייט (3:7) ניצחה את אורלנדו (7:2) בהארכה.', 'x'] }, b);
+  assert.equal(d.paragraphs[0], 'גולדן סטייט ניצחה את אורלנדו בהארכה.');
+  const twice = { paragraphs: ['גולדן סטייט ניצחה בהארכה, וגולדן סטייט עלתה למאזן 3:7.', 'סטף קרי קלע 41 נקודות.'] };
+  const codes = verifyDraft(twice, b, [], null).issues.map((i) => i.code);
+  assert.ok(codes.includes('team-twice'));
+  assert.ok(codes.includes('too-short'));
+});
+
+test('review in code: a comeback that is not the angle, and the separation in a rout, must be told', () => {
+  const okc = gameBrief(game('401909941'));
+  assert.ok(okc.must_tell.some((x) => x.fact_he === okc.story.turn_he[0]));
+  const lal = gameBrief(analyzeGame(json(join(DIR, '401909294.json')), { names, context: json(join(DIR, 'extra', 'ctx-401909294.json')) }));
+  assert.ok(lal.must_tell.some((x) => x.fact_he === 'הלייקרס חזרו מפיגור 16'));
+});

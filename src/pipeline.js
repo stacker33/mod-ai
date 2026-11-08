@@ -20,7 +20,7 @@ import { analyzeGame } from './game.js';
 import { gameBrief, playerBrief, FEATURED } from './writer/brief.js';
 import { buildPrompt, proofPrompt, introPrompt, schemaFor } from './writer/prompt.js';
 import { generateJSON } from './writer/gemini.js';
-import { verifyDraft, autoFix, draftText } from './writer/verify.js';
+import { tidy, verifyDraft, autoFix, draftText } from './writer/verify.js';
 import { fetchContext } from './context.js';
 import { crossCheck, backupSummary, backupGames } from './secondary.js';
 import { fetchSport5Night, compareNight } from './compare.js';
@@ -185,6 +185,7 @@ export async function writeItem(cfg, mode, brief, f) {
       last = { mode, gameId: f.gameId, model: 'template', template: true, rounds: 0, draft, check: verifyDraft(draft, brief, names, ctx), writtenAt: new Date().toISOString() };
       break;
     }
+    res.data = tidy(res.data, brief); // records already in the score line: removed in code, not by another round
     const check = verifyDraft(res.data, brief, names, ctx);
     last = { mode, gameId: f.gameId, model: res.model, rounds: round, draft: res.data, check, writtenAt: new Date().toISOString() };
     if (!check.issues.length) break;
@@ -275,7 +276,8 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   let main = null;
   if (tracks.length) {
     const lead = tracks.find((t) => t.player.track === 'full') || [...tracks].sort((x, y) => (y.line?.pts || 0) - (x.line?.pts || 0))[0];
-    main = await writeItem(cfg, 'player', { ...playerBrief(f, lead), max_paragraphs: 3, final_score_in: 'headline' }, f);
+    // Israeli article: the longer format (~250-350 words), more room than a nightly block
+    main = await writeItem(cfg, 'player', { ...playerBrief(f, lead), max_paragraphs: 5, target_words: [250, 350], final_score_in: 'headline' }, f);
     Object.assign(main, { player: lead.player, players: tracks.map((t) => t.player.he || t.player.name), corrected, heading: gb.heading, end: f.endedAt || f.date, weight, angle: gb.main_angle });
     items.push(main);
     log(`  article ${tracks.map((t) => t.player.name).join(' + ')} ${main.held ? 'HELD' : 'ok'} (${main.rounds} rounds, ${main.model})`);

@@ -26,6 +26,7 @@ export function trimSchedule(j) {
         date: e.date,
         state: c.status?.type?.state || null,
         cup: (c.notes || []).some((n) => /NBA Cup/i.test(n.headline || '')),
+        note: (c.notes || [])[0]?.headline || null,
         teams: (c.competitors || []).map((x) => ({ id: x.team?.id || x.id, abbr: x.team?.abbreviation, winner: !!x.winner, home: x.homeAway === 'home', score: Number(x.score?.value ?? x.score?.displayValue ?? NaN) })),
       };
     }),
@@ -151,6 +152,12 @@ export async function fetchContext(summary, { cacheDir, archiveDir = null }) {
       res = h2hStreak(list, winner.team.id, loser.team.id, summary.header.id, comp.date);
     }
     ext.h2h[winner.team.id] = { opp: loser.team.id, ...res };
+  }
+  // last season's playoffs: did these two meet? (cached forever: a past season never changes)
+  const home = cs.find((c) => c.homeAway === 'home') || cs[0];
+  const curSeason = ext.schedules[home.team.id]?.season;
+  if (curSeason) {
+    try { ext.playoffs = { season: curSeason - 1, sched: await cachedSchedule(home.team.abbreviation, curSeason - 1, 3, cacheDir) }; } catch (e) { ext.errors.push(`playoffs: ${e.message}`); }
   }
   // the conference table (ESPN standings) — used only where it already includes this game
   try { ext.standings = await getStandings(); } catch (e) { ext.errors.push(`standings: ${e.message}`); }
@@ -289,7 +296,8 @@ export function formFacts(f, ext = {}) {
       if (!rows || !p.he) continue;
       const avg = seasonAvg(rows, f.date, f.gameId);
       const before = rows.filter((r) => ['regular', 'post', 'playin'].includes(r.type) && r.min > 0 && r.eventId !== f.gameId && r.date && new Date(r.date) < new Date(f.date));
-      if (isStar(rows, f.date, f.gameId) && p.min >= 20 && (p.pts <= 10 || (avg >= 18 && p.pts <= avg * 0.45))) {
+      const resting = side === W && f.result.margin >= 18;
+      if (isStar(rows, f.date, f.gameId) && p.min >= 20 && (p.fg?.[1] ?? 0) >= 8 && !resting && (p.pts <= 10 || (avg >= 18 && p.pts <= avg * 0.45))) {
         const fg = p.fg ? ` (${p.fg[0]} מ-${p.fg[1]} מהשדה)` : '';
         let rare = '';
         // single digits: how many times in his career (only with the whole career in the log)
@@ -408,6 +416,20 @@ export function buildContext(f, ext = {}) {
     }
     if (before && before.kind === 'L' && side === W && before.length >= 4) {
       add({ type: 'LOSING_STREAK_ENDED', side: W, value: before.length, source, fact_he: `${tn(W)} ${vb(W, 'שברה', 'שברו')} רצף של ${before.length} הפסדים`, tokens: [`${before.length} הפסדים`], weight: 60, flag: 'streak' });
+    }
+  }
+
+  // the first meeting since one of them knocked the other out of last season's playoffs
+  const series = (ext.playoffs?.sched?.events || []).filter((e) => e.state === 'post' && e.teams.some((x) => x.id === f.teams.home.id) && e.teams.some((x) => x.id === f.teams.away.id));
+  if (series.length >= 4) {
+    const wins = (id) => series.filter((e) => e.teams.find((x) => x.id === id)?.winner).length;
+    const hw = wins(f.teams.home.id), aw = wins(f.teams.away.id);
+    const won = hw > aw ? 'home' : 'away', lost = won === 'home' ? 'away' : 'home';
+    const metThisSeason = (ext.schedules?.[f.teams.home.id]?.events || []).some((e) => e.id !== f.gameId && e.state === 'post' && new Date(e.date) < new Date(f.date) && e.teams.some((x) => x.id === f.teams.away.id));
+    const note = series.map((e) => e.note || '').find(Boolean) || '';
+    const round = /1st Round|First Round/i.test(note) ? ' בסיבוב הראשון' : /Semifinal/i.test(note) ? ' בחצי גמר האזור' : /Conf(erence)? Finals/i.test(note) ? ' בגמר האזור' : /NBA Finals/i.test(note) ? ' בגמר ה-NBA' : '';
+    if (!metThisSeason && Math.max(hw, aw) === 4) {
+      add({ type: 'PLAYOFF_REMATCH', side: won, value: series.length, source: 'ESPN team schedule (last season\'s playoffs)', fact_he: `זה היה המפגש הראשון בין הקבוצות מאז ש${tn(won)} ${vb(won, 'הדיחה', 'הדיחו')} את ${tn(lost)}${round} של הפלייאוף בעונה שעברה (${pair(Math.max(hw, aw), Math.min(hw, aw))} בסדרה)`, tokens: ['פלייאוף'], weight: 56, flag: 'history' });
     }
   }
 

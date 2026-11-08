@@ -139,7 +139,7 @@ export function storyline(f, b, names, tn, momentOf = () => null, angleOf = () =
   // color: a former team (even when it is not the first return), the previous meeting, who was out
   const color = [];
   const inStory = new Set([...(protagonist?.what_made_it_he || []), ...cast.map((c) => c.fact_he)]);
-  const COLOR = ['STAR_ABSENT', 'RETURN_TO_FORMER_TEAM', 'STAR_HELD', 'RECENT_FORM', 'LAST_GAME_MOMENT', 'FIRST_VENUE_LOSS', 'ROOKIE_GAME', 'FORMER_TEAM_MEETING', 'DEBUT', 'H2H_STREAK', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED'];
+  const COLOR = ['STAR_ABSENT', 'PLAYOFF_REMATCH', 'RETURN_TO_FORMER_TEAM', 'STAR_HELD', 'RECENT_FORM', 'LAST_GAME_MOMENT', 'FIRST_VENUE_LOSS', 'ROOKIE_GAME', 'FORMER_TEAM_MEETING', 'DEBUT', 'H2H_STREAK', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED'];
   const venue = main?.type !== 'FIRST_VENUE_LOSS' && (f.candidates || []).find((k) => k.type === 'FIRST_VENUE_LOSS');
   if (venue) { const s = angleOf(venue); if (s) color.push(s); }
   for (const x of (f.contextFacts || []).filter((c) => c.verified && c.type !== main?.type && COLOR.includes(c.type) && !inStory.has(c.fact_he)).sort((a, b) => COLOR.indexOf(a.type) - COLOR.indexOf(b.type))) color.push(x.fact_he);

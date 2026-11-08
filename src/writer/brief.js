@@ -297,6 +297,7 @@ export function gameBrief(f) {
   // standard recap: 2 body paragraphs; 3 only when an Israeli played in the game
   const israeliPlayed = (f.israelis || []).some((i) => i.played);
   b.max_paragraphs = israeliPlayed ? 3 : 2;
+  b.target_words = [90, 130]; // Sport5's nightly block: ~90-130 words, more when the game earns it
   const isr = israeliLines(f);
   if (isr.length) b.israelis_featured = isr;
   // the score line above the block already shows the final score: the text does not repeat it
@@ -306,7 +307,13 @@ export function gameBrief(f) {
   b.story = storyline(f, b, names, tn, (m) => momentHe(m, f, names, tn), (k) => angleHe(k, f, tn, names));
   // the hero of the story is in the block even when the sentence about him had to go (wrong number -> dropped)
   const hero = b.story.protagonist;
-  if (hero && !(b.main_angle?.fact_he || '').includes(hero.name_he)) b.must_tell = [{ fact_he: `${hero.name_he} סיים עם ${hero.line_he}`, who: [hero.name_he, hero.name_he.split(' ').slice(1).join(' ')], num: hero.line_he.match(/\d+/)?.[0] || null, para: 0, full_only: true }];
+  b.must_tell = [];
+  // a major comeback that is not the angle must still be told (it explains how the game was won)
+  const cbk = top?.type !== 'COMEBACK' && (f.candidates || []).find((k) => k.type === 'COMEBACK');
+  if (cbk) { const s = angleHe(cbk, f, tn, names); if (s) b.must_tell.push({ fact_he: s, who: [tn(cbk.side)], num: String(cbk.pts), para: 1, full_only: true }); }
+  // a rout: when / how the gap opened has to be in the block, not only the scorers
+  if (b.story.theme === 'DOMINANCE' && b.story.turn_he[0]) { const s = b.story.turn_he[0]; const n = s.match(/\d+/)?.[0] || null; b.must_tell.push({ fact_he: s, who: [tn('home'), tn('away')], num: n, para: 1, full_only: true }); }
+  if (hero && !(b.main_angle?.fact_he || '').includes(hero.name_he)) b.must_tell.push({ fact_he: `${hero.name_he} סיים עם ${hero.line_he}`, who: [hero.name_he, hero.name_he.split(' ').slice(1).join(' ')], num: hero.line_he.match(/\d+/)?.[0] || null, para: 0, full_only: true });
   b.states = states; // for the verifier (stripped from the prompt)
   b._check = checkData(f, names, tn, recordAngles, ctxFacts);
   return b;
@@ -389,6 +396,8 @@ export function playerBrief(f, t) {
   const toHigh = t.milestones.find((m) => m.type === 'CAREER_HIGH_TO');
   b.his_story_he = (f.notable || []).filter((m) => m.playerId === t.player.id).slice(0, 2)
     .map((m) => { const s = momentHe(m, f, names, tnHe); if (!s || !toHigh) return s; return m.type === 'TURNOVERS' ? `${s}, הכי הרבה בקריירה שלו` : s.replace('איבודים במשחק כולו)', 'איבודים במשחק כולו, הכי הרבה בקריירה שלו)'); }).filter(Boolean);
+  // HOW HE ACTUALLY PLAYED — not the same as "led his team in scoring". From his line and the game only.
+  b.performance = performanceVerdict(t, f);
   // his full line is part of every Israeli article (Sport5's fixed form), in the body
   const mt = [{ fact_he: `${t.player.he} סיים עם ${b.line_full_he}`, who: [t.player.he, surname(t.player.he)], num: String(t.line.pts) },
     ...b.his_story_he.map((s) => ({ fact_he: s, who: [t.player.he, surname(t.player.he)], num: firstNum(s) }))];
@@ -419,6 +428,27 @@ export function playerBrief(f, t) {
   const extraTokens = [b.team_streak_he ? ordinal(streak.length) : null, ...t.milestones.filter((m) => m.type === 'STREAK').map((m) => String(m.text.match(/\d+/)?.[0] || ''))].filter(Boolean);
   b._check = { ...g._check, streak_tokens: [...(g._check.streak_tokens || []), ...extraTokens] };
   return b;
+}
+
+// an Israeli's night, judged from the numbers: a verdict and the reasons (each one a verified fact)
+export function performanceVerdict(t, f) {
+  const l = t.line;
+  const fgPct = l.fg && l.fg[1] ? l.fg[0] / l.fg[1] : null;
+  const margin = t.won ? f.result.margin : -f.result.margin;
+  const top = t.teamRank?.pts?.place === 1;
+  const reasons = [];
+  if (top) reasons.push(t.teamRank.pts.shared ? 'חלק את הובלת הקלעים של קבוצתו' : 'הקלע המוביל של קבוצתו');
+  if (l.fg && l.fg[1] >= 8) reasons.push(`${l.fg[0]} מ-${l.fg[1]} מהשדה`);
+  if (l.plusMinus != null && Math.abs(l.plusMinus) >= 10) reasons.push(`מדד פלוס מינוס ${l.plusMinus > 0 ? `${l.plusMinus}+` : `${-l.plusMinus}-`}`);
+  if (l.to >= 5) reasons.push(`${l.to} איבודים`);
+  const rout = !t.won && f.result.margin >= 18;
+  if (rout && l.min <= 28) reasons.push(`${l.min} דקות בלבד במשחק שהוכרע מוקדם`);
+  let verdict = 'solid';
+  if ((l.pts >= 20 && (fgPct ?? 0) >= 0.45) || (l.pts >= 15 && l.ast >= 8) || (l.pts >= 15 && l.reb >= 10) || (t.won && (l.plusMinus ?? 0) >= 12)) verdict = 'strong';
+  if ((fgPct != null && l.fg[1] >= 10 && fgPct < 0.35) || l.to >= 6 || (l.plusMinus ?? 0) <= -15) verdict = verdict === 'strong' ? 'mixed' : 'poor';
+  if (rout && l.min <= 28 && verdict !== 'strong') verdict = 'quiet_in_rout';
+  const he = { strong: 'ערב טוב שלו', solid: 'ערב סביר', mixed: 'ערב עם אור וצל', poor: 'ערב חלש שלו', quiet_in_rout: 'ערב שקט במשחק שהוכרע מוקדם' }[verdict];
+  return { verdict, verdict_he: he, reasons_he: reasons, team_margin: margin };
 }
 
 // the late plays worth telling: ties and go-ahead plays in the last two minutes, the decisive play, and a
