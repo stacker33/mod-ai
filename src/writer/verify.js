@@ -168,7 +168,13 @@ function scoreIssues(text, brief, ctx) {
 // records: "(W:L)" right after a team name, "L:W" after "עלתה/ירדה למאזן"
 function recordIssues(text, brief, ctx) {
   const out = [];
-  const recs = brief.records || (brief.team_record ? { [brief.team_he]: brief.team_record } : {});
+  const recs = brief.records || brief.game?.records || (brief.team_record ? { [brief.team_he]: brief.team_record } : {});
+  // the team a record belongs to: the nearest team name before it in the sentence
+  const teamBefore = (sentence, idx) => {
+    let best = null, at = -1;
+    for (const k of Object.keys(recs)) for (const n of new Set([k, k.replace(/^ה/, '')])) { const i = sentence.lastIndexOf(n, idx); if (i > at) { at = i; best = k; } }
+    return best;
+  };
   const forms = Object.values(recs).map((r) => ({ paren: r.after_team_name.replace(/[()]/g, ''), verb: r.after_verb.match(/\d+:\d+/)?.[0] }));
   const known = (p) => forms.some((f) => f.paren === p || f.verb === p);
   for (const sentence of sentences(text)) {
@@ -177,12 +183,21 @@ function recordIssues(text, brief, ctx) {
       if (forms.some((f) => f.verb === p)) continue;
       const swapped = `${m[6]}:${m[5]}`;
       const fixable = forms.some((f) => f.verb === swapped);
-      out.push({ code: 'record-relative', severity: 'block', msg: `"${m[0]}": אחרי "${m[1]} למאזן" כותבים הפסדים:ניצחונות${fixable ? ` — ${swapped}` : ''}`, fix: fixable ? { type: 'replace', sentence, from: m[0], to: m[0].replace(p, swapped) } : { type: 'drop', sentence } });
+      // a record we know for the team the sentence is about: correct it (the right form, verb included)
+      const team = !fixable && teamBefore(sentence, m.index);
+      const right = team && recs[team]?.after_verb;
+      out.push({ code: 'record-relative', severity: 'block', msg: `"${m[0]}": ${right ? `המאזן של ${team} הוא "${right}"` : `אחרי "${m[1]} למאזן" כותבים הפסדים:ניצחונות${fixable ? ` — ${swapped}` : ''}`}`, fix: fixable ? { type: 'replace', sentence, from: m[0], to: m[0].replace(p, swapped) } : right ? { type: 'replace', sentence, from: m[0], to: right } : { type: 'drop', sentence } });
     }
     for (const m of sentence.matchAll(/\((\d+):(\d+)\)/g)) {
       const p = `${m[1]}:${m[2]}`;
-      if (!known(p) && !known(`${m[2]}:${m[1]}`)) continue; // not a record
       const name = sentence.slice(Math.max(0, m.index - 25), m.index);
+      // right after a team name it IS a record — a wrong one is replaced with that team's real record
+      const tb = teamBefore(sentence, m.index);
+      if (tb && sentence.slice(sentence.lastIndexOf(tb.replace(/^ה/, ''), m.index), m.index).length <= tb.length + 2 && recs[tb]?.after_team_name && !known(p) && !known(`${m[2]}:${m[1]}`)) {
+        out.push({ code: 'record-standalone', severity: 'block', msg: `"${tb} (${p})": המאזן של ${tb} הוא ${recs[tb].after_team_name}`, fix: { type: 'replace', sentence, from: m[0], to: recs[tb].after_team_name } });
+        continue;
+      }
+      if (!known(p) && !known(`${m[2]}:${m[1]}`)) continue; // not a record
       const team = (ctx?.teams ? ['home', 'away'] : []).find((s) => ctx.teams[s].some((w) => name.includes(w)));
       if (forms.some((f) => f.paren === p)) continue;
       const swapped = `${m[2]}:${m[1]}`;
@@ -250,7 +265,8 @@ export function verifyDraft(input, brief, names, ctx = null) {
   const words = draftText({ paragraphs: draft.paragraphs || [] }).split(/\s+/).filter(Boolean).length;
   if (brief.target_words && (draft.paragraphs || []).length >= 2) { // a whole piece, not a fragment
     const [lo, hi] = brief.target_words;
-    if (words < lo * 0.7) push('too-short', 'style', `${words} מילים — הפורמט הזה הוא בערך ${lo}–${hi}: חסר סיפור (מה הכריע, מי עוד היה חשוב, הקשר)`);
+    // the Israeli article has a firmer floor (200 of 250): it is the longer format the editor relies on
+    if (words < lo * (brief.kind === 'player' ? 0.8 : 0.7)) push('too-short', 'style', `${words} מילים — הפורמט הזה הוא בערך ${lo}–${hi}: חסר סיפור (מה הכריע, מי עוד היה חשוב, הקשר)`);
     if (words > hi * 1.35) push('too-long', 'style', `${words} מילים — הפורמט הזה הוא בערך ${lo}–${hi}: לקצר את מה שלא משרת את הסיפור`);
   }
   for (const bad of ['משחק מרתק', 'דרמה גדולה']) if (text.includes(bad) && !(brief.margin <= 3 || brief.overtimes)) push('hype', 'style', `ביטוי מוגזם למשחק לא צמוד: ${bad}`);
@@ -336,9 +352,15 @@ export function autoFix(draft, issues, brief = null) {
     d.paragraphs = (d.paragraphs || []).map(fn).map((p) => p.replace(/\s{2,}/g, ' ').replace(/\s+([.,!?])/g, '$1').trim()).filter(Boolean);
     for (const k of fields) if (typeof d[k] === 'string') d[k] = d[k].replace(/\s{2,}/g, ' ').replace(/\s+([.,!?])/g, '$1').trim();
   };
+  // several fixes can hit one sentence: each works on the sentence as the previous fix left it
+  const cur = new Map();
   for (const i of issues.filter((x) => x.severity === 'block' && x.fix)) {
-    if (i.fix.type === 'replace') edit((t) => (t.includes(i.fix.sentence) ? t.replace(i.fix.sentence, i.fix.sentence.replace(i.fix.from, i.fix.to)) : t));
-    else if (i.fix.type === 'drop') edit((t) => t.replace(i.fix.sentence, ''));
+    const now = cur.get(i.fix.sentence) ?? i.fix.sentence;
+    if (i.fix.type === 'replace') {
+      const next = now.replace(i.fix.from, i.fix.to);
+      edit((t) => (t.includes(now) ? t.replace(now, next) : t));
+      cur.set(i.fix.sentence, next);
+    } else if (i.fix.type === 'drop') { edit((t) => t.replace(now, '')); cur.set(i.fix.sentence, ''); }
   }
   for (const a of issues.filter((x) => x.severity === 'block' && x.fix?.type === 'prepend')) {
     if (d.paragraphs?.length) d.paragraphs[0] = `${a.fix.text} ${d.paragraphs[0].trim()}`;

@@ -372,6 +372,8 @@ export function playerBrief(f, t) {
     line_full_he: fullLineHe(t.line),
     line_short_he: `(${t.line.pts} נק' ו-${t.line.ast >= t.line.reb ? `${t.line.ast} אס'` : `${t.line.reb} ריב'`})`,
     by_quarter: t.byPeriod.map((x) => ({ period_he: PERIOD_HE(x.period, f.clutch.finalPeriod), pts: x.pts })),
+    // his line at half-time, as Sport5 writes it ("במחצית, אגב, דני עמד על 6/8/12" -> here in words)
+    at_half_he: (() => { const h = t.byPeriod.filter((x) => x.period <= 2); const p = h.reduce((a, x) => a + x.pts, 0), r = h.reduce((a, x) => a + x.reb, 0), a = h.reduce((a2, x) => a2 + x.ast, 0); const c = (k, one, many) => (k === 1 ? one : `${k} ${many}`); return `במחצית הוא עמד על ${c(p, 'נקודה אחת', 'נקודות')}, ${c(r, 'ריבאונד אחד', 'ריבאונדים')} ו${a === 1 ? 'אסיסט אחד' : `-${a} אסיסטים`}`; })(),
     halves: t.halves,
     hottest_stretch: t.bestBurst ? { pts: t.bestBurst.pts, from_he: whenHe(periodNumber(t.bestBurst.from.periodName), t.bestBurst.from.clock, f.clutch.finalPeriod), to_he: whenHe(periodNumber(t.bestBurst.to.periodName), t.bestBurst.to.clock, f.clutch.finalPeriod) } : null,
     assists_to: t.assistsTo.map((a) => ({ name_he: names.get(a.name) || a.name, n: a.n })),
@@ -386,6 +388,8 @@ export function playerBrief(f, t) {
     next_game: t.team.context.next ? { opp_he: t.team.context.next.oppHe, home: t.team.context.next.home, weekday_he: t.team.context.next.israel.weekday, time_il: t.team.context.next.israel.time } : null,
     teammates: t.teammates.map((m) => ({ name_he: names.get(m.name) || m.name, pts: m.pts, reb: m.reb, ast: m.ast })),
     opponents: t.opponents.map((m) => ({ name_he: names.get(m.name) || m.name, pts: m.pts, reb: m.reb, ast: m.ast })),
+    // both teams' records, ready in both forms — never guessed ("סן אנטוניו עלתה למאזן ...")
+    records: g.records,
     game: g,
   };
   // another Israeli in the same game (Wolf next to Avdija, Sharp against Avdija) belongs in this article

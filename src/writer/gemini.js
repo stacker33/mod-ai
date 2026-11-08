@@ -16,7 +16,9 @@ function markSlow(file, m, why) {
 
 const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-export async function generateJSON({ key, model, fallback, system, messages, schema, temperature = 0.5, healthFile = null }) {
+// fallbackHint: extra text for the fallback models only (a code-written skeleton of the story), so a weaker
+// model starts from the facts in order instead of from a blank page
+export async function generateJSON({ key, model, fallback, system, messages, schema, temperature = 0.5, healthFile = null, fallbackHint = null }) {
   const listed = [model, ...String(fallback || '').split(',')].map((x) => x && x.trim()).filter(Boolean);
   const health = healthFile ? readHealth(healthFile) : {};
   // skip the models that hung / were overloaded in the last 20 minutes (all of them skipped -> try them anyway)
@@ -33,7 +35,7 @@ export async function generateJSON({ key, model, fallback, system, messages, sch
           signal: AbortSignal.timeout(TIMEOUT),
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: system }] },
-            contents: messages.map((x) => ({ role: x.role, parts: [{ text: x.text }] })),
+            contents: messages.map((x, i) => ({ role: x.role, parts: [{ text: i === 0 && fallbackHint && m !== listed[0] ? `${x.text}\n\n${fallbackHint}` : x.text }] })),
             generationConfig: { temperature, responseMimeType: 'application/json', responseSchema: schema, maxOutputTokens: 8192 },
           }),
         });

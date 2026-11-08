@@ -110,3 +110,26 @@ test('review in code: a comeback that is not the angle, and the separation in a 
   const lal = gameBrief(analyzeGame(json(join(DIR, '401909294.json')), { names, context: json(join(DIR, 'extra', 'ctx-401909294.json')) }));
   assert.ok(lal.must_tell.some((x) => x.fact_he === 'הלייקרס חזרו מפיגור 16'));
 });
+
+test('records: both teams in the Israeli brief; a correct opponent record passes, a wrong one is corrected (not deleted)', async () => {
+  const { playerBrief } = await import('../src/writer/brief.js');
+  const { autoFix } = await import('../src/writer/verify.js');
+  const f = game('401909944', [avdija]);
+  const pb = playerBrief(f, f.tracks[0]);
+  assert.equal(pb.records['סן אנטוניו'].after_verb, 'עלתה למאזן 2:8');
+  assert.equal(pb.at_half_he, 'במחצית הוא עמד על 10 נקודות, 3 ריבאונדים ואסיסט אחד');
+  const d = { headline: 'דני אבדיה בהפסד', subheadline: 'x', paragraphs: ['וומבניאמה בלט עם 29 נקודות, וסן אנטוניו עלתה למאזן 2:8.', 'פורטלנד (5:4) ירדה, ופורטלנד ירדה למאזן 6:3.'] };
+  const r = verifyDraft(d, pb, [], null);
+  assert.ok(!r.issues.some((i) => /record/.test(i.code) && /סן אנטוניו/.test(i.fix?.sentence || '')));
+  const fixed = autoFix(d, r.issues, pb);
+  assert.ok(fixed.paragraphs[0].includes('סן אנטוניו עלתה למאזן 2:8')); // kept
+  assert.match(fixed.paragraphs[1], /פורטלנד \(3:6\) ירדה, ופורטלנד ירדה למאזן 3:6/); // corrected, not dropped
+});
+
+test('a fallback model gets the story skeleton; local AI tests are fenced to 08:00-10:00 Israel time', async () => {
+  const src = readFileSync(join(DIR, '..', 'src', 'pipeline.js'), 'utf8');
+  assert.match(src, /fallbackHint: skeletonHint\(mode, brief\)/);
+  const { writeItem } = await import('../src/pipeline.js');
+  const h = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }).format(new Date()));
+  if (h < 8 || h >= 10) await assert.rejects(() => writeItem({ env: {}, dict: [], ai: {} }, 'game', {}, { players: { home: [], away: [] } }), /08:00-10:00/);
+});

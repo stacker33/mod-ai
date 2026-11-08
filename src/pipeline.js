@@ -160,7 +160,27 @@ export function templateDraft(mode, b) {
   return { headline, subheadline: b.line_short_he ? `${b.player_he} ${b.line_short_he}` : b.team_he, paragraphs: [p1, story, others].filter(Boolean) };
 }
 
+// for a fallback model: the story in plain verified sentences, in order — the base to rewrite in a lively
+// voice (the hook, the verbs), never to copy as it is and never to go beyond
+function skeletonHint(mode, brief) {
+  try {
+    const d = templateDraft(mode, brief);
+    const lines = [d.headline, d.subheadline, ...(d.paragraphs || [])].filter(Boolean).join('\n');
+    return `שלד עובדתי של הסיפור (נכתב בקוד, כל עובדה בו מאומתת). כתוב ממנו את הטקסט בקול של עורך — פתיחה חיה, פעלים, סדר שמשרת את הסיפור — בלי להוסיף עובדות שאינן ב-BRIEF:\n${lines}`;
+  } catch { return null; }
+}
+
+// LOCAL AI TESTS: the free quota resets at 10:00 Israel time, and the night's games use the same day's
+// quota as any test run after that — so tests on this machine run only 08:00-10:00 (the night's leftover),
+// unless MODAI_ALLOW_AI=1. The live runner (GitHub Actions) is never limited by this.
+function localAiAllowed(env) {
+  if (env.GITHUB_ACTIONS || env.MODAI_ALLOW_AI === '1') return true;
+  const h = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }).format(new Date()));
+  return h >= 8 && h < 10;
+}
+
 export async function writeItem(cfg, mode, brief, f) {
+  if (!localAiAllowed(cfg.env || process.env)) throw Object.assign(new Error('Local AI test outside 08:00-10:00 Israel time (it would use tonight\'s quota). Set MODAI_ALLOW_AI=1 to override.'), { localGuard: true });
   const inGame = new Set(['home', 'away'].flatMap((s) => f.players[s].map((p) => p.id)));
   const names = cfg.dict.map((d) => ({ ...d, inGame: inGame.has(d.id), status: d.approved ? 'approved' : d.status }));
   const ctx = ctxFor(f);
@@ -175,7 +195,7 @@ export async function writeItem(cfg, mode, brief, f) {
   for (let round = 1; round <= rounds; round++) {
     let res;
     try {
-      res = await generateJSON({ ...cfg.ai, system, messages, schema: schemaFor(mode) });
+      res = await generateJSON({ ...cfg.ai, system, messages, schema: schemaFor(mode), fallbackHint: skeletonHint(mode, brief) });
       countCall(res.model);
     } catch (e) {
       if (!e.quota) throw e; // a busy model: the runner retries at the next check
