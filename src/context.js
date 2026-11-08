@@ -422,7 +422,13 @@ export function buildContext(f, ext = {}) {
       const rows = ext.gamelogs?.[p.id] || ext.recent?.[p.id];
       if (!rows) continue;
       const r = formerTeamFact(rows, p, f.teams[side].abbr, f.teams[opp].abbr, f.gameId, f.date, side === 'home');
-      if (!r) continue;
+      if (!r) {
+        // not a first: still worth a line when a starter faces a team he played 2+ seasons for
+        const seasonsThere = new Set(rows.filter((x) => x.team === f.teams[opp].abbr && x.type === 'regular' && x.eventId !== f.gameId).map((x) => x.season)).size;
+        const nowHere = rows.filter((x) => x.eventId !== f.gameId && x.date && new Date(x.date) < new Date(f.date)).at(-1)?.team === f.teams[side].abbr;
+        if (seasonsThere >= 2 && nowHere && p.starter && p.min >= 20 && p.he) add({ type: 'FORMER_TEAM_MEETING', side, player: p.name, value: seasonsThere, pts: p.pts, source: 'ESPN player game log', fact_he: `${p.he}, ששיחק ${SEASONS_HE(seasonsThere)} ב${(heTeam(f.teams[opp].abbr) || tn(opp)).replace(/^ה/, '')}, סיים מול קבוצתו לשעבר עם ${shortLineHe(p)}`, tokens: [p.he.split(' ').slice(1).join(' ') || p.he], weight: 34, flag: 'former_team' });
+        continue;
+      }
       const name = p.he || p.name;
       const oppHe = heTeam(f.teams[opp].abbr) || tn(opp);
       const where = r.seasons ? `, הקבוצה שבה שיחק ${SEASONS_HE(r.seasons)}` : ', קבוצתו לשעבר';
@@ -435,6 +441,10 @@ export function buildContext(f, ext = {}) {
       add({ type: 'RETURN_TO_FORMER_TEAM', side, player: p.name, value: r.seasons, source: 'ESPN player game log', fact_he, tokens: [(name.split(' ').slice(1).join(' ') || name)], weight: (r.kind === 'FIRST_RETURN' ? 80 : r.kind === 'RETURN_NEW_COLORS' ? 66 : 70) - (big ? 0 : 20) + (r.seasons >= 3 ? 4 : 0) + (r.seasons >= 8 ? 12 : 0), flag: 'former_team' });
     }
   }
+
+  // one former-team line per game: the one who mattered most on the night (Durant in Phoenix, not a role player)
+  const ftm = out.filter((x) => x.type === 'FORMER_TEAM_MEETING').sort((a, b) => b.pts - a.pts || b.value - a.value);
+  for (const x of ftm.slice(1)) out.splice(out.indexOf(x), 1);
 
   for (const side of ['home', 'away']) {
     for (const p of f.players[side]) {

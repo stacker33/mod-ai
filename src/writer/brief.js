@@ -124,6 +124,7 @@ function angleHe(k, f, tn, names = new Map()) {
   if (k.context) return k.fact_he; // verified context facts arrive already written
   switch (k.type) {
     case 'COMEBACK': return `${t(k.side)} ${vb(k.side, 'חזרה', 'חזרו')} מפיגור ${k.pts}`;
+    case 'SPECIAL_VENUE': return `${t(k.side)} ${vb(k.side, 'ניצחה', 'ניצחו')} את ${t(f.result.loser)} במשחק שנערך ב${k.city_he}`;
     case 'FIRST_VENUE_LOSS': return `${t(k.side)} ${vb(k.side, 'ספגה', 'ספגו')} הפסד ${k.home ? 'בית' : 'חוץ'} ראשון העונה`;
     case 'GAME_WINNER': {
       const wb = f.clutch.winningBasket;
@@ -442,6 +443,8 @@ function angleTokens(k, names) {
   if (k.context) return k.tokens || [];
   switch (k.type) {
     case 'FIRST_LOSS': case 'FIRST_WIN': case 'FIRST_VENUE_LOSS': return ['ראשון', 'ראשונה'];
+    case 'SPECIAL_VENUE': return [k.city_he];
+    case 'BLOWOUT': return ['הפרש', 'ניצחון', 'מחץ', 'דרס', 'דרסה', 'ריסק', 'ריסקה'];
     case 'UNBEATEN': return ['בלי הפסד', 'ללא הפסד', 'מושלמת'];
     case 'WINLESS': return ['בלי ניצחון', 'ללא ניצחון'];
     case 'SHORT_ROSTER': return ['שחקנים'];

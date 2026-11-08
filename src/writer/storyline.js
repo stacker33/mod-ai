@@ -16,7 +16,7 @@ const HOOK = {
 };
 const DRAMA = new Set(['GAME_WINNER', 'BUZZER_BEATER', 'FORCED_OT', 'OVERTIME', 'CLOSE_FINISH']);
 const HERO = new Set(['BIG_SCORING', 'CAREER_HIGH', 'TIES_CAREER_HIGH', 'SEASON_HIGH', 'TIES_SEASON_HIGH', 'TRIPLE_DOUBLE', 'TOP_PERFORMER', 'UNUSUAL_STAT_LINE', 'SCORING_STREAK']);
-const FORM = new Set(['RETURN_TO_FORMER_TEAM', 'RECENT_FORM', 'STAR_HELD', 'LAST_GAME_MOMENT']);
+const FORM = new Set(['FORMER_TEAM_MEETING', 'RETURN_TO_FORMER_TEAM', 'RECENT_FORM', 'STAR_HELD', 'LAST_GAME_MOMENT']);
 const CONTEXT = new Set(['STAR_ABSENT', 'FIRST_LOSS', 'FIRST_WIN', 'UNBEATEN', 'WINLESS', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED', 'LOSING_STREAK_ENDED', 'H2H_STREAK', 'LOST_FIRST_PLACE', 'TOOK_FIRST_PLACE', 'CONFERENCE_LEADER', 'RETURN_TO_FORMER_TEAM', 'SHORT_ROSTER']);
 
 // "קלע 7 מתוך 8 הנקודות האחרונות של בוסטון": the longest closing stretch of a team's scoring that one
@@ -54,8 +54,12 @@ export function storyline(f, b, names, tn, momentOf = () => null, angleOf = () =
   const arcFor = (p) => notable.filter((m) => m.playerId === p.id);
   let hero = main?.player ? byEn(main.player) : null;
   if (!hero) {
-    const arc = notable.find((m) => ['PERIOD_TAKEOVER', 'PLAYER_SURGE', 'BIG_HALF'].includes(m.type) && byId(m.playerId)?.side === W);
-    hero = arc ? byId(arc.playerId) : [...all.filter((p) => p.side === W)].sort((a, b2) => b2.pts - a.pts)[0];
+    // the winner's top scorer, unless a player with a story arc (who carried the deciding quarter, a surge,
+    // the man of the last quarter) scored about as much — then it was his night
+    const top = [...all.filter((p) => p.side === W)].sort((a, b2) => b2.pts - a.pts)[0];
+    const arcIds = [...notable.filter((m) => ['PERIOD_TAKEOVER', 'PLAYER_SURGE', 'BIG_HALF'].includes(m.type)).map((m) => m.playerId), ...notable.filter((m) => m.type === 'Q4_COLLAPSE' && m.by).map((m) => m.by.playerId)];
+    const arcHero = arcIds.map(byId).filter((p) => p && p.side === W).sort((a, b2) => b2.pts - a.pts)[0];
+    hero = arcHero && top && arcHero.pts >= top.pts * 0.8 ? arcHero : top;
   }
   const share = closingShare(f, hero?.side || W);
   const shareHe = share && byEn(share.player) ? `${heName(byEn(share.player))} קלע ${share.pts} מתוך ${share.team} הנקודות האחרונות של ${tn(byEn(share.player).side)}` : null;
@@ -69,12 +73,14 @@ export function storyline(f, b, names, tn, momentOf = () => null, angleOf = () =
   const t = main?.type;
   const close = f.result.margin <= 4 || f.clutch.overtimes > 0;
   let theme = 'HERO';
-  if (t && DRAMA.has(t) && close) theme = 'DRAMA';
+  const dramaInGame = (f.candidates || []).some((k) => DRAMA.has(k.type) || k.type === 'FORCED_OT');
+  if ((t && DRAMA.has(t) && close) || (close && dramaInGame)) theme = 'DRAMA';
   else if (t === 'COMEBACK') theme = 'COMEBACK';
   else if (t === 'LATE_COLLAPSE' || notable.some((m) => m.type === 'Q4_COLLAPSE')) theme = close || t === 'LATE_COLLAPSE' ? 'COLLAPSE' : 'COMEBACK';
   else if (t && CONTEXT.has(t)) theme = 'CONTEXT';
   else if (duel) theme = 'DUEL';
   else if ((t === 'BLOWOUT' || t === 'DOMINANT_QUARTER' || t === 'MAJOR_RUN') && f.result.margin >= 18) theme = 'DOMINANCE';
+  else if (t === 'SPECIAL_VENUE') theme = f.result.margin >= 18 ? 'DOMINANCE' : 'CONTEXT';
   else if (t && HERO.has(t)) theme = 'HERO';
   else if (close) theme = 'DRAMA';
   else if (f.result.margin >= 20) theme = 'DOMINANCE';
@@ -124,15 +130,16 @@ export function storyline(f, b, names, tn, momentOf = () => null, angleOf = () =
   // the deficit the winner erased, when the story is someone's big night ("Doncic erased a 16-point deficit")
   const cb = main?.type !== 'COMEBACK' && (f.candidates || []).find((k) => k.type === 'COMEBACK');
   if (cb) { const s = angleOf(cb); if (s) turn.unshift(s); }
-  for (const m of notable.filter((x) => ['HOT_THREES', 'COLD_THREES', 'COLD_SHOOTING'].includes(x.type)).slice(0, 1)) { const s = momentHe(m); if (s) turn.push(s); }
+  // shooting that explains the result: the winner hot, or the loser cold
+  for (const m of notable.filter((x) => (x.type === 'HOT_THREES' && x.side === W) || (['COLD_THREES', 'COLD_SHOOTING'].includes(x.type) && x.side === L)).slice(0, 1)) { const s = momentHe(m); if (s) turn.push(s); }
   const told = notable.some((m) => m.type === 'Q4_COLLAPSE');
   if (b.after_three_clause && !told) turn.push(b.after_three_clause);
-  else if (b.halftime_clause) turn.push(b.halftime_clause);
+  else if (b.halftime_clause && !told) turn.push(b.halftime_clause);
 
   // color: a former team (even when it is not the first return), the previous meeting, who was out
   const color = [];
   const inStory = new Set([...(protagonist?.what_made_it_he || []), ...cast.map((c) => c.fact_he)]);
-  const COLOR = ['STAR_ABSENT', 'RETURN_TO_FORMER_TEAM', 'STAR_HELD', 'RECENT_FORM', 'LAST_GAME_MOMENT', 'FIRST_VENUE_LOSS', 'ROOKIE_GAME', 'DEBUT', 'H2H_STREAK', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED'];
+  const COLOR = ['STAR_ABSENT', 'RETURN_TO_FORMER_TEAM', 'STAR_HELD', 'RECENT_FORM', 'LAST_GAME_MOMENT', 'FIRST_VENUE_LOSS', 'ROOKIE_GAME', 'FORMER_TEAM_MEETING', 'DEBUT', 'H2H_STREAK', 'WIN_STREAK', 'LOSS_STREAK', 'STREAK_ENDED'];
   const venue = main?.type !== 'FIRST_VENUE_LOSS' && (f.candidates || []).find((k) => k.type === 'FIRST_VENUE_LOSS');
   if (venue) { const s = angleOf(venue); if (s) color.push(s); }
   for (const x of (f.contextFacts || []).filter((c) => c.verified && c.type !== main?.type && COLOR.includes(c.type) && !inStory.has(c.fact_he)).sort((a, b) => COLOR.indexOf(a.type) - COLOR.indexOf(b.type))) color.push(x.fact_he);

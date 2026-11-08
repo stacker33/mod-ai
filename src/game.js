@@ -29,7 +29,7 @@ export function analyzeGame(summary, { israelis = [], histories = new Map(), sch
   // next game, previous meeting, absences: background for the recap (not story angles)
   const enToHe = new Map([...names.values()].filter((n) => n.en && n.he).map((n) => [n.en, n.he]));
   f.gameContext = gameContext(f, context, enToHe);
-  f.story = rankStory([...f.candidates, ...colorCandidates(f.color)], f.contextFacts);
+  f.story = rankStory([...f.candidates, ...colorCandidates(f.color)], f.contextFacts, f);
   f.candidates = f.story.ranked;
   const teams = [f.teams.home.abbr, f.teams.away.abbr];
   f.tracks = israelis

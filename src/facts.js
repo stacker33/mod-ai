@@ -277,6 +277,9 @@ function notableMoments(plays, f) {
     // it matters when that team lost, or when it would have ended regulation / an overtime
     const lost = f.result.loser === p.side;
     if (!lost && lastPeriod) continue;
+    // the team got there anyway before the period ended (offensive rebound + tip-in): not a missed chance
+    const own = (q) => q[p.side] - q[other(p.side)];
+    if (plays.slice(plays.indexOf(p) + 1).some((q) => q.period === p.period && (kind === 'tying' ? own(q) >= 0 : own(q) > 0))) continue;
     out.push({ type: 'MISSED_WINNER', side: p.side, player: p.ids[0] || null, period: p.period, secondsLeft: p.cs, shot: value === 3 ? 'three' : 'two', kind, regulation: p.period === 4 && fp > 4, wow: lastPeriod ? 70 : 55 });
   }
   // a big first half for one player
@@ -488,7 +491,11 @@ function candidates(f) {
       c.push({ type: 'DOMINANT_QUARTER', weight: side === f.result.winner ? 58 : 40, side, period: i + 1, score: { home: h, away: a }, why: `${f.teams[side].abbr} won period ${i + 1} by ${Math.abs(h - a)}`, evidence: 'box' });
     }
   });
-  if (m >= 25) add('BLOWOUT', 45, `won by ${m}`, 'box', { side: f.result.winner, n: m });
+  // a real rout is the story (when the gap opened is told in the turn)
+  if (m >= 25) add('BLOWOUT', m >= 30 ? 74 : 60, `won by ${m}`, 'box', { side: f.result.winner, n: m });
+  // a game away from both arenas (Mexico City, Paris, London...): the occasion is the story
+  const CITY_HE = { 'Mexico City': 'מקסיקו סיטי', Paris: 'פריז', London: 'לונדון', Berlin: 'ברלין', 'Abu Dhabi': 'אבו דאבי', 'Las Vegas': 'לאס וגאס', Montreal: 'מונטריאול', Tokyo: 'טוקיו', Manchester: 'מנצ\'סטר' };
+  if (f.neutralSite && CITY_HE[f.venueCity]) add('SPECIAL_VENUE', 72, `played in ${f.venueCity}`, 'box', { side: f.result.winner, city_he: CITY_HE[f.venueCity] });
 
   for (const side of ['home', 'away']) {
     for (const p of f.players[side]) {
@@ -616,6 +623,8 @@ export function buildFacts(summary, { israelis = [], fetchedAt = new Date().toIS
     // an NBA Cup game (group play / knockout): Sport5 adds the Cup record to the score line
     cupGame: /NBA Cup/i.test([summary.header?.gameNote, ...(comp.notes || []).map((n) => n.headline)].filter(Boolean).join(' ')),
     venue: summary.gameInfo?.venue?.fullName || null,
+    venueCity: summary.gameInfo?.venue?.address?.city || null,
+    neutralSite: !!comp.neutralSite,
     status: { final: statusType.state === 'post' && !!statusType.completed, state: statusType.state, detail: statusType.detail || '' },
     teams: { home: team(H), away: team(A) },
   };
