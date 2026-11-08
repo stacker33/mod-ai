@@ -47,7 +47,7 @@ test('MIA @ LAC: overtime in the score line; the missed winners at the end of re
   const f = game('401909935');
   const b = gameBrief(f);
   assert.ok(b.heading.endsWith('117:116 בהארכה'));
-  assert.ok(b.details.some((d) => /החטיא .* (בסיום הזמן החוקי|בסיום ההארכה)/.test(d)), b.details.join(' | '));
+  assert.ok(b.details.some((d) => /החטיא .* (הזמן החוקי|ההארכה)/.test(d)), b.details.join(' | '));
 });
 
 test('LAL @ SAC: Doncic, not Sharp\'s 3 points, is the story; Sharp still gets his own article', () => {

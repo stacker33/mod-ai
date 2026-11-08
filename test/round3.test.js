@@ -128,12 +128,13 @@ test('H. structure: 2 paragraphs; the headline carries the main angle or the cod
 test('I. unverified career high / season high / streak / standings / history never pass', () => {
   const f = game('401909909'); // no context fetched -> nothing verified
   const b = gameBrief(f);
-  assert.deepEqual(b.verified, { season_high: false, career_high: false, streak: false, standings: false, historical: false });
+  assert.deepEqual(b.verified, { season_high: false, career_high: false, streak: false, standings: false, playoffs: false, historical: false });
   for (const [s, c] of [
     ['ניקיל אלכסנדר-ווקר קלע שיא קריירה.', 'unverified-career_high'],
     ['ניקיל אלכסנדר-ווקר קלע שיא עונה.', 'unverified-season_high'],
     ['אטלנטה רשמה ניצחון שלישי ברציפות.', 'unverified-streak'],
     ['אטלנטה עלתה למקום השישי בטבלה.', 'unverified-standings'],
+    ['אטלנטה הדיחה אותם מהפלייאוף בעונה שעברה.', 'unverified-playoffs'],
     ['זה הניצחון הגדול ביותר בהיסטוריה של אטלנטה.', 'unverified-historical'],
   ]) assert.ok(codes(one(f, s)).includes(c), s);
 });

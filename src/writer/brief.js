@@ -67,7 +67,10 @@ function momentHe(m, f, names, tn) {
       if (!who) return null;
       const what = m.shot === 'three' ? 'שלשה' : 'זריקה';
       const could = m.kind === 'winning' ? 'שהייתה יכולה להכריע את המשחק' : 'שהייתה יכולה לשלוח להארכה';
-      const when = m.regulation ? 'בסיום הזמן החוקי' : m.period > 4 ? 'בסיום ההארכה' : 'בהתקפה האחרונה';
+      // the exact time, so the order against the other late plays is never guessed (a tie at 1.5, the miss at 0.5)
+      const end = m.regulation ? 'הזמן החוקי' : m.period > 4 ? 'ההארכה' : null;
+      const s = m.secondsLeft;
+      const when = s != null && s < 1 ? `בשנייה האחרונה${end ? ` של ${end}` : ''}` : s != null && s < 60 ? `${Math.round(s)} שניות לסיום${end ? ` ${end}` : ''}` : end ? `בסיום ${end}` : 'בהתקפה האחרונה';
       return `${who} החטיא ${what} ${m.regulation && m.kind === 'winning' ? 'שהייתה יכולה להכריע את המשחק' : could} ${when}`;
     }
     case 'BIG_HALF': { const who = byId(m.playerId); return who ? `${who} קלע ${m.pts} נקודות כבר במחצית הראשונה` : null; }
@@ -292,6 +295,8 @@ export function gameBrief(f) {
     career_high: ctxFacts.some((x) => x.flag === 'career_high'),
     streak: recordAngles.length > 0 || ctxFacts.some((x) => x.flag === 'streak'),
     standings: false,
+    // last season's playoff series between the two (ESPN schedule) — the only playoff language allowed
+    playoffs: ctxFacts.some((x) => x.flag === 'history'),
     historical: false, // no NBA / franchise record source yet
   };
   // standard recap: 2 body paragraphs; 3 only when an Israeli played in the game
@@ -422,6 +427,7 @@ export function playerBrief(f, t) {
     career_high: ms.includes('CAREER_HIGH') || ms.includes('TIES_CAREER_HIGH'),
     streak: !!b.team_streak_he || ms.includes('STREAK') || g.verified.streak,
     standings: false,
+    playoffs: g.verified.playoffs,
   };
   b.states = g.states;
   // the player piece may also state his team's streak and his own verified streaks
