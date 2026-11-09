@@ -29,6 +29,7 @@ export function nightBoard(dir) {
     } else if (g?.status === 'retry' && /quota/.test(g.error || '')) status = 'quota';
     else if (g && ['failed', 'blocked'].includes(g.status)) status = 'manual';
     else if (g?.status === 'retry') status = 'retry';
+    else if (g?.status === 'await_recap') status = 'ap';
     else status = sched?.state === 'in' ? 'live' : 'upcoming';
     const t = (side) => heTeam(f?.teams?.[side]?.abbr || sched?.[side]) || f?.teams?.[side]?.heShort || sched?.[side] || '';
     const line = f ? `${t('home')} - ${t('away')} ${f.teams.away.score}:${f.teams.home.score}` : `${t('home')} - ${t('away')}`;
@@ -63,7 +64,7 @@ export function nightBoard(dir) {
     ready: board.filter((x) => ['ok', 'fixed'].includes(x.status)).length,
     review: board.filter((x) => ['review', 'partial'].includes(x.status)).length,
     held: board.filter((x) => ['held', 'manual'].includes(x.status)).length,
-    waiting: board.filter((x) => ['quota', 'retry'].includes(x.status)).length,
+    waiting: board.filter((x) => ['quota', 'retry', 'ap'].includes(x.status)).length,
     live: board.filter((x) => x.status === 'live').length,
     upcoming: board.filter((x) => x.status === 'upcoming').length,
     avgMinutes: mins.length ? mins[Math.floor((mins.length - 1) / 2)] : null, // median: one late game does not skew it

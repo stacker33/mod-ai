@@ -9,6 +9,7 @@
 // per-team scores), so they compare strings instead of trying to parse Hebrew grammar.
 
 import { narrativeChecks } from './narrative.js';
+import { AP_GATES } from '../recap.js';
 
 const NUM = /\d+(?:\.\d+)?/g;
 const PAIR = /\d+:\d+/g;
@@ -16,7 +17,7 @@ const LATIN_OK = new Set(['NBA', 'LA', 'MVP', 'TD', 'W']);
 const SENT = /[^.!?\n]+[.!?]?/g;
 
 export function allowedFrom(brief) {
-  const s = JSON.stringify(brief, (k, v) => (k === 'states' || k.startsWith('_') ? undefined : v));
+  const s = JSON.stringify(brief, (k, v) => (k === 'states' || k === 'ap_recap' || k.startsWith('_') ? undefined : v));
   return { numbers: new Set(s.match(NUM) || []), pairs: new Set(s.match(PAIR) || []) };
 }
 
@@ -224,9 +225,16 @@ export function verifyDraft(input, brief, names, ctx = null) {
   issues.push(...narrativeChecks(draft, text, brief, ctx));
 
   const { numbers, pairs } = allowedFrom(brief);
+  // AP's recap: its numbers are allowed in a context sentence ("missed 12 games", "seventh straight"), never
+  // as a stat (points, rebounds, percentages — those come from the box score); its wording verifies a
+  // milestone claim (a career best, a streak, a series) the box score cannot
+  const ap = brief.ap_recap || brief.game?.ap_recap || null;
+  const apNums = new Set(ap ? (ap.text.match(NUM) || []) : []);
+  const STAT = /נקוד|ריבאונד|אסיסט|חטיפ|חסימ|מהשדה|שלשות|עונשין|אחוז|איבוד/;
+  const apOk = (flag) => !!(ap && AP_GATES[flag]?.test(ap.text));
   const finalScores = (brief.result_for_winner || brief.result_he || brief.game?.result_for_winner || '').match(/(\d+):(\d+)/)?.slice(1).map(Number) || null;
   for (const s of sentences(text)) {
-    for (const n of new Set(s.replace(PAIR, ' ').match(NUM) || [])) if (!numbers.has(n)) push('number', 'block', `המספר ${n} לא מופיע בנתונים`, { type: 'drop', sentence: s });
+    for (const n of new Set(s.replace(PAIR, ' ').match(NUM) || [])) if (!numbers.has(n) && !(apNums.has(n) && !STAT.test(s))) push('number', 'block', `המספר ${n} לא מופיע בנתונים`, { type: 'drop', sentence: s });
     // (a record in the wrong order is already a record issue with its own fix)
     for (const p of new Set(s.match(PAIR) || [])) if (!pairs.has(p) && !issues.some((i) => i.fix?.to === p || i.fix?.to?.includes?.(p) || (/^record-/.test(i.code) && i.fix?.sentence === s))) push('pair', 'block', `התוצאה ${p} לא מופיעה בנתונים`, { type: 'drop', sentence: s });
     // the final result after "ניצחון"/"הפסד" keeps Sport5's form (subject last). Only the final score is
@@ -240,7 +248,7 @@ export function verifyDraft(input, brief, names, ctx = null) {
     for (const w of new Set(s.match(/[A-Za-z][A-Za-z.'-]+/g) || [])) if (!LATIN_OK.has(w)) push('latin', 'block', `מילה באנגלית: ${w}`, { type: 'drop', sentence: s });
     for (const w of new Set(s.match(/\S*[Ͱ-ϿЀ-ӿ؀-ۿ]\S*/g) || [])) push('foreign', 'block', `אותיות זרות במילה: ${w}`, { type: 'drop', sentence: s });
     for (const n of names.filter((x) => !x.inGame && x.he && x.he.includes(' '))) if (s.includes(n.he)) push('name', 'block', `השם ${n.he} לא שייך למשחק הזה`, { type: 'drop', sentence: s });
-    for (const g of GATES) if (!brief.verified?.[g.flag] && g.re.test(s)) push(`unverified-${g.flag}`, 'block', `"${s.slice(0, 70)}": טענה (${g.flag}) שלא אומתה בנתונים`, { type: 'drop', sentence: s });
+    for (const g of GATES) if (!brief.verified?.[g.flag] && !apOk(g.flag) && g.re.test(s)) push(`unverified-${g.flag}`, 'block', `"${s.slice(0, 70)}": טענה (${g.flag}) שלא אומתה בנתונים`, { type: 'drop', sentence: s });
     if (LEAK.test(s)) push('leak', 'block', `טקסט פנימי דלף לטיוטה: "${s.slice(0, 60)}"`, { type: 'drop', sentence: s });
     for (const re of REDUNDANT) if (re.test(s)) push('redundant', 'style', `ניסוח כפול: "${s.match(re)[0]}" — כתוב פעם אחת ("ניצחון שני ברציפות")`);
     for (const [re, better] of BANNED) if (re.test(s)) push('banned', 'style', `ניסוח מתורגם: "${s.match(re)[0]}" — עדיף: ${better}`);

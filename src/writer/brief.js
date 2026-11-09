@@ -321,6 +321,8 @@ export function gameBrief(f) {
   if (hero && !(b.main_angle?.fact_he || '').includes(hero.name_he)) b.must_tell.push({ fact_he: `${hero.name_he} סיים עם ${hero.line_he}`, who: [hero.name_he, hero.name_he.split(' ').slice(1).join(' ')], num: hero.line_he.match(/\d+/)?.[0] || null, para: 0, full_only: true });
   b.states = states; // for the verifier (stripped from the prompt)
   b._check = checkData(f, names, tn, recordAngles, ctxFacts);
+  // AP's recap (English): background for the story and the context, never numbers (see prompt rule 20)
+  if (f.apRecap) b.ap_recap = { headline: f.apRecap.headline, text: f.apRecap.text };
   return b;
 }
 

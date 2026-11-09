@@ -12,6 +12,7 @@
 //   12   publish (held only if a contradiction or nothing usable is left)  notify.js, scripts/tick.js
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
+import { apRecap, sameHero } from './recap.js';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getSummary, getTeamSchedule } from './espn.js';
@@ -88,6 +89,7 @@ export async function factsForGame(date, gameId, cfg, row = null) {
   // the second source's view of the same game: final score + every 10+ point scorer
   if (!f.backupSource) { try { f.crossCheck = await crossCheck(f, cfg.env, date); } catch { f.crossCheck = null; } }
   f.endedAt = s.plays?.at(-1)?.wallclock || null;
+  f.apRecap = apRecap(s); // background for the writer (src/recap.js), when AP has filed
   writeFileSync(join(dir, `${gameId}.json`), JSON.stringify(f, null, 2));
   return f;
 }
@@ -272,6 +274,8 @@ const checkBox = (it) => {
   const style = issues.filter((i) => i.severity === 'style');
   if (style.length) o.push(`> ✍️ ניסוח לבדיקה: ${style.map((i) => i.msg).join('; ')}`);
   if (it.angle) o.push(`> 🎯 זווית: ${it.angle.fact_he}`);
+  if (it.ap) o.push(`> 📰 ${it.ap.source}: ${it.ap.headline}${it.ap.sameHero === false ? ' (גיבור אחר משלנו)' : ''}`);
+  else if (it.mode === 'game') o.push('> 📰 נכתב בלי הסיכום של AP');
   if (it.corrected) o.push('> 🔁 נכתב מחדש אחרי תיקון סטטיסטיקה של ESPN');
   if (it.check.toApprove.length) o.push(`> ✏️ שמות שעוד לא אושרו: ${it.check.toApprove.join(', ')}`);
   if (it.leads?.namesMissing?.length) o.push(`> ❓ שחקנים בלי שם בעברית: ${it.leads.namesMissing.join(', ')}`);
@@ -287,7 +291,10 @@ export async function draftsForGame(date, f, cfg, { corrected = false, log = () 
   const items = [];
   const gb = gameBrief(f);
   const weight = f.candidates[0]?.weight || 0;
-  const base = { heading: gb.heading, end: f.endedAt || f.date, weight, angle: gb.main_angle, corrected, leads: { highlights: f.color?.highlights || [], unverified: f.research, namesMissing: f.namesMissing } };
+  // AP's headline beside ours: did AP see the same protagonist? (the morning comparison)
+  const heroEn = ['home', 'away'].flatMap((x) => f.players[x]).find((p) => p.he && p.he === gb.story?.protagonist?.name_he)?.name;
+  const ap = f.apRecap ? { headline: f.apRecap.headline, source: f.apRecap.source, published: f.apRecap.published, sameHero: sameHero(f.apRecap, heroEn) } : null;
+  const base = { heading: gb.heading, end: f.endedAt || f.date, weight, angle: gb.main_angle, corrected, ap, leads: { highlights: f.color?.highlights || [], unverified: f.research, namesMissing: f.namesMissing } };
   // Israelis who actually played (box score minutes); one who did not play changes nothing: normal recap
   const tracks = (f.tracks || []).filter((t) => t.inGame && t.played && t.ok);
   // editor, 2026-11-05 (as on Sport5's page): a game with an Israeli who played gets a separate article and

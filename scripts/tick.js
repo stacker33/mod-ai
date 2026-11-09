@@ -8,7 +8,8 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { listGames, getStandings } from '../src/espn.js';
+import { listGames, getStandings, getSummary } from '../src/espn.js';
+import { apRecap, recapDeadline, RECAP_FULL } from '../src/recap.js';
 import { backupGames } from '../src/secondary.js';
 import { loadConfig, dayDir, factsForGame, draftsForGame, recheckGame, writeIntro, assembleClosing, boxHash, morningCompare, saveFollowups } from '../src/pipeline.js';
 import { heTeam } from '../src/teams.js';
@@ -87,11 +88,35 @@ async function tickDate(date, cfg) {
     s.teams = `${r.away.abbr}@${r.home.abbr}`;
     if (!s.status && Object.entries(state.games).some(([id, g]) => id !== r.id && g.teams === s.teams && g.status === 'done')) continue;
     const label = `${r.away.abbr} @ ${r.home.abbr} ${r.away.score}-${r.home.score}`;
-    const due = !s.status || (s.status === 'retry' && now >= s.nextTry);
+    const due = !s.status || s.status === 'await_recap' || (s.status === 'retry' && now >= s.nextTry);
     const recheck = s.status === 'done' && !s.rechecked && now - s.doneAt >= RECHECK_AFTER;
     if (!due && !recheck) continue;
     const quotaUntil = readQuota().until || 0;
     if (quotaUntil > now) continue; // waiting for the daily writing quota; nothing is lost
+    // AP FIRST (editor, 2026-11-10): a regular game is written once AP's recap is in — it tells the story
+    // the numbers cannot. At night it waits until 05:30 (the shift starts at 06:00), later at most 30 min.
+    // Games with an Israeli are written right away, as before.
+    const israeliTeam = (cfg.israelis || []).some((p) => [r.home.abbr, r.away.abbr].includes(p.team));
+    if (!recheck && !r.backup && !israeliTeam && (!s.status || s.status === 'await_recap')) {
+      s.finalSeen ||= now;
+      const deadline = recapDeadline(s.finalSeen);
+      let rec = null;
+      try { rec = apRecap(await getSummary(r.id)); } catch { /* ESPN busy: try at the next check */ }
+      // a short take that has not grown for 10 minutes is AP's recap for this game: write from it
+      if (rec && !s.recapSeen) { s.recapSeen = now; state.games[r.id] = s; changed = true; }
+      const settled = rec && (rec.chars >= RECAP_FULL || now - s.recapSeen >= 10 * 60e3);
+      if (!settled && now < deadline) {
+        if (s.status !== 'await_recap') {
+          const until = new Date(deadline).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
+          log(`${label}: final — waiting for AP's recap (until ${until})${rec ? ` — only a first take so far (${rec.chars} chars)` : ''}`);
+          s.status = 'await_recap';
+          state.games[r.id] = s;
+          changed = true;
+        }
+        continue;
+      }
+      log(`${label}: ${rec ? `AP's recap is in (${rec.chars} chars, ${Math.round((now - s.finalSeen) / 60e3)} min after final)` : "no AP recap by the deadline — writing without it"}`);
+    }
     try {
       const f = await factsForGame(date, r.id, cfg, r);
       const hash = boxHash(f);

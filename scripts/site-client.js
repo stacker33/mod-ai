@@ -49,7 +49,7 @@ function render(md) {
 // status: [class, icon, words] — the icon is on the card, the words in its tooltip
 const STATUS = {
   ok: ['ok', '✅', 'מוכן לאישור'], fixed: ['ok', '🔧', 'מוכן לאישור (תוקן אוטומטית)'], review: ['warn', '⚠️', 'לבדיקה'], held: ['bad', '⛔', 'לא פורסם — לכתוב ידנית'], partial: ['warn', '⚠️', 'חלק מהפריטים לא פורסמו'],
-  quota: ['warn', '⏳', 'ממתין למכסת כתיבה'], retry: ['warn', '🔁', 'ניסיון חוזר'], manual: ['bad', '⛔', 'נכשל — לכתוב ידנית'],
+  quota: ['warn', '⏳', 'ממתין למכסת כתיבה'], ap: ['warn', '📰', 'ממתין לסיכום של AP'], retry: ['warn', '🔁', 'ניסיון חוזר'], manual: ['bad', '⛔', 'נכשל — לכתוב ידנית'],
   live: ['live', '🏀', 'משוחק עכשיו'], upcoming: ['mute', '', 'טרם התחיל'], final: ['mute', '', 'הסתיים'],
 };
 
